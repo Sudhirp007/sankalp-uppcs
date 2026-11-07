@@ -36,7 +36,7 @@ async function main() {
   console.log(`\n=== Sankalp End-to-End Live Service Verification (${BASE_URL}) ===`);
   console.log(`Test Aspirant Identity: ${TEST_USER_ID}\n`);
 
-  // 1. Static SPA Assets Check
+  // 1. Static SPA Assets + Edge SEO Injection + Sitemap & Robots Check
   const rootRes = await fetch(`${BASE_URL}/`);
   const rootHtml = await rootRes.text();
   assert.equal(rootRes.status, 200, "GET / must return 200 OK");
@@ -44,7 +44,38 @@ async function main() {
     rootHtml.includes("<div id=\"root\"></div>"),
     "GET / must serve built Vite SPA HTML"
   );
-  console.log("[PASS 1/8] Cloudflare Worker Static Assets serving built React SPA (200 OK)");
+  assert.ok(
+    rootHtml.includes('<link rel="canonical" href="https://mockexamonline.com/" />'),
+    "GET / must inject Edge SEO canonical tag for mockexamonline.com"
+  );
+  assert.ok(
+    rootHtml.includes('type="application/ld+json"'),
+    "GET / must inject Schema.org JSON-LD structured data"
+  );
+
+  const robotsRes = await fetch(`${BASE_URL}/robots.txt`);
+  const robotsTxt = await robotsRes.text();
+  assert.equal(robotsRes.status, 200);
+  assert.ok(robotsTxt.includes("Sitemap: https://mockexamonline.com/sitemap.xml"));
+
+  const sitemapRes = await fetch(`${BASE_URL}/sitemap.xml`);
+  const sitemapXml = await sitemapRes.text();
+  assert.equal(sitemapRes.status, 200);
+  assert.ok(sitemapXml.includes("<urlset") && sitemapXml.includes("/current-affairs/"));
+
+  const pubHome = await reqJson<{
+    stats: { totalQuestions: number; totalPapers: number };
+    sampleQuestion: { id: string } | null;
+    latestPosts: Array<{ slug: string }>;
+  }>("/api/v1/public/home");
+  assert.equal(pubHome.status, 200);
+  assert.ok(pubHome.data.stats.totalQuestions >= 2100, "Public marketing stats must reflect >=2100 questions");
+  assert.ok(pubHome.data.latestPosts.length >= 6, "Public home must return seeded Current Affairs & Blog posts");
+  assert.ok(pubHome.data.sampleQuestion?.id, "Public home must return live interactive PYQ sampleQuestion");
+
+  console.log(
+    `[PASS 1/9] Edge SEO + Sitemap + Public Marketing Feed verified (${pubHome.data.latestPosts.length} SEO posts, sampleQ=${pubHome.data.sampleQuestion?.id})`
+  );
 
   // 2. Live Service Health Check (Neon + pgvector + Firebase + Razorpay)
   const health = await reqJson<{
@@ -380,10 +411,31 @@ async function main() {
   assert.equal(resetPlan.data.planTier, "FREE");
 
   console.log(
-    `[PASS 8/8] Live Razorpay Test API Order (${order2.data.orderId}, isSandbox=${order2.data.isSandbox}) + Web Crypto HMAC-SHA256 verified (tampered rejected 400; valid signature upgraded user to PRO_PASS)`
+    `[PASS 8/9] Live Razorpay Test API Order (${order2.data.orderId}, isSandbox=${order2.data.isSandbox}) + Web Crypto HMAC-SHA256 verified (tampered rejected 400; valid signature upgraded user to PRO_PASS)`
   );
 
-  console.log("\nALL 8 END-TO-END LIVE SERVICE CHECKS PASSED!\n");
+  // 9. Freemium Conversion Gate Check (FREE tier allows 2 FULL_PAPER mocks, gates 3rd with 402 FREEMIUM_LIMIT_REACHED)
+  const fp1 = await reqJson<{ sessionId: string }>("/api/v1/test-sessions", {
+    method: "POST",
+    body: JSON.stringify({ examId: "uppcs-prelims", sessionType: "FULL_PAPER", mode: "EXAM", limit: 10 }),
+  });
+  assert.equal(fp1.status, 200, "1st Free FULL_PAPER mock must succeed");
+
+  const fp2 = await reqJson<{ sessionId: string }>("/api/v1/test-sessions", {
+    method: "POST",
+    body: JSON.stringify({ examId: "uppcs-prelims", sessionType: "FULL_PAPER", mode: "EXAM", limit: 10 }),
+  });
+  assert.equal(fp2.status, 200, "2nd Free FULL_PAPER mock must succeed");
+
+  const fp3 = await reqJson<{ code?: string; error?: string }>("/api/v1/test-sessions", {
+    method: "POST",
+    body: JSON.stringify({ examId: "uppcs-prelims", sessionType: "FULL_PAPER", mode: "EXAM", limit: 10 }),
+  });
+  assert.equal(fp3.status, 402, "3rd Free FULL_PAPER mock must trigger 402 Freemium Upgrade Gate");
+  assert.equal(fp3.data.code, "FREEMIUM_LIMIT_REACHED");
+  console.log("[PASS 9/9] Freemium Conversion Gate verified (2 Free Full Papers allowed -> 3rd triggers 402 FREEMIUM_LIMIT_REACHED)");
+
+  console.log("\nALL 9 END-TO-END LIVE SERVICE CHECKS PASSED!\n");
 }
 
 main().catch((err) => {

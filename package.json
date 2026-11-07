@@ -12,7 +12,9 @@
     "preview": "wrangler dev --port 8787 --ip 0.0.0.0",
     "dev:lan": "node scripts/lan-mobile-bridge.mjs",
     "deploy": "npm run build && wrangler deploy",
+    "deploy:prod": "node scripts/deploy-production.mjs",
     "db:migrate": "tsx scripts/migrate-schema.ts",
+    "db:seed-seo": "tsx scripts/seed-seo-content.ts",
     "db:sync-sqlite": "tsx scripts/migrate_sqlite_to_neon.ts",
     "db:sync-economy": "tsx scripts/sync_indian_economy.ts",
     "test:e2e": "tsx scripts/verify-e2e.ts"

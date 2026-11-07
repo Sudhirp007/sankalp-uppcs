@@ -306,7 +306,93 @@ export interface SubscriptionPlanDTO {
   features: string[];
 }
 
+export interface PublicPostSummary {
+  id: string;
+  slug: string;
+  category: "CURRENT_AFFAIRS" | "BLOG" | string;
+  linkedTopicId: string | null;
+  title: string;
+  summary: string;
+  tags: string[];
+  examSlugs: string[];
+  readingTimeMins: number;
+  publishedAt: string;
+}
+
+export interface PublicHomeResponse {
+  language: LangCode;
+  stats: {
+    totalQuestions: number;
+    totalPapers: number;
+    totalMicroTopics: number;
+    totalExams: number;
+  };
+  exams: Array<{
+    id: string;
+    slug: string;
+    name: string;
+    shortName: string;
+    description: string;
+    totalQuestions: number;
+    maxMarks: number;
+    durationMins: number;
+    positiveMarks: number;
+    negativeMarks: number;
+    historicalCutoff: number;
+    targetCycleLabel: string;
+  }>;
+  subjectBreakdown: Array<{ subject: string; count: number }>;
+  plans: Array<{
+    id: string;
+    code: string;
+    name: string;
+    badge: string;
+    amountInr: number;
+    validityDays: number;
+    features: string[];
+  }>;
+  sampleQuestion: {
+    id: string;
+    subject: string;
+    stem: string;
+    options: Array<{ key: string; text: string }>;
+    correctOption: string;
+    explanation: string;
+    goldenRule: string;
+  } | null;
+  latestPosts: PublicPostSummary[];
+}
+
+export interface PublicPostDetailResponse {
+  language: LangCode;
+  post: PublicPostSummary & {
+    body: string;
+    keyTakeaways: string[];
+    coverMediaUrl: string | null;
+  };
+  relatedPosts: Array<{
+    slug: string;
+    category: string;
+    title: string;
+    readingTimeMins: number;
+    publishedAt: string;
+  }>;
+}
+
 export const api = {
+  getPublicHome: (lang: LangCode = "EN") =>
+    apiFetch<PublicHomeResponse>(`/api/v1/public/home?lang=${lang}`),
+
+  getPublicPosts: (category = "ALL", lang: LangCode = "EN") =>
+    apiFetch<{ language: LangCode; posts: PublicPostSummary[] }>(
+      `/api/v1/public/posts?category=${encodeURIComponent(category)}&lang=${lang}`
+    ),
+
+  getPublicPostBySlug: (slug: string, lang: LangCode = "EN") =>
+    apiFetch<PublicPostDetailResponse>(
+      `/api/v1/public/posts/${encodeURIComponent(slug)}?lang=${lang}`
+    ),
+
   getBootstrap: () => apiFetch<BootstrapResponse>("/api/v1/bootstrap"),
 
   updatePreferences: (payload: {

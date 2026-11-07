@@ -426,3 +426,33 @@ export const paymentOrders = pgTable(
   },
   (t) => [index("idx_orders_user").on(t.userId)]
 );
+
+// 19. Public SEO Content Engine — Daily Current Affairs, Exam Guides & Strategy Blogs
+export const seoPosts = pgTable(
+  "seo_posts",
+  {
+    id: text("id").primaryKey(),
+    slug: text("slug").notNull().unique(),
+    category: text("category").notNull().default("CURRENT_AFFAIRS"), // CURRENT_AFFAIRS | BLOG
+    linkedTopicId: text("linked_topic_id").references(() => syllabusTopics.id, { onDelete: "set null" }),
+    titleEn: text("title_en").notNull(),
+    titleHi: text("title_hi").notNull(),
+    summaryEn: text("summary_en").notNull(),
+    summaryHi: text("summary_hi").notNull(),
+    bodyEn: text("body_en").notNull(),
+    bodyHi: text("body_hi").notNull(),
+    keyTakeawaysEn: jsonb("key_takeaways_en").$type<string[]>().notNull().default([]),
+    keyTakeawaysHi: jsonb("key_takeaways_hi").$type<string[]>().notNull().default([]),
+    tags: jsonb("tags").$type<string[]>().notNull().default([]),
+    examSlugs: jsonb("exam_slugs").$type<string[]>().notNull().default(["uppcs-prelims"]),
+    coverMediaUrl: text("cover_media_url"), // Flow / Pomelli visual or video poster URL
+    readingTimeMins: integer("reading_time_mins").notNull().default(5),
+    isPublished: boolean("is_published").notNull().default(true),
+    publishedAt: timestamp("published_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => [
+    index("idx_seo_posts_cat_pub").on(t.category, t.publishedAt),
+    uniqueIndex("uq_seo_posts_slug").on(t.slug),
+  ]
+);

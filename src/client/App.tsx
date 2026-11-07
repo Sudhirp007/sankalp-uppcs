@@ -35,10 +35,12 @@ import { SyllabusExplorerView } from "./views/SyllabusExplorerView";
 import { TestCockpitView } from "./views/TestCockpitView";
 import { LearningStudioView } from "./views/LearningStudioView";
 import { FlashcardsSrsView } from "./views/FlashcardsSrsView";
+import { PublicMarketingApp } from "./views/PublicMarketingApp";
 
 type ActiveTab = "JOURNEY" | "GLOBAL" | "SYLLABUS" | "STUDIO" | "SRS" | "COCKPIT";
 
 export const App: React.FC = () => {
+  const [pathname, setPathname] = useState<string>(() => window.location.pathname || "/");
   const [fbUser, setFbUser] = useState<FirebaseUser | null>(null);
   const [boot, setBoot] = useState<BootstrapResponse | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>("JOURNEY");
@@ -60,6 +62,19 @@ export const App: React.FC = () => {
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
   useEffect(() => {
+    const onPopState = () => setPathname(window.location.pathname || "/");
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  const navigateTo = useCallback((nextPath: string) => {
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, "", nextPath);
+    }
+    setPathname(nextPath);
+  }, []);
+
+  useEffect(() => {
     const unsub = subscribeFirebaseUser((u) => {
       setFbUser(u);
     });
@@ -71,7 +86,7 @@ export const App: React.FC = () => {
       setErrorBanner(null);
       const b = await api.getBootstrap();
       setBoot(b);
-      if (!b.user.onboardingCompleted) {
+      if (!b.user.onboardingCompleted && window.location.pathname.startsWith("/app")) {
         setShowOnboarding(true);
       }
       const targetExam = overrideExamId || b.user.activeExamId || "uppcs-prelims";
@@ -135,7 +150,12 @@ export const App: React.FC = () => {
       setActiveSession(detail);
       setActiveTab("COCKPIT");
     } catch (err: unknown) {
-      setErrorBanner(err instanceof Error ? err.message : "Unable to start test session");
+      const msg = err instanceof Error ? err.message : "Unable to start test session";
+      if (msg.includes("FREEMIUM_LIMIT_REACHED")) {
+        setShowUpgradeModal(true);
+      } else {
+        setErrorBanner(msg);
+      }
     } finally {
       setStartingSession(false);
     }
@@ -180,6 +200,71 @@ export const App: React.FC = () => {
     setActiveTab("STUDIO");
   };
 
+  const isAppWorkspace = pathname.startsWith("/app");
+
+  // Public Marketing Website, SEO Content Hubs & Pricing Funnel (/, /pricing, /current-affairs, /blog, /exams/*)
+  if (!isAppWorkspace) {
+    return (
+      <>
+        <PublicMarketingApp
+          pathname={pathname}
+          lang={lang}
+          fbUser={fbUser}
+          planTier={boot?.user.planTier || "FREE"}
+          onToggleLanguage={handleToggleLanguage}
+          onNavigate={navigateTo}
+          onEnterFreeApp={async (opts) => {
+            if (opts?.examId) {
+              await api.updatePreferences({
+                activeExamId: opts.examId,
+                enrolledExamIds: [opts.examId],
+              });
+              await refreshAll(opts.examId);
+            }
+            navigateTo("/app");
+            if (opts?.topicId) {
+              await launchSession({
+                sessionType: "TOPIC_DRILL",
+                topicIds: [opts.topicId],
+                limit: 10,
+              });
+            } else if (boot && !boot.user.onboardingCompleted) {
+              setShowOnboarding(true);
+            }
+          }}
+          onOpenProCheckout={() => setShowUpgradeModal(true)}
+          onOpenAuthModal={() => setShowAuthModal(true)}
+        />
+
+        {showUpgradeModal && boot && (
+          <UpgradeModal
+            lang={lang}
+            userEmail={fbUser?.email || boot.user.email}
+            userName={fbUser?.displayName || boot.user.displayName}
+            currentPlanTier={boot.user.planTier}
+            isTestBillingMode={boot.user.isTestBillingMode}
+            onClose={() => setShowUpgradeModal(false)}
+            onSuccess={async () => {
+              await refreshAll();
+              navigateTo("/app");
+            }}
+          />
+        )}
+
+        {showAuthModal && (
+          <AuthModal
+            lang={lang}
+            fbUser={fbUser}
+            onClose={() => setShowAuthModal(false)}
+            onAuthenticated={async () => {
+              await refreshAll();
+            }}
+          />
+        )}
+      </>
+    );
+  }
+
   if (loadingBoot) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8FAFC] text-slate-600 gap-3">
@@ -214,18 +299,19 @@ export const App: React.FC = () => {
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 lg:px-6 h-16 flex items-center justify-between gap-3">
           {/* Brand + Active Exam Journey Switcher */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 shrink-0">
             <div
-              onClick={() => setActiveTab("JOURNEY")}
-              className="flex items-center gap-2.5 cursor-pointer"
+              onClick={() => navigateTo("/")}
+              title="Back to MockExamOnline.com Home"
+              className="flex items-center gap-2 cursor-pointer shrink-0"
             >
-              <div className="w-9 h-9 rounded-xl bg-[#1E3A8A] text-white flex items-center justify-center font-extrabold text-base shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-[#1E3A8A] text-white flex items-center justify-center font-extrabold text-base shadow-xs shrink-0">
                 <GraduationCap className="w-5 h-5" />
               </div>
-              <div className="hidden sm:block">
+              <div className="hidden lg:block">
                 <div className="font-extrabold text-base leading-none text-slate-900">Sankalp</div>
-                <div className="text-[10px] text-slate-500 font-medium mt-0.5">
-                  {t.brandSubtitle}
+                <div className="text-[10px] text-slate-500 font-medium mt-0.5 whitespace-nowrap">
+                  MockExamOnline
                 </div>
               </div>
             </div>
@@ -252,7 +338,7 @@ export const App: React.FC = () => {
           </div>
 
           {/* Primary Navigation Tabs */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden xl:flex items-center gap-1 shrink-0">
             {(
               [
                 { id: "JOURNEY", label: t.navJourney, icon: LayoutDashboard },
@@ -273,24 +359,24 @@ export const App: React.FC = () => {
                   key={item.id}
                   type="button"
                   onClick={() => setActiveTab(item.id)}
-                  className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-xs font-bold whitespace-nowrap transition cursor-pointer ${
                     isActive
                       ? "bg-indigo-50 text-[#1E3A8A]"
                       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
-                  {item.label}
+                  <Icon className="w-3.5 h-3.5 shrink-0" />
+                  <span>{item.label}</span>
                 </button>
               );
             })}
           </nav>
 
           {/* Right Action Controls: Streak, Medium Toggle, Razorpay Pro Pass, Auth */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {boot && (
-              <div className="hidden lg:inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-bold text-amber-900">
-                <Flame className="w-3.5 h-3.5 text-amber-600" />
+              <div className="hidden 2xl:inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-bold text-amber-900 whitespace-nowrap">
+                <Flame className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                 <span className="font-mono-metric">{boot.user.streakDays}</span>
                 <span className="text-[11px]">{t.streakSuffix}</span>
               </div>
@@ -301,9 +387,9 @@ export const App: React.FC = () => {
               type="button"
               title={t.mediumToggleTitle}
               onClick={handleToggleLanguage}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 px-2.5 py-1.5 text-xs font-bold text-[#1E3A8A] transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 px-2.5 py-1.5 text-xs font-bold text-[#1E3A8A] whitespace-nowrap transition cursor-pointer"
             >
-              <Globe2 className="w-3.5 h-3.5" />
+              <Globe2 className="w-3.5 h-3.5 shrink-0" />
               <span>{t.mediumLabel}</span>
             </button>
 
@@ -313,18 +399,18 @@ export const App: React.FC = () => {
                 type="button"
                 onClick={() => setShowUpgradeModal(true)}
                 title="Manage Pro Pass or Reset in Test Mode"
-                className="inline-flex items-center gap-1 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-200 px-2.5 py-1.5 text-[11px] font-extrabold transition cursor-pointer"
+                className="inline-flex items-center gap-1 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-200 px-2.5 py-1.5 text-[11px] font-extrabold whitespace-nowrap transition cursor-pointer"
               >
-                <Crown className="w-3.5 h-3.5 text-amber-600" />
+                <Crown className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                 <span>{t.proActiveBadge}</span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => setShowUpgradeModal(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold px-2.5 sm:px-3 py-1.5 text-xs shadow-xs transition cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold px-2.5 sm:px-3 py-1.5 text-xs whitespace-nowrap shadow-xs transition cursor-pointer"
               >
-                <Crown className="w-3.5 h-3.5" />
+                <Crown className="w-3.5 h-3.5 shrink-0" />
                 <span className="hidden sm:inline">{t.upgradePro}</span>
               </button>
             )}
@@ -377,8 +463,8 @@ export const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Bottom-Friendly Tab Strip */}
-        <div className="md:hidden flex items-center gap-1 overflow-x-auto px-4 py-2 border-t border-slate-100 bg-slate-50/70">
+        {/* Tablet & Mobile Sub-Nav Strip (<1280px) */}
+        <div className="xl:hidden flex items-center gap-1 overflow-x-auto px-4 py-2 border-t border-slate-100 bg-slate-50/70">
           {(
             [
               { id: "JOURNEY", label: t.navJourney },

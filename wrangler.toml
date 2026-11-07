@@ -3,11 +3,34 @@ main = "src/server/index.ts"
 compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Custom Domain Bindings for Public Production Deployment (mockexamonline.com)
+routes = [
+  { pattern = "mockexamonline.com", custom_domain = true },
+  { pattern = "www.mockexamonline.com", custom_domain = true }
+]
+
 [assets]
 directory = "./dist"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
-run_worker_first = ["/api/*"]
+run_worker_first = [
+  "/api/*",
+  "/sitemap.xml",
+  "/robots.txt",
+  "/",
+  "/pricing",
+  "/exams/*",
+  "/current-affairs",
+  "/current-affairs/*",
+  "/blog",
+  "/blog/*",
+  "/pyq-bank",
+  "/about",
+  "/contact",
+  "/privacy-policy",
+  "/terms",
+  "/refund-policy"
+]
 
 [vars]
 FIREBASE_PROJECT_ID = "sankalp-uppcs-app"

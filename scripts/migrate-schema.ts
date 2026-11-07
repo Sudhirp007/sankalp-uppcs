@@ -309,6 +309,28 @@ async function main() {
       verified_at TIMESTAMP
     )`,
     `CREATE INDEX IF NOT EXISTS idx_orders_user ON payment_orders(user_id)`,
+    `CREATE TABLE IF NOT EXISTS seo_posts (
+      id TEXT PRIMARY KEY,
+      slug TEXT NOT NULL UNIQUE,
+      category TEXT NOT NULL DEFAULT 'CURRENT_AFFAIRS',
+      linked_topic_id TEXT REFERENCES syllabus_topics(id) ON DELETE SET NULL,
+      title_en TEXT NOT NULL,
+      title_hi TEXT NOT NULL,
+      summary_en TEXT NOT NULL,
+      summary_hi TEXT NOT NULL,
+      body_en TEXT NOT NULL,
+      body_hi TEXT NOT NULL,
+      key_takeaways_en JSONB NOT NULL DEFAULT '[]'::jsonb,
+      key_takeaways_hi JSONB NOT NULL DEFAULT '[]'::jsonb,
+      tags JSONB NOT NULL DEFAULT '[]'::jsonb,
+      exam_slugs JSONB NOT NULL DEFAULT '["uppcs-prelims"]'::jsonb,
+      cover_media_url TEXT,
+      reading_time_mins INTEGER NOT NULL DEFAULT 5,
+      is_published BOOLEAN NOT NULL DEFAULT TRUE,
+      published_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_seo_posts_cat_pub ON seo_posts(category, published_at DESC)`,
   ];
 
   for (const stmt of ddlStatements) {

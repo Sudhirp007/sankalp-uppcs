@@ -12,6 +12,7 @@ import {
   timingSafeEqualHex,
   verifyRazorpayPaymentSignature,
 } from "./razorpay";
+import { buildRobotsTxt, buildSitemapXml, injectEdgeSeoIntoHtml } from "./seo";
 
 export interface WorkerBindings {
   DATABASE_URL?: string;
@@ -782,6 +783,32 @@ app.post("/api/v1/test-sessions", async (c) => {
   const examId = body.examId || user.activeExamId || "uppcs-prelims";
   const [exam] = await db.select().from(schema.exams).where(eq(schema.exams.id, examId)).limit(1);
   const targetExam = exam || (await db.select().from(schema.exams).limit(1))[0];
+
+  // Freemium Quota Enforcement: Free tier gets Unlimited Smart/Topic Drills + 2 Full-Length Commission Papers
+  if (user.planTier !== "PRO_PASS" && body.sessionType === "FULL_PAPER") {
+    const existingFullPapers = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(schema.testSessions)
+      .where(
+        and(
+          eq(schema.testSessions.userId, user.id),
+          eq(schema.testSessions.sessionType, "FULL_PAPER")
+        )
+      );
+    if ((existingFullPapers[0]?.count ?? 0) >= 2) {
+      return c.json(
+        {
+          error: "FREEMIUM_LIMIT_REACHED",
+          code: "FREEMIUM_LIMIT_REACHED",
+          message:
+            lang === "HI"
+              ? "निःशुल्क स्टार्टर प्लान में 2 पूर्ण-लंबाई प्रश्नपत्र शामिल हैं। सभी 85+ आयोग प्रश्नपत्र अनलॉक करने हेतु संकल्प प्रो पास चुनें।"
+              : "Free Starter includes 2 Full-Length Commission Papers + Unlimited Smart Drills. Upgrade to Sankalp Pro Pass for all 85+ Official Papers!",
+        },
+        402
+      );
+    }
+  }
 
   const desiredCount = Math.min(150, Math.max(5, body.limit || (body.sessionType === "FULL_PAPER" ? 30 : 15)));
 
@@ -1848,10 +1875,220 @@ app.post("/api/v1/billing/webhook", async (c) => {
   return c.json({ received: true });
 });
 
-// Fallback for non-API requests when served via Cloudflare Workers Static Assets
+// ---------------------------------------------------------------------------
+// 10. Public Marketing, Daily Current Affairs, Blog & SEO Endpoints
+// ---------------------------------------------------------------------------
+app.get("/robots.txt", (c) => {
+  return c.text(buildRobotsTxt(), 200, {
+    "Content-Type": "text/plain; charset=utf-8",
+    "Cache-Control": "public, max-age=3600",
+  });
+});
+
+app.get("/sitemap.xml", async (c) => {
+  const db = createDb(c.env?.DATABASE_URL);
+  const xml = await buildSitemapXml(db);
+  return c.body(xml, 200, {
+    "Content-Type": "application/xml; charset=utf-8",
+    "Cache-Control": "public, max-age=1800",
+  });
+});
+
+app.get("/api/v1/public/home", async (c) => {
+  const db = createDb(c.env?.DATABASE_URL);
+  const lang = normalizeLang(c.req.query("lang") || "EN");
+
+  const [countsRes, exams, subjectRows, plans, sampleQuestions, posts] = await Promise.all([
+    db.execute(sql`
+      SELECT
+        (SELECT COUNT(*)::int FROM questions) AS total_questions,
+        (SELECT COUNT(*)::int FROM exam_papers) AS total_papers,
+        (SELECT COUNT(*)::int FROM syllabus_topics WHERE level = 3) AS total_micro_topics,
+        (SELECT COUNT(*)::int FROM exams WHERE is_active = true) AS total_exams
+    `),
+    db.select().from(schema.exams).where(eq(schema.exams.isActive, true)),
+    db.execute(sql`
+      SELECT subject, COUNT(*)::int AS cnt
+      FROM questions
+      GROUP BY subject
+      ORDER BY cnt DESC
+    `),
+    db.select().from(schema.subscriptionPlans).where(eq(schema.subscriptionPlans.isActive, true)),
+    db
+      .select()
+      .from(schema.questions)
+      .where(sql`${schema.questions.goldenRuleEn} IS NOT NULL`)
+      .limit(1),
+    db
+      .select()
+      .from(schema.seoPosts)
+      .where(eq(schema.seoPosts.isPublished, true))
+      .orderBy(desc(schema.seoPosts.publishedAt))
+      .limit(6),
+  ]);
+
+  const statsRow = countsRes.rows[0] as Record<string, number>;
+  const demoQ = sampleQuestions[0];
+
+  return c.json({
+    language: lang,
+    stats: {
+      totalQuestions: statsRow?.total_questions ?? 2118,
+      totalPapers: statsRow?.total_papers ?? 85,
+      totalMicroTopics: statsRow?.total_micro_topics ?? 35,
+      totalExams: statsRow?.total_exams ?? 4,
+    },
+    exams: exams.map((e) => ({
+      id: e.id,
+      slug: e.slug,
+      name: pickText(lang, e.nameEn, e.nameHi),
+      shortName: pickText(lang, e.shortNameEn, e.shortNameHi),
+      description: pickText(lang, e.descriptionEn, e.descriptionHi),
+      totalQuestions: e.totalQuestions,
+      maxMarks: e.maxMarks,
+      durationMins: e.durationMins,
+      positiveMarks: Math.round(e.positiveMarks * 100) / 100,
+      negativeMarks: Math.round(e.positiveMarks * e.negativeMarkingRatio * 100) / 100,
+      historicalCutoff: e.historicalCutoff,
+      targetCycleLabel: e.targetCycleLabel,
+    })),
+    subjectBreakdown: (subjectRows.rows as Array<{ subject: string; cnt: number }>).map((r) => ({
+      subject: r.subject,
+      count: r.cnt,
+    })),
+    plans: plans.map((p) => ({
+      id: p.id,
+      code: p.code,
+      name: pickText(lang, p.nameEn, p.nameHi),
+      badge: pickText(lang, p.badgeEn, p.badgeHi),
+      amountInr: Math.round(p.amountPaise / 100),
+      validityDays: p.validityDays,
+      features: lang === "HI" ? p.featuresHi : p.featuresEn,
+    })),
+    sampleQuestion: demoQ
+      ? {
+          id: demoQ.id,
+          subject: demoQ.subject,
+          stem: pickText(lang, demoQ.questionEn, demoQ.questionHi),
+          options: pickOptions(lang, demoQ.optionsEn, demoQ.optionsHi),
+          correctOption: demoQ.correctOption,
+          explanation: pickText(lang, demoQ.explanationEn, demoQ.explanationHi),
+          goldenRule: pickText(lang, demoQ.goldenRuleEn, demoQ.goldenRuleHi),
+        }
+      : null,
+    latestPosts: posts.map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      category: p.category,
+      linkedTopicId: p.linkedTopicId,
+      title: pickText(lang, p.titleEn, p.titleHi),
+      summary: pickText(lang, p.summaryEn, p.summaryHi),
+      tags: p.tags,
+      examSlugs: p.examSlugs,
+      readingTimeMins: p.readingTimeMins,
+      publishedAt: p.publishedAt,
+    })),
+  });
+});
+
+app.get("/api/v1/public/posts", async (c) => {
+  const db = createDb(c.env?.DATABASE_URL);
+  const lang = normalizeLang(c.req.query("lang") || "EN");
+  const cat = c.req.query("category") || "ALL";
+
+  const rows = await db
+    .select()
+    .from(schema.seoPosts)
+    .where(
+      cat !== "ALL"
+        ? and(eq(schema.seoPosts.isPublished, true), eq(schema.seoPosts.category, cat))
+        : eq(schema.seoPosts.isPublished, true)
+    )
+    .orderBy(desc(schema.seoPosts.publishedAt));
+
+  return c.json({
+    language: lang,
+    posts: rows.map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      category: p.category,
+      linkedTopicId: p.linkedTopicId,
+      title: pickText(lang, p.titleEn, p.titleHi),
+      summary: pickText(lang, p.summaryEn, p.summaryHi),
+      tags: p.tags,
+      examSlugs: p.examSlugs,
+      readingTimeMins: p.readingTimeMins,
+      publishedAt: p.publishedAt,
+    })),
+  });
+});
+
+app.get("/api/v1/public/posts/:slug", async (c) => {
+  const db = createDb(c.env?.DATABASE_URL);
+  const lang = normalizeLang(c.req.query("lang") || "EN");
+  const slug = c.req.param("slug");
+
+  const [post] = await db
+    .select()
+    .from(schema.seoPosts)
+    .where(and(eq(schema.seoPosts.slug, slug), eq(schema.seoPosts.isPublished, true)))
+    .limit(1);
+
+  if (!post) {
+    return c.json({ error: "Article not found" }, 404);
+  }
+
+  const related = await db
+    .select()
+    .from(schema.seoPosts)
+    .where(and(eq(schema.seoPosts.isPublished, true), sql`${schema.seoPosts.slug} <> ${slug}`))
+    .orderBy(desc(schema.seoPosts.publishedAt))
+    .limit(3);
+
+  return c.json({
+    language: lang,
+    post: {
+      id: post.id,
+      slug: post.slug,
+      category: post.category,
+      linkedTopicId: post.linkedTopicId,
+      title: pickText(lang, post.titleEn, post.titleHi),
+      summary: pickText(lang, post.summaryEn, post.summaryHi),
+      body: pickText(lang, post.bodyEn, post.bodyHi),
+      keyTakeaways: lang === "HI" ? post.keyTakeawaysHi : post.keyTakeawaysEn,
+      tags: post.tags,
+      examSlugs: post.examSlugs,
+      coverMediaUrl: post.coverMediaUrl,
+      readingTimeMins: post.readingTimeMins,
+      publishedAt: post.publishedAt,
+    },
+    relatedPosts: related.map((r) => ({
+      slug: r.slug,
+      category: r.category,
+      title: pickText(lang, r.titleEn, r.titleHi),
+      readingTimeMins: r.readingTimeMins,
+      publishedAt: r.publishedAt,
+    })),
+  });
+});
+
+// Edge SEO HTML Injector + SPA Asset Fallback
 app.all("*", async (c) => {
   if (c.env?.ASSETS) {
-    return c.env.ASSETS.fetch(c.req.raw);
+    const assetRes = await c.env.ASSETS.fetch(c.req.raw);
+    const contentType = assetRes.headers.get("content-type") || "";
+    if (c.req.method === "GET" && contentType.includes("text/html")) {
+      try {
+        const url = new URL(c.req.url);
+        const rawHtml = await assetRes.text();
+        const db = createDb(c.env?.DATABASE_URL);
+        const seoHtml = await injectEdgeSeoIntoHtml(rawHtml, url.pathname, db);
+        return c.html(seoHtml, 200);
+      } catch {
+        return c.env.ASSETS.fetch(c.req.raw);
+      }
+    }
+    return assetRes;
   }
   return c.text("Sankalp UPPCS API Running. Build static assets with `npm run build`.", 200);
 });
