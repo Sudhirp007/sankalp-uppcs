@@ -202,6 +202,7 @@ export const App: React.FC = () => {
         onExitToDashboard={() => setActiveTab("JOURNEY")}
         onOpenCheatSheet={handleOpenCheatSheet}
         onOpenMistakeDeck={() => setActiveTab("SRS")}
+        onFlashcardCreated={() => refreshAll()}
       />
     );
   }
@@ -451,6 +452,7 @@ export const App: React.FC = () => {
               })
             }
             onOpenFlashcards={() => setActiveTab("SRS")}
+            onRefreshStudio={() => refreshAll()}
           />
         )}
 

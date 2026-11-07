@@ -1,4 +1,24 @@
 import assert from "node:assert/strict";
+import { createHmac } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
+
+function loadLocalEnv(): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const file of [".env.local", ".dev.vars"]) {
+    if (!existsSync(file)) continue;
+    for (const line of readFileSync(file, "utf8").split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx > 0) {
+        const k = trimmed.slice(0, eqIdx).trim();
+        const v = trimmed.slice(eqIdx + 1).trim().replace(/^['"]|['"]$/g, "");
+        out[k] = v;
+      }
+    }
+  }
+  return out;
+}
 
 const BASE_URL = process.env.E2E_BASE_URL || "http://127.0.0.1:8787";
 const TEST_USER_ID = `asp_e2e_${Date.now().toString(36)}`;
@@ -173,7 +193,7 @@ async function main() {
         selectedOption: idx === 0 ? "B" : idx === 1 ? "A" : null,
         eliminatedOptions: idx === 0 ? ["C", "D"] : [],
         confidenceTag: idx === 0 ? "GUESS_50_50" : "SURE",
-        isMarkedReview: false,
+        isMarkedReview: idx === 1 || idx === 2,
         timeSpentSec: 40,
       })),
     }),
@@ -183,10 +203,11 @@ async function main() {
 
   const postSubmit = await reqJson<{
     session: { status: string };
-    items: Array<{ correctOption?: string; sourceKeyType?: string }>;
+    items: Array<{ correctOption?: string; sourceKeyType?: string; isMarkedReview?: boolean }>;
   }>(`/api/v1/test-sessions/${createdSession.data.sessionId}`);
   assert.equal(postSubmit.data.session.status, "SUBMITTED");
   assert.ok(Boolean(postSubmit.data.items[0]?.correctOption), "correctOption revealed post-submit");
+  assert.equal(postSubmit.data.items[1]?.isMarkedReview, true, "Marked for review persisted post-submit");
 
   const globalExp = await reqJson<{
     overallPortfolioElo: number;
@@ -197,7 +218,7 @@ async function main() {
     `[PASS 6/8] Commission Grading & Cross-Exam Radar verified (Net=${submitRes.data.summary.netMarks}/${submitRes.data.summary.maxMarks}, 50-50 Gain=${submitRes.data.summary.guess5050NetGain}, Global ELO=${globalExp.data.overallPortfolioElo})`
   );
 
-  // 7. Learning Studio Scratchpad Persistence & FSRS Flashcard Scheduling
+  // 7. Learning Studio Personal Curation, Private Personal Flashcard CRUD & FSRS Scheduling
   const scratch = await reqJson<{ ok: boolean; scratchpadNotes: Record<string, string> }>(
     "/api/v1/me/scratchpad",
     {
@@ -210,6 +231,39 @@ async function main() {
   );
   assert.equal(scratch.data.ok, true);
 
+  const curatedStudio = await reqJson<{
+    sheets: Array<{ id: string; hasPersonalNote: boolean; curationTier: string }>;
+  }>("/api/v1/studio");
+  const annotatedSheet = curatedStudio.data.sheets.find((s) => s.id === "cs-panchayati-raj");
+  assert.equal(annotatedSheet?.hasPersonalNote, true, "Studio sheet must reflect personal note");
+
+  // Create a Private Personal Flashcard & verify multi-tenant privacy isolation
+  const createdCard = await reqJson<{ ok: boolean; flashcardId: string }>("/api/v1/srs/cards", {
+    method: "POST",
+    body: JSON.stringify({
+      topicId: "top-econ-fiscal",
+      front: "E2E Private Card: FRBM 2003 Fiscal Deficit target?",
+      back: "3% of GDP",
+      mnemonic: "FRBM = 3%",
+    }),
+  });
+  assert.equal(createdCard.status, 200);
+  assert.equal(createdCard.data.ok, true);
+
+  const myDeck = await reqJson<{
+    personalCount: number;
+    cards: Array<{ flashcardId: string; isPersonal: boolean }>;
+  }>("/api/v1/srs/due?deck=MY_CARDS");
+  assert.equal(myDeck.data.personalCount, 1);
+  assert.equal(myDeck.data.cards[0]?.flashcardId, createdCard.data.flashcardId);
+
+  // Verify another user CANNOT see this user's private flashcard
+  const otherUserDeckRes = await fetch(`${BASE_URL}/api/v1/srs/due?deck=MY_CARDS`, {
+    headers: { "x-aspirant-id": `asp_isolated_${Date.now().toString(36)}` },
+  });
+  const otherUserDeck = (await otherUserDeckRes.json()) as { personalCount: number };
+  assert.equal(otherUserDeck.personalCount, 0, "Private personal flashcards MUST NOT leak across users");
+
   const dueCards = await reqJson<{ cards: Array<{ flashcardId: string }> }>("/api/v1/srs/due");
   assert.ok(dueCards.data.cards.length > 0, "Must have flashcards available");
   const reviewRes = await reqJson<{ ok: boolean; nextIntervalDays: number }>("/api/v1/srs/review", {
@@ -218,25 +272,39 @@ async function main() {
   });
   assert.equal(reviewRes.data.ok, true);
   assert.ok(reviewRes.data.nextIntervalDays >= 2);
+
+  const delCard = await reqJson<{ ok: boolean }>(`/api/v1/srs/cards/${createdCard.data.flashcardId}`, {
+    method: "DELETE",
+  });
+  assert.equal(delCard.data.ok, true);
   console.log(
-    `[PASS 7/8] Learning Studio Cloud Scratchpad & FSRS Review verified (nextIntervalDays=${reviewRes.data.nextIntervalDays}d)`
+    `[PASS 7/8] Curated Studio, Private Personal Flashcard Isolation & FSRS Review verified (nextIntervalDays=${reviewRes.data.nextIntervalDays}d)`
   );
 
-  // 8. Razorpay Billing Order Creation + Tampered Signature Rejection + Valid HMAC Upgrade
+  // 8. Live Razorpay Test API Order Creation + Tampered Signature Rejection + Valid HMAC Upgrade
+  const localEnv = loadLocalEnv();
+  const rzpSecret = process.env.RAZORPAY_KEY_SECRET || localEnv.RAZORPAY_KEY_SECRET || "";
+
   const plans = await reqJson<{ plans: Array<{ id: string; amountInr: number }> }>(
     "/api/v1/billing/plans"
   );
   assert.ok(plans.data.plans.length >= 2);
 
-  // 8a. Create Order #1 and verify tampered signature is REJECTED (400)
+  // 8a. Create Order #1 via Razorpay API and verify tampered signature is REJECTED (400)
   const order1 = await reqJson<{
     orderId: string;
+    keyId: string;
+    isSandbox: boolean;
     sandboxProof?: { razorpayOrderId: string; razorpayPaymentId: string; razorpaySignature: string };
   }>("/api/v1/billing/create-order", {
     method: "POST",
     body: JSON.stringify({ planId: "plan-sankalp-pro-annual" }),
   });
   assert.equal(order1.status, 200);
+  if (rzpSecret) {
+    assert.equal(order1.data.isSandbox, false, "Must use real Razorpay Test Mode API when keys exist");
+    assert.ok(order1.data.orderId.startsWith("order_"), "Razorpay API must return official order_... ID");
+  }
 
   const tamperedVerify = await reqJson<{ error?: string }>("/api/v1/billing/verify-payment", {
     method: "POST",
@@ -258,19 +326,37 @@ async function main() {
     body: JSON.stringify({ planId: "plan-sankalp-pro-annual" }),
   });
   assert.equal(order2.status, 200);
-  if (order2.data.sandboxProof) {
-    const validVerify = await reqJson<{ ok: boolean; planTier: string }>(
-      "/api/v1/billing/verify-payment",
-      {
-        method: "POST",
-        body: JSON.stringify(order2.data.sandboxProof),
-      }
-    );
-    assert.equal(validVerify.status, 200);
-    assert.equal(validVerify.data.planTier, "PRO_PASS");
+
+  const paymentPayload = order2.data.sandboxProof
+    ? order2.data.sandboxProof
+    : {
+        razorpayOrderId: order2.data.orderId,
+        razorpayPaymentId: `pay_test_${Date.now().toString(36)}`,
+        razorpaySignature: createHmac("sha256", rzpSecret)
+          .update(`${order2.data.orderId}|pay_test_${Date.now().toString(36)}`)
+          .digest("hex"),
+      };
+  // Ensure paymentId matches signature input exactly when computed locally
+  if (!order2.data.sandboxProof) {
+    const testPid = `pay_test_${Date.now().toString(36)}`;
+    paymentPayload.razorpayPaymentId = testPid;
+    paymentPayload.razorpaySignature = createHmac("sha256", rzpSecret)
+      .update(`${order2.data.orderId}|${testPid}`)
+      .digest("hex");
   }
+
+  const validVerify = await reqJson<{ ok: boolean; planTier: string }>(
+    "/api/v1/billing/verify-payment",
+    {
+      method: "POST",
+      body: JSON.stringify(paymentPayload),
+    }
+  );
+  assert.equal(validVerify.status, 200);
+  assert.equal(validVerify.data.planTier, "PRO_PASS");
+
   console.log(
-    `[PASS 8/8] Razorpay Order + Web Crypto HMAC-SHA256 verified (tampered signature rejected 400; valid signature upgraded user to PRO_PASS)`
+    `[PASS 8/8] Live Razorpay Test API Order (${order2.data.orderId}, isSandbox=${order2.data.isSandbox}) + Web Crypto HMAC-SHA256 verified (tampered rejected 400; valid signature upgraded user to PRO_PASS)`
   );
 
   console.log("\nALL 8 END-TO-END LIVE SERVICE CHECKS PASSED!\n");

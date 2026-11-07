@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { AlertOctagon, CheckCircle2, Layers, RotateCcw, Sparkles } from "lucide-react";
+import {
+  AlertOctagon,
+  CheckCircle2,
+  Layers,
+  Plus,
+  RotateCcw,
+  Sparkles,
+  Trash2,
+  X,
+} from "lucide-react";
 import { api, type FlashcardItemDTO } from "../lib/api";
 import type { LangCode } from "../lib/i18n";
 
@@ -15,10 +24,17 @@ export const FlashcardsSrsView: React.FC<FlashcardsSrsViewProps> = ({
   const [deck, setDeck] = useState<string>("ALL");
   const [cards, setCards] = useState<FlashcardItemDTO[]>([]);
   const [mistakeCount, setMistakeCount] = useState<number>(0);
+  const [personalCount, setPersonalCount] = useState<number>(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
   const [lastScheduledMsg, setLastScheduledMsg] = useState<string | null>(null);
+
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newFront, setNewFront] = useState("");
+  const [newBack, setNewBack] = useState("");
+  const [newMnemonic, setNewMnemonic] = useState("");
+  const [savingNewCard, setSavingNewCard] = useState(false);
 
   const loadDeck = async (selectedDeck: string) => {
     setLoading(true);
@@ -26,6 +42,7 @@ export const FlashcardsSrsView: React.FC<FlashcardsSrsViewProps> = ({
       const res = await api.getDueFlashcards(selectedDeck);
       setCards(res.cards);
       setMistakeCount(res.mistakeCount);
+      setPersonalCount(res.personalCount);
       setCurrentIndex(0);
       setFlipped(false);
     } finally {
@@ -58,6 +75,35 @@ export const FlashcardsSrsView: React.FC<FlashcardsSrsViewProps> = ({
     setCurrentIndex((prev) => prev + 1);
   };
 
+  const handleCreateCard = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFront.trim() || !newBack.trim() || savingNewCard) return;
+    setSavingNewCard(true);
+    try {
+      await api.createPersonalFlashcard({
+        front: newFront.trim(),
+        back: newBack.trim(),
+        mnemonic: newMnemonic.trim() || undefined,
+        originContext: lang === "HI" ? "व्यक्तिगत फ्लैशकार्ड डेक" : "Created in Flashcards Studio",
+      });
+      setNewFront("");
+      setNewBack("");
+      setNewMnemonic("");
+      setShowCreateForm(false);
+      setDeck("MY_CARDS");
+      await loadDeck("MY_CARDS");
+      onReviewedCountChange();
+    } finally {
+      setSavingNewCard(false);
+    }
+  };
+
+  const handleDeletePersonalCard = async (cardId: string) => {
+    await api.deletePersonalFlashcard(cardId);
+    await loadDeck(deck);
+    onReviewedCountChange();
+  };
+
   return (
     <div className={`max-w-4xl mx-auto space-y-6 ${lang === "HI" ? "lang-hi" : ""}`}>
       {/* Deck Selector Pills */}
@@ -73,25 +119,99 @@ export const FlashcardsSrsView: React.FC<FlashcardsSrsViewProps> = ({
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
             {lang === "HI"
-              ? "गलत किए गए टेस्ट प्रश्न स्वचालित रूप से 'टेस्ट मिस्टेक डेक' में जुड़ जाते हैं।"
-              : "Wrong answers from mocks & drills automatically convert into due cards in your Test Mistake Deck."}
+              ? "आपके गलत टेस्ट प्रश्न, कमज़ोर विषय (<60% दक्षता) और व्यक्तिगत कार्ड प्राथमिकता क्रम में दिखते हैं।"
+              : "Curated by your performance: Test Mistakes, Personal Cards & Weak Topics (<60% mastery) surface first."}
           </p>
         </div>
 
-        {lastScheduledMsg && (
-          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-            {lastScheduledMsg}
-          </span>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {lastScheduledMsg && (
+            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              {lastScheduledMsg}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowCreateForm((v) => !v)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#1E3A8A] hover:bg-indigo-900 text-white px-3.5 py-2 text-xs font-bold transition cursor-pointer"
+          >
+            {showCreateForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+            {lang === "HI" ? "नया व्यक्तिगत कार्ड" : "Create Personal Card"}
+          </button>
+        </div>
       </div>
+
+      {showCreateForm && (
+        <form
+          onSubmit={handleCreateCard}
+          className="rounded-2xl bg-white border-2 border-indigo-200 shadow-xs p-5 space-y-3"
+        >
+          <div className="font-bold text-sm text-slate-900">
+            {lang === "HI"
+              ? "अपना निजी सक्रिय-स्मरण फ्लैशकार्ड बनाएं (केवल आपको दृश्य)"
+              : "Create Private Active-Recall Flashcard (Visible Only to Your Account)"}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input
+              type="text"
+              required
+              value={newFront}
+              onChange={(e) => setNewFront(e.target.value)}
+              placeholder={
+                lang === "HI"
+                  ? "प्रश्न / संकेत (Front Prompt)..."
+                  : "Front Prompt (e.g., FRBM Act 2003 Fiscal Deficit Target)..."
+              }
+              className="rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#1E3A8A]"
+            />
+            <input
+              type="text"
+              required
+              value={newBack}
+              onChange={(e) => setNewBack(e.target.value)}
+              placeholder={
+                lang === "HI"
+                  ? "सटीक उत्तर / मुख्य तथ्य (Back Answer)..."
+                  : "Back Canonical Answer / Fact..."
+              }
+              className="rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#1E3A8A]"
+            />
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={newMnemonic}
+              onChange={(e) => setNewMnemonic(e.target.value)}
+              placeholder={
+                lang === "HI"
+                  ? "वैकल्पिक ट्रिक / स्मृति सूत्र (Mnemonic)..."
+                  : "Optional Mnemonic or Examiner Trap Warning..."
+              }
+              className="flex-1 rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#1E3A8A]"
+            />
+            <button
+              type="submit"
+              disabled={savingNewCard}
+              className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 text-xs transition cursor-pointer"
+            >
+              {savingNewCard ? "..." : lang === "HI" ? "सहेजें" : "Save to My Deck"}
+            </button>
+          </div>
+        </form>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         {[
-          { key: "ALL", en: "All Cards", hi: "सभी कार्ड्स" },
+          { key: "ALL", en: "For You (Smart Queue)", hi: "स्मार्ट प्राथमिकता क्यू" },
           {
             key: "MISTAKE_DECK",
             en: `Test Mistake Deck (${mistakeCount})`,
             hi: `टेस्ट त्रुटि डेक (${mistakeCount})`,
+          },
+          {
+            key: "MY_CARDS",
+            en: `My Personal Cards (${personalCount})`,
+            hi: `मेरे व्यक्तिगत कार्ड्स (${personalCount})`,
           },
           { key: "ARTICLES_COMMITTEES", en: "Polity & Articles", hi: "संविधान एवं समितियां" },
           { key: "ECONOMY_CONCEPTS", en: "Fiscal & Economy", hi: "अर्थव्यवस्था सूत्र" },
@@ -146,21 +266,35 @@ export const FlashcardsSrsView: React.FC<FlashcardsSrsViewProps> = ({
                 className={`inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
                   activeCard.originType === "TEST_MISTAKE"
                     ? "bg-rose-100 text-rose-800"
-                    : "bg-indigo-50 text-[#1E3A8A]"
+                    : activeCard.isPersonal
+                      ? "bg-amber-100 text-amber-900"
+                      : "bg-indigo-50 text-[#1E3A8A]"
                 }`}
               >
                 {activeCard.originLabel}
               </span>
             </div>
 
-            <div className="text-right">
-              <span className="font-mono-metric text-xs font-bold text-slate-700">
-                {currentIndex + 1} / {cards.length}
-              </span>
-              {activeCard.askedInLabel && (
-                <div className="text-[11px] text-amber-800 font-semibold mt-0.5">
-                  {activeCard.askedInLabel}
-                </div>
+            <div className="text-right flex items-center gap-2.5">
+              <div>
+                <span className="font-mono-metric text-xs font-bold text-slate-700">
+                  {currentIndex + 1} / {cards.length}
+                </span>
+                {activeCard.askedInLabel && (
+                  <div className="text-[11px] text-amber-800 font-semibold mt-0.5">
+                    {activeCard.askedInLabel}
+                  </div>
+                )}
+              </div>
+              {activeCard.isPersonal && (
+                <button
+                  type="button"
+                  title="Delete Personal Card"
+                  onClick={() => handleDeletePersonalCard(activeCard.flashcardId)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               )}
             </div>
           </div>

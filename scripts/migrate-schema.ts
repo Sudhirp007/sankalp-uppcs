@@ -174,6 +174,8 @@ async function main() {
       created_at TIMESTAMP NOT NULL DEFAULT NOW()
     )`,
     `CREATE INDEX IF NOT EXISTS idx_flashcards_topic ON flashcards(topic_id)`,
+    `ALTER TABLE flashcards ADD COLUMN IF NOT EXISTS created_by_user_id TEXT`,
+    `CREATE INDEX IF NOT EXISTS idx_flashcards_owner ON flashcards(created_by_user_id)`,
     `CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       firebase_uid TEXT UNIQUE,

@@ -6,8 +6,10 @@ import * as schema from "../db/schema";
 import { resolveRequestIdentity } from "./auth";
 import { normalizeLang, pickArtifactContent, pickOptions, pickText, type LangCode } from "./projector";
 import {
+  computeHmacSha256Hex,
   createRazorpayOrder,
   createSandboxPaymentProof,
+  timingSafeEqualHex,
   verifyRazorpayPaymentSignature,
 } from "./razorpay";
 
@@ -130,8 +132,11 @@ async function ensureUserRecord(
     )
     .onConflictDoNothing();
 
-  // Seed starter due SRS cards (including 2 Test Mistake Deck items)
-  const allCards = await db.select({ id: schema.flashcards.id }).from(schema.flashcards);
+  // Seed starter due SRS cards (only global curated cards, never another user's private cards)
+  const allCards = await db
+    .select({ id: schema.flashcards.id })
+    .from(schema.flashcards)
+    .where(sql`${schema.flashcards.createdByUserId} IS NULL`);
   if (allCards.length > 0) {
     await db
       .insert(schema.userItemSrs)
@@ -1167,7 +1172,12 @@ app.post("/api/v1/test-sessions/:id/submit", async (c) => {
       const linkedCards = await db
         .select()
         .from(schema.flashcards)
-        .where(inArray(schema.flashcards.topicId, wrongTopics));
+        .where(
+          and(
+            inArray(schema.flashcards.topicId, wrongTopics),
+            sql`(${schema.flashcards.createdByUserId} IS NULL OR ${schema.flashcards.createdByUserId} = ${user.id})`
+          )
+        );
 
       for (const fc of linkedCards) {
         await db
@@ -1212,7 +1222,7 @@ app.post("/api/v1/test-sessions/:id/submit", async (c) => {
 });
 
 // ---------------------------------------------------------------------------
-// 7. Topic Learning Studio — Cheat Sheets & Comparison Matrices (Screen 7)
+// 7. Topic Learning Studio — Performance-Curated Cheat Sheets & Notes (Screen 7)
 // ---------------------------------------------------------------------------
 app.get("/api/v1/studio", async (c) => {
   const db = createDb(c.env?.DATABASE_URL);
@@ -1224,37 +1234,67 @@ app.get("/api/v1/studio", async (c) => {
     db.select().from(schema.learningArtifacts),
     db.select().from(schema.syllabusTopics),
     db.select().from(schema.userTopicMastery).where(eq(schema.userTopicMastery.userId, user.id)),
-    db.select().from(schema.flashcards),
+    db
+      .select()
+      .from(schema.flashcards)
+      .where(
+        sql`(${schema.flashcards.createdByUserId} IS NULL OR ${schema.flashcards.createdByUserId} = ${user.id})`
+      ),
   ]);
 
   const topicMap = new Map(topics.map((t) => [t.id, t]));
   const masteryMap = new Map(masteryRows.map((m) => [m.topicId, m.masteryScore]));
 
-  const sheets = artifacts.map((a) => {
-    const t = topicMap.get(a.topicId);
-    const linkedCardsCount = cards.filter((fc) => fc.topicId === a.topicId).length;
-    return {
-      id: a.id,
-      topicId: a.topicId,
-      topicName: t ? pickText(lang, t.nameEn, t.nameHi) : "",
-      subjectKey: t?.subjectKey || "General Studies",
-      artifactType: a.artifactType,
-      title: pickText(lang, a.titleEn, a.titleHi),
-      estReadMins: a.estReadMins,
-      pyqCoverageCount: a.pyqCoverageCount,
-      canonicalSource: pickText(lang, a.canonicalSourceEn, a.canonicalSourceHi),
-      topicMasteryPct: Math.round(masteryMap.get(a.topicId) ?? 60),
-      linkedFlashcardsCount: linkedCardsCount,
-      content: pickArtifactContent(lang, a.contentEn, a.contentHi),
-      scratchpadNote: (user.scratchpadNotes || {})[a.id] || "",
-    };
-  });
+  const sheets = artifacts
+    .map((a) => {
+      const t = topicMap.get(a.topicId);
+      const linkedCardsCount = cards.filter((fc) => fc.topicId === a.topicId).length;
+      const masteryPct = Math.round(masteryMap.get(a.topicId) ?? 55);
+      const noteText = (user.scratchpadNotes || {})[a.id] || "";
+      const hasPersonalNote = noteText.trim().length > 0;
+
+      const curationTier =
+        masteryPct < 60 ? "PRIORITY_GAP" : hasPersonalNote ? "PERSONAL_NOTE" : "STRONGHOLD";
+      const curatedReason =
+        masteryPct < 60
+          ? lang === "HI"
+            ? `प्राथमिक सुधार क्षेत्र • ${masteryPct}% दक्षता`
+            : `Recommended Gap Fix • ${masteryPct}% Mastery`
+          : hasPersonalNote
+            ? lang === "HI"
+              ? `आपके व्यक्तिगत नोट्स युक्त • ${masteryPct}%`
+              : `Annotated with Your Notes • ${masteryPct}%`
+            : lang === "HI"
+              ? `मजबूत पकड़ रिवीजन • ${masteryPct}%`
+              : `High-Retention Review • ${masteryPct}%`;
+
+      return {
+        id: a.id,
+        topicId: a.topicId,
+        topicName: t ? pickText(lang, t.nameEn, t.nameHi) : "",
+        subjectKey: t?.subjectKey || "General Studies",
+        artifactType: a.artifactType,
+        title: pickText(lang, a.titleEn, a.titleHi),
+        estReadMins: a.estReadMins,
+        pyqCoverageCount: a.pyqCoverageCount,
+        canonicalSource: pickText(lang, a.canonicalSourceEn, a.canonicalSourceHi),
+        topicMasteryPct: masteryPct,
+        curationTier,
+        curatedReason,
+        hasPersonalNote,
+        linkedFlashcardsCount: linkedCardsCount,
+        content: pickArtifactContent(lang, a.contentEn, a.contentHi),
+        scratchpadNote: noteText,
+      };
+    })
+    // Curate order dynamically by performance: weakest mastery first so high-yield gaps appear on top
+    .sort((a, b) => a.topicMasteryPct - b.topicMasteryPct);
 
   return c.json({ language: lang, sheets });
 });
 
 // ---------------------------------------------------------------------------
-// 8. Active-Recall Flashcards & Mistake SRS Player (Screen 8)
+// 8. Active-Recall Flashcards, Personal User Cards & Mistake SRS (Screen 8)
 // ---------------------------------------------------------------------------
 app.get("/api/v1/srs/due", async (c) => {
   const db = createDb(c.env?.DATABASE_URL);
@@ -1263,33 +1303,66 @@ app.get("/api/v1/srs/due", async (c) => {
   const lang = normalizeLang(user.preferredLanguage);
   const deckFilter = c.req.query("deck") || "ALL";
 
-  const [srsRows, allCards, topics] = await Promise.all([
+  const [srsRows, allCards, topics, masteryRows] = await Promise.all([
     db.select().from(schema.userItemSrs).where(eq(schema.userItemSrs.userId, user.id)),
-    db.select().from(schema.flashcards),
+    db
+      .select()
+      .from(schema.flashcards)
+      .where(
+        sql`(${schema.flashcards.createdByUserId} IS NULL OR ${schema.flashcards.createdByUserId} = ${user.id})`
+      ),
     db.select().from(schema.syllabusTopics),
+    db.select().from(schema.userTopicMastery).where(eq(schema.userTopicMastery.userId, user.id)),
   ]);
 
   const srsByCard = new Map(srsRows.map((s) => [s.flashcardId, s]));
   const topicMap = new Map(topics.map((t) => [t.id, t]));
+  const masteryMap = new Map(masteryRows.map((m) => [m.topicId, m.masteryScore]));
   const now = Date.now();
 
-  const cards = allCards
+  const mapped = allCards
     .map((fc) => {
       const srs = srsByCard.get(fc.id);
+      const isPersonal = fc.createdByUserId === user.id;
       const isDue = !srs || new Date(srs.nextDueAt).getTime() <= now;
       const t = topicMap.get(fc.topicId);
+      const topicMasteryPct = Math.round(masteryMap.get(fc.topicId) ?? 55);
+      const originType = isPersonal
+        ? "PERSONAL_CARD"
+        : (srs?.originType as "TEST_MISTAKE" | "TOPIC_DECK") || "TOPIC_DECK";
+
+      // Performance priority score (lower = shown earlier in session)
+      const priorityRank =
+        (isDue ? 0 : 100) +
+        (originType === "TEST_MISTAKE" ? 0 : isPersonal ? 10 : topicMasteryPct < 60 ? 20 : 40) +
+        topicMasteryPct * 0.1;
+
       return {
         flashcardId: fc.id,
         srsId: srs?.id || null,
         topicId: fc.topicId,
-        topicBreadcrumb: t ? `${t.subjectKey} → ${pickText(lang, t.nameEn, t.nameHi)}` : "GS",
+        topicBreadcrumb: t ? `${t.subjectKey} → ${pickText(lang, t.nameEn, t.nameHi)}` : "General Studies",
+        topicMasteryPct,
         deckCategory: fc.deckCategory,
-        originType: srs?.originType || "TOPIC_DECK",
-        originLabel: pickText(
-          lang,
-          srs?.originLabelEn || "High-Yield Syllabus Deck",
-          srs?.originLabelHi || "उच्च-उपयोगी पाठ्यक्रम डेक"
-        ),
+        isPersonal,
+        originType,
+        originLabel: isPersonal
+          ? pickText(
+              lang,
+              srs?.originLabelEn || "Created by You (Personal Card)",
+              srs?.originLabelHi || "आपके द्वारा निर्मित (व्यक्तिगत कार्ड)"
+            )
+          : pickText(
+              lang,
+              srs?.originLabelEn ||
+                (topicMasteryPct < 60
+                  ? `Curated for Weak Topic (${topicMasteryPct}% Mastery)`
+                  : "High-Yield Syllabus Deck"),
+              srs?.originLabelHi ||
+                (topicMasteryPct < 60
+                  ? `कमज़ोर विषय हेतु चयनित (${topicMasteryPct}% दक्षता)`
+                  : "उच्च-उपयोगी पाठ्यक्रम डेक")
+            ),
         cardTypeLabel: pickText(lang, fc.cardTypeLabelEn, fc.cardTypeLabelHi),
         front: pickText(lang, fc.frontEn, fc.frontHi),
         back: pickText(lang, fc.backEn, fc.backHi),
@@ -1299,20 +1372,111 @@ app.get("/api/v1/srs/due", async (c) => {
         isDue,
         intervalDays: srs?.intervalDays ?? 0,
         repetitions: srs?.repetitions ?? 0,
+        priorityRank,
       };
     })
-    .filter((cItem) => {
-      if (deckFilter === "MISTAKE_DECK") return cItem.originType === "TEST_MISTAKE";
-      if (deckFilter !== "ALL") return cItem.deckCategory === deckFilter;
-      return true;
-    });
+    .sort((a, b) => a.priorityRank - b.priorityRank);
+
+  const filtered = mapped.filter((cItem) => {
+    if (deckFilter === "MISTAKE_DECK") return cItem.originType === "TEST_MISTAKE";
+    if (deckFilter === "MY_CARDS") return cItem.isPersonal;
+    if (deckFilter !== "ALL") return cItem.deckCategory === deckFilter;
+    return true;
+  });
 
   return c.json({
     language: lang,
-    dueCount: cards.filter((x) => x.isDue).length,
-    mistakeCount: cards.filter((x) => x.originType === "TEST_MISTAKE").length,
-    cards,
+    dueCount: mapped.filter((x) => x.isDue).length,
+    mistakeCount: mapped.filter((x) => x.originType === "TEST_MISTAKE").length,
+    personalCount: mapped.filter((x) => x.isPersonal).length,
+    cards: filtered,
   });
+});
+
+app.post("/api/v1/srs/cards", async (c) => {
+  const db = createDb(c.env?.DATABASE_URL);
+  const fbProject = c.env?.FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || "sankalp-uppcs-app";
+  const user = await ensureUserRecord(db, c.req.raw, fbProject);
+
+  const body = await c.req.json<{
+    topicId?: string | null;
+    sourceQuestionId?: string | null;
+    front: string;
+    back: string;
+    mnemonic?: string;
+    trapWarning?: string;
+    originContext?: string;
+  }>();
+
+  const front = (body.front || "").trim();
+  const back = (body.back || "").trim();
+  if (!front || !back) {
+    return c.json({ error: "Both front prompt and back answer are required." }, 400);
+  }
+
+  let resolvedTopicId = body.topicId || "top-econ-fiscal";
+  const [topicExists] = await db
+    .select({ id: schema.syllabusTopics.id })
+    .from(schema.syllabusTopics)
+    .where(eq(schema.syllabusTopics.id, resolvedTopicId))
+    .limit(1);
+  if (!topicExists) {
+    resolvedTopicId = "top-econ-fiscal";
+  }
+
+  const cardId = `fc_usr_${crypto.randomUUID().replace(/-/g, "").slice(0, 14)}`;
+  await db.insert(schema.flashcards).values({
+    id: cardId,
+    topicId: resolvedTopicId,
+    createdByUserId: user.id,
+    sourceQuestionId: body.sourceQuestionId || null,
+    deckCategory: "MY_CARDS",
+    cardTypeLabelEn: "Personal Active-Recall Card",
+    cardTypeLabelHi: "व्यक्तिगत सक्रिय-स्मरण कार्ड",
+    frontEn: front,
+    frontHi: front,
+    backEn: back,
+    backHi: back,
+    mnemonicEn: body.mnemonic?.trim() || null,
+    mnemonicHi: body.mnemonic?.trim() || null,
+    trapWarningEn: body.trapWarning?.trim() || null,
+    trapWarningHi: body.trapWarning?.trim() || null,
+    askedInLabelEn: body.originContext || "Personal Study Deck",
+    askedInLabelHi: body.originContext || "व्यक्तिगत अध्ययन डेक",
+  });
+
+  await db
+    .insert(schema.userItemSrs)
+    .values({
+      id: `${user.id}__${cardId}`,
+      userId: user.id,
+      flashcardId: cardId,
+      sourceQuestionId: body.sourceQuestionId || null,
+      originType: "PERSONAL_CARD",
+      originLabelEn: body.originContext || "Created by You (Personal Card)",
+      originLabelHi: body.originContext || "आपके द्वारा निर्मित (व्यक्तिगत कार्ड)",
+      intervalDays: 0,
+      repetitions: 0,
+      nextDueAt: new Date(),
+    })
+    .onConflictDoNothing();
+
+  return c.json({ ok: true, flashcardId: cardId });
+});
+
+app.delete("/api/v1/srs/cards/:id", async (c) => {
+  const db = createDb(c.env?.DATABASE_URL);
+  const fbProject = c.env?.FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || "sankalp-uppcs-app";
+  const user = await ensureUserRecord(db, c.req.raw, fbProject);
+  const cardId = c.req.param("id");
+
+  await db
+    .delete(schema.flashcards)
+    .where(
+      and(eq(schema.flashcards.id, cardId), eq(schema.flashcards.createdByUserId, user.id))
+    );
+
+  return c.json({ ok: true, deletedId: cardId });
 });
 
 app.post("/api/v1/srs/review", async (c) => {
@@ -1539,6 +1703,62 @@ app.post("/api/v1/billing/verify-payment", async (c) => {
     proExpiresAt,
     razorpayOrderId: body.razorpayOrderId,
   });
+});
+
+// Server-to-Server Razorpay Webhook Handler (payment.captured / order.paid)
+app.post("/api/v1/billing/webhook", async (c) => {
+  const webhookSecret = c.env?.RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    return c.json({ error: "RAZORPAY_WEBHOOK_SECRET not configured" }, 400);
+  }
+  const signature = c.req.header("x-razorpay-signature") || "";
+  const rawBody = await c.req.text();
+  const expected = await computeHmacSha256Hex(rawBody, webhookSecret);
+  if (!timingSafeEqualHex(expected, signature.trim().toLowerCase())) {
+    return c.json({ error: "Invalid webhook signature" }, 400);
+  }
+
+  const event = JSON.parse(rawBody) as {
+    event?: string;
+    payload?: {
+      payment?: { entity?: { id?: string; order_id?: string } };
+      order?: { entity?: { id?: string } };
+    };
+  };
+
+  const rzpOrderId =
+    event.payload?.payment?.entity?.order_id || event.payload?.order?.entity?.id;
+  const rzpPaymentId = event.payload?.payment?.entity?.id || "webhook_captured";
+
+  if (rzpOrderId && (event.event === "payment.captured" || event.event === "order.paid")) {
+    const db = createDb(c.env?.DATABASE_URL);
+    const [orderRow] = await db
+      .select()
+      .from(schema.paymentOrders)
+      .where(eq(schema.paymentOrders.razorpayOrderId, rzpOrderId))
+      .limit(1);
+
+    if (orderRow) {
+      const [plan] = await db
+        .select()
+        .from(schema.subscriptionPlans)
+        .where(eq(schema.subscriptionPlans.id, orderRow.planId))
+        .limit(1);
+      const proExpiresAt = new Date(Date.now() + (plan?.validityDays ?? 365) * 24 * 60 * 60 * 1000);
+
+      await db
+        .update(schema.paymentOrders)
+        .set({ razorpayPaymentId: rzpPaymentId, status: "PAID", verifiedAt: new Date() })
+        .where(eq(schema.paymentOrders.id, orderRow.id));
+
+      await db
+        .update(schema.users)
+        .set({ planTier: "PRO_PASS", proExpiresAt, updatedAt: new Date() })
+        .where(eq(schema.users.id, orderRow.userId));
+    }
+  }
+
+  return c.json({ received: true });
 });
 
 // Fallback for non-API requests when served via Cloudflare Workers Static Assets

@@ -246,6 +246,9 @@ export interface StudioSheet {
   pyqCoverageCount: number;
   canonicalSource: string;
   topicMasteryPct: number;
+  curationTier: "PRIORITY_GAP" | "PERSONAL_NOTE" | "STRONGHOLD";
+  curatedReason: string;
+  hasPersonalNote: boolean;
   linkedFlashcardsCount: number;
   scratchpadNote: string;
   content: {
@@ -263,8 +266,10 @@ export interface FlashcardItemDTO {
   srsId: string | null;
   topicId: string;
   topicBreadcrumb: string;
+  topicMasteryPct: number;
   deckCategory: string;
-  originType: "TEST_MISTAKE" | "TOPIC_DECK";
+  isPersonal: boolean;
+  originType: "TEST_MISTAKE" | "TOPIC_DECK" | "PERSONAL_CARD";
   originLabel: string;
   cardTypeLabel: string;
   front: string;
@@ -380,8 +385,28 @@ export const api = {
       language: LangCode;
       dueCount: number;
       mistakeCount: number;
+      personalCount: number;
       cards: FlashcardItemDTO[];
     }>(`/api/v1/srs/due?deck=${encodeURIComponent(deck)}`),
+
+  createPersonalFlashcard: (payload: {
+    topicId?: string | null;
+    sourceQuestionId?: string | null;
+    front: string;
+    back: string;
+    mnemonic?: string;
+    trapWarning?: string;
+    originContext?: string;
+  }) =>
+    apiFetch<{ ok: boolean; flashcardId: string }>("/api/v1/srs/cards", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  deletePersonalFlashcard: (flashcardId: string) =>
+    apiFetch<{ ok: boolean; deletedId: string }>(`/api/v1/srs/cards/${encodeURIComponent(flashcardId)}`, {
+      method: "DELETE",
+    }),
 
   reviewFlashcard: (flashcardId: string, rating: 1 | 2 | 3 | 4) =>
     apiFetch<{ ok: boolean; flashcardId: string; nextIntervalDays: number; nextDueAt: string }>(

@@ -5,7 +5,10 @@ import type { LangCode } from "../lib/i18n";
 
 declare global {
   interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on?: (event: string, cb: (resp: { error?: { description?: string } }) => void) => void;
+    };
   }
 }
 
@@ -54,6 +57,13 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
 
       // 1. Live / Test Razorpay Checkout.js modal when real RAZORPAY_KEY_ID is set
       if (!order.isSandbox && window.Razorpay) {
+        if (order.keyId.startsWith("rzp_test_")) {
+          setStatusMsg(
+            lang === "HI"
+              ? "Razorpay Test Mode सक्रिय: परीक्षण हेतु UPI में success@razorpay का उपयोग करें।"
+              : "Razorpay Test Mode Active: Use UPI ID success@razorpay or any Razorpay test card."
+          );
+        }
         const rzp = new window.Razorpay({
           key: order.keyId,
           amount: order.amountPaise,
@@ -66,22 +76,44 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
             email: userEmail || "aspirant@sankalp.in",
           },
           theme: { color: "#1E3A8A" },
+          modal: {
+            ondismiss: () => {
+              setProcessing(false);
+            },
+          },
           handler: async (response: {
             razorpay_order_id: string;
             razorpay_payment_id: string;
             razorpay_signature: string;
           }) => {
-            await api.verifyBillingPayment({
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-            });
-            await onSuccess();
-            onClose();
+            try {
+              setProcessing(true);
+              setStatusMsg(
+                lang === "HI"
+                  ? "Razorpay HMAC-SHA256 हस्ताक्षर सत्यापित किया जा रहा है..."
+                  : "Verifying Razorpay Payment Signature (HMAC-SHA256)..."
+              );
+              await api.verifyBillingPayment({
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              });
+              await onSuccess();
+              onClose();
+            } catch (verifyErr: unknown) {
+              setErrorMsg(
+                verifyErr instanceof Error ? verifyErr.message : "Signature verification failed"
+              );
+            } finally {
+              setProcessing(false);
+            }
           },
         });
+        rzp.on?.("payment.failed", (resp) => {
+          setErrorMsg(resp?.error?.description || "Razorpay test payment failed. Please retry.");
+          setProcessing(false);
+        });
         rzp.open();
-        setProcessing(false);
         return;
       }
 

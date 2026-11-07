@@ -214,6 +214,7 @@ export const flashcards = pgTable(
     topicId: text("topic_id")
       .notNull()
       .references(() => syllabusTopics.id, { onDelete: "cascade" }),
+    createdByUserId: text("created_by_user_id"),
     sourceQuestionId: text("source_question_id").references(() => questions.id, { onDelete: "set null" }),
     deckCategory: text("deck_category").notNull().default("ARTICLES"),
     cardTypeLabelEn: text("card_type_label_en").notNull().default("Constitutional Article & Concept Recall"),

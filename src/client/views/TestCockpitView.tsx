@@ -4,16 +4,18 @@ import {
   ArrowRight,
   Bookmark,
   BookOpen,
+  Check,
   CheckCircle2,
   Clock,
   Globe2,
   Layers,
+  Plus,
   Scissors,
   ShieldCheck,
   Sparkles,
   XCircle,
 } from "lucide-react";
-import type { TestSessionDetailResponse } from "../lib/api";
+import { api, type TestSessionDetailResponse } from "../lib/api";
 import { UI_COPY, type LangCode } from "../lib/i18n";
 
 interface LocalResponseState {
@@ -43,6 +45,7 @@ interface TestCockpitViewProps {
   onExitToDashboard: () => void;
   onOpenCheatSheet: (artifactId: string) => void;
   onOpenMistakeDeck: () => void;
+  onFlashcardCreated?: () => void;
 }
 
 export const TestCockpitView: React.FC<TestCockpitViewProps> = ({
@@ -54,12 +57,16 @@ export const TestCockpitView: React.FC<TestCockpitViewProps> = ({
   onExitToDashboard,
   onOpenCheatSheet,
   onOpenMistakeDeck,
+  onFlashcardCreated,
 }) => {
   const t = UI_COPY[lang];
   const { session, items } = detail;
   const isSubmitted = session.status === "SUBMITTED";
 
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [omrFilter, setOmrFilter] = useState<"ALL" | "REVIEW" | "UNANSWERED" | "WRONG">("ALL");
+  const [savedCardIds, setSavedCardIds] = useState<Record<string, boolean>>({});
+  const [savingCard, setSavingCard] = useState(false);
   const [elapsedSec, setElapsedSec] = useState(session.elapsedSec || 0);
   const [responses, setResponses] = useState<Record<string, LocalResponseState>>(() => {
     const map: Record<string, LocalResponseState> = {};
@@ -200,13 +207,41 @@ export const TestCockpitView: React.FC<TestCockpitViewProps> = ({
   const paletteCounts = useMemo(() => {
     let answered = 0;
     let marked = 0;
+    let wrong = 0;
     for (const it of items) {
       const r = responses[it.questionId];
       if (r?.selectedOption) answered++;
-      if (r?.isMarkedReview) marked++;
+      if (r?.isMarkedReview || it.isMarkedReview) marked++;
+      if (isSubmitted && it.isCorrect === false) wrong++;
     }
-    return { answered, marked, unanswered: items.length - answered };
-  }, [items, responses]);
+    return { answered, marked, wrong, unanswered: items.length - answered };
+  }, [items, responses, isSubmitted]);
+
+  const handleSaveQuestionAsFlashcard = async () => {
+    if (savedCardIds[currentItem.questionId] || savingCard) return;
+    setSavingCard(true);
+    try {
+      const correctChoice = currentItem.options.find((o) => o.key === currentItem.correctOption);
+      const backAnswer = correctChoice
+        ? `(${correctChoice.key}) ${correctChoice.text}${
+            currentItem.explanation ? ` — ${currentItem.explanation.slice(0, 220)}` : ""
+          }`
+        : currentItem.explanation || "Refer to official answer key";
+
+      await api.createPersonalFlashcard({
+        topicId: currentItem.topicId,
+        sourceQuestionId: currentItem.questionId,
+        front: currentItem.stem,
+        back: backAnswer,
+        mnemonic: currentItem.goldenRule || undefined,
+        originContext: `Saved from ${session.title} (Q.${currentItem.displayOrder})`,
+      });
+      setSavedCardIds((prev) => ({ ...prev, [currentItem.questionId]: true }));
+      onFlashcardCreated?.();
+    } finally {
+      setSavingCard(false);
+    }
+  };
 
   const handleFinalSubmit = async () => {
     await onSubmitPaper({
@@ -406,7 +441,7 @@ export const TestCockpitView: React.FC<TestCockpitViewProps> = ({
                   ? `प्रश्न ${currentItem.displayOrder} / ${items.length}`
                   : `Question ${currentItem.displayOrder} of ${items.length}`}
               </span>
-              {!isSubmitted && (
+              {!isSubmitted ? (
                 <button
                   type="button"
                   onClick={toggleReviewMark}
@@ -419,6 +454,13 @@ export const TestCockpitView: React.FC<TestCockpitViewProps> = ({
                   <Bookmark className="w-3.5 h-3.5" />
                   {curState.isMarkedReview ? t.markedForReview : t.markForReview}
                 </button>
+              ) : (
+                (curState.isMarkedReview || currentItem.isMarkedReview) && (
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-purple-100 text-purple-800 px-2.5 py-1 text-xs font-bold">
+                    <Bookmark className="w-3.5 h-3.5" />
+                    {lang === "HI" ? "परीक्षा के दौरान चिह्नित" : "Marked for Review in Test"}
+                  </span>
+                )
               )}
             </div>
 
@@ -590,14 +632,43 @@ export const TestCockpitView: React.FC<TestCockpitViewProps> = ({
                       : `Standard Reference Verified (${Math.round((currentItem.confidenceScore ?? 0.96) * 100)}% Confidence)`}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => onOpenCheatSheet(currentItem.linkedArtifactId)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-[#1E3A8A] px-3 py-1.5 text-xs font-bold transition cursor-pointer"
-                >
-                  <BookOpen className="w-3.5 h-3.5" />
-                  {t.openCheatSheet}
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={savingCard || Boolean(savedCardIds[currentItem.questionId])}
+                    onClick={handleSaveQuestionAsFlashcard}
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                      savedCardIds[currentItem.questionId]
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200"
+                    }`}
+                  >
+                    {savedCardIds[currentItem.questionId] ? (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        {lang === "HI" ? "मेरे फ्लैशकार्ड्स में सहेजा गया" : "Saved to My Flashcards"}
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-3.5 h-3.5" />
+                        {savingCard
+                          ? "..."
+                          : lang === "HI"
+                            ? "फ्लैशकार्ड बनाएं"
+                            : "Save to My Flashcards"}
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onOpenCheatSheet(currentItem.linkedArtifactId)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-[#1E3A8A] px-3 py-1.5 text-xs font-bold transition cursor-pointer"
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    {t.openCheatSheet}
+                  </button>
+                </div>
               </div>
 
               {currentItem.goldenRule && (
@@ -657,16 +728,64 @@ export const TestCockpitView: React.FC<TestCockpitViewProps> = ({
               </div>
             </div>
 
+            {/* Quick OMR Filter Tabs (Jump directly to Review / Unanswered / Wrong) */}
+            <div className="flex flex-wrap gap-1.5">
+              {(isSubmitted
+                ? [
+                    { key: "ALL" as const, label: lang === "HI" ? "सभी" : "All" },
+                    {
+                      key: "WRONG" as const,
+                      label: lang === "HI" ? `गलत (${paletteCounts.wrong})` : `Wrong (${paletteCounts.wrong})`,
+                    },
+                    {
+                      key: "REVIEW" as const,
+                      label: lang === "HI" ? `चिह्नित (${paletteCounts.marked})` : `Review (${paletteCounts.marked})`,
+                    },
+                  ]
+                : [
+                    { key: "ALL" as const, label: lang === "HI" ? "सभी" : "All" },
+                    {
+                      key: "REVIEW" as const,
+                      label: lang === "HI" ? `चिह्नित (${paletteCounts.marked})` : `Review (${paletteCounts.marked})`,
+                    },
+                    {
+                      key: "UNANSWERED" as const,
+                      label: lang === "HI" ? `शेष (${paletteCounts.unanswered})` : `Left (${paletteCounts.unanswered})`,
+                    },
+                  ]
+              ).map((f) => (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => setOmrFilter(f.key)}
+                  className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition cursor-pointer ${
+                    omrFilter === f.key
+                      ? "bg-[#1E3A8A] text-white"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-5 gap-2">
               {items.map((it, idx) => {
                 const r = responses[it.questionId];
+                const isMarked = Boolean(r?.isMarkedReview || it.isMarkedReview);
+                const isAnswered = Boolean(r?.selectedOption);
+
+                if (omrFilter === "REVIEW" && !isMarked) return null;
+                if (omrFilter === "UNANSWERED" && isAnswered) return null;
+                if (omrFilter === "WRONG" && it.isCorrect !== false) return null;
+
                 let btnColor = "bg-slate-100 text-slate-700 border-slate-200";
                 if (isSubmitted) {
                   if (it.isCorrect === true) btnColor = "bg-emerald-600 text-white border-emerald-600";
                   else if (it.isCorrect === false) btnColor = "bg-rose-600 text-white border-rose-600";
-                } else if (r?.isMarkedReview) {
+                } else if (isMarked) {
                   btnColor = "bg-purple-600 text-white border-purple-600";
-                } else if (r?.selectedOption) {
+                } else if (isAnswered) {
                   btnColor = "bg-[#1E3A8A] text-white border-[#1E3A8A]";
                 }
 
@@ -675,14 +794,33 @@ export const TestCockpitView: React.FC<TestCockpitViewProps> = ({
                     key={it.questionId}
                     type="button"
                     onClick={() => setCurrentIdx(idx)}
-                    className={`font-mono-metric h-9 rounded-lg border text-xs font-bold transition cursor-pointer ${btnColor} ${
+                    className={`relative font-mono-metric h-9 rounded-lg border text-xs font-bold transition cursor-pointer ${btnColor} ${
                       currentIdx === idx ? "ring-2 ring-offset-1 ring-amber-500" : ""
                     }`}
                   >
                     {it.displayOrder}
+                    {/* Distinct indicator for Answered + Marked for Review (evaluated per UPPSC rule) */}
+                    {!isSubmitted && isMarked && isAnswered && (
+                      <span
+                        title="Answered & Marked for Review (Evaluated on Submit)"
+                        className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border border-white"
+                      />
+                    )}
+                    {isSubmitted && isMarked && (
+                      <span
+                        title="Was Marked for Review"
+                        className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-purple-400 border border-white"
+                      />
+                    )}
                   </button>
                 );
               })}
+            </div>
+
+            <div className="text-[11px] text-slate-500 leading-snug pt-2 border-t border-slate-100">
+              {lang === "HI"
+                ? "नियम: 'चिह्नित + उत्तर चयनित' का मूल्यांकन होगा; केवल 'चिह्नित (बिना उत्तर)' पर 0 अंक।"
+                : "UPPSC Rule: Answered + Review (green dot) IS graded; Unanswered + Review = 0 marks."}
             </div>
           </div>
         </aside>
