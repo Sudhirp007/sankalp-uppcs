@@ -748,40 +748,47 @@ app.post("/api/v1/test-sessions", async (c) => {
   const [exam] = await db.select().from(schema.exams).where(eq(schema.exams.id, examId)).limit(1);
   const targetExam = exam || (await db.select().from(schema.exams).limit(1))[0];
 
-  const desiredCount = Math.min(50, Math.max(5, body.limit || (body.sessionType === "FULL_PAPER" ? 25 : 15)));
+  const desiredCount = Math.min(150, Math.max(5, body.limit || (body.sessionType === "FULL_PAPER" ? 30 : 15)));
 
-  // Build candidate question pool (prioritizing clean bilingual coverage when lang === 'HI')
-  let candidates = await db
-    .select()
-    .from(schema.questions)
-    .orderBy(
-      lang === "HI"
-        ? sql`CASE WHEN ${schema.questions.questionHi} IS NOT NULL THEN 0 ELSE 1 END, RANDOM()`
-        : sql`CASE WHEN ${schema.questions.goldenRuleEn} IS NOT NULL THEN 0 ELSE 1 END, RANDOM()`
-    )
-    .limit(250);
-
+  // Push filters directly to Neon Postgres so large subject banks (1,200+ Indian Economy Qs) are 100% reachable
+  const whereClauses = [];
   if (body.paperId) {
-    const byPaper = candidates.filter((q) => q.paperId === body.paperId);
-    if (byPaper.length >= 3) candidates = byPaper;
+    whereClauses.push(eq(schema.questions.paperId, body.paperId));
   }
   if (Array.isArray(body.topicIds) && body.topicIds.length > 0) {
-    const topicSet = new Set(body.topicIds);
-    const byTopic = candidates.filter((q) => q.topicId && topicSet.has(q.topicId));
-    if (byTopic.length >= 3) candidates = byTopic;
+    whereClauses.push(inArray(schema.questions.topicId, body.topicIds));
   }
   if (Array.isArray(body.origins) && body.origins.length > 0) {
-    const originSet = new Set(body.origins);
-    const byOrigin = candidates.filter((q) => originSet.has(q.questionOrigin));
-    if (byOrigin.length >= 3) candidates = byOrigin;
+    whereClauses.push(inArray(schema.questions.questionOrigin, body.origins));
   }
   if (body.questionFormat && body.questionFormat !== "ALL") {
-    const byFmt = candidates.filter((q) => q.questionFormat === body.questionFormat);
-    if (byFmt.length >= 3) candidates = byFmt;
+    whereClauses.push(eq(schema.questions.questionFormat, body.questionFormat));
   }
 
-  // Always include our flagship curated question at the top of Adaptive / Polity / Hindi demos if available
-  const selected = candidates.slice(0, desiredCount);
+  const orderExpr =
+    lang === "HI"
+      ? sql`CASE WHEN ${schema.questions.questionHi} IS NOT NULL THEN 0 ELSE 1 END, RANDOM()`
+      : sql`CASE WHEN ${schema.questions.goldenRuleEn} IS NOT NULL THEN 0 ELSE 1 END, RANDOM()`;
+
+  let selected = await db
+    .select()
+    .from(schema.questions)
+    .where(whereClauses.length > 0 ? and(...whereClauses) : undefined)
+    .orderBy(orderExpr)
+    .limit(desiredCount);
+
+  // Graceful fallback if an overly narrow origin+topic combination had 0 rows
+  if (selected.length === 0 && Array.isArray(body.topicIds) && body.topicIds.length > 0) {
+    selected = await db
+      .select()
+      .from(schema.questions)
+      .where(inArray(schema.questions.topicId, body.topicIds))
+      .orderBy(orderExpr)
+      .limit(desiredCount);
+  }
+  if (selected.length === 0) {
+    selected = await db.select().from(schema.questions).orderBy(orderExpr).limit(desiredCount);
+  }
   if (selected.length === 0) {
     return c.json({ error: "No questions available for selected filters" }, 400);
   }

@@ -24,13 +24,13 @@ export const SyllabusExplorerView: React.FC<SyllabusExplorerViewProps> = ({
   onOpenCheatSheet,
 }) => {
   const [expandedDomains, setExpandedDomains] = useState<Record<string, boolean>>(() => {
-    const init: Record<string, boolean> = {};
+    const init: Record<string, boolean> = { "dom-econ": true, "dom-polity": true };
     data.tree.slice(0, 2).forEach((d) => {
       init[d.id] = true;
     });
     return init;
   });
-  const [selectedTopics, setSelectedTopics] = useState<string[]>(["top-polity-panchayat"]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>(["top-econ-fiscal", "top-econ-monetary"]);
   const [origins, setOrigins] = useState<string[]>(["PYQ", "CONCEPT_BUILDER", "NCERT_DRILL"]);
   const [mode, setMode] = useState<"EXAM" | "TUTOR">("EXAM");
   const [limit, setLimit] = useState<number>(15);
@@ -122,6 +122,21 @@ export const SyllabusExplorerView: React.FC<SyllabusExplorerViewProps> = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const domTopicIds = dom.modules.flatMap((m) => m.microTopics.map((mt) => mt.id));
+                      const allSelected = domTopicIds.every((id) => selectedTopics.includes(id));
+                      setSelectedTopics((prev) =>
+                        allSelected
+                          ? prev.filter((id) => !domTopicIds.includes(id))
+                          : Array.from(new Set([...prev, ...domTopicIds]))
+                      );
+                    }}
+                    className="font-mono-metric text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold"
+                  >
+                    {dom.totalQuestions} Qs • {lang === "HI" ? "सभी चुनें" : "Select All"}
+                  </span>
                   <span className="font-mono-metric text-xs px-2.5 py-0.5 rounded-full bg-indigo-50 text-[#1E3A8A] font-semibold">
                     {dom.weightPct}% {lang === "HI" ? "भार" : "Weight"}
                   </span>
@@ -313,7 +328,7 @@ export const SyllabusExplorerView: React.FC<SyllabusExplorerViewProps> = ({
             <input
               type="range"
               min={5}
-              max={30}
+              max={50}
               step={5}
               value={limit}
               onChange={(e) => setLimit(Number(e.target.value))}
