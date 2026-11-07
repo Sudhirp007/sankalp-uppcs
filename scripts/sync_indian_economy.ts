@@ -181,7 +181,7 @@ async function main() {
     {
       id: "mod-econ-public",
       slug: "econ-public-monetary",
-      parent: "dom-econ",
+      parent: "dom-economy",
       level: 2,
       key: "Indian Economy & Budget",
       en: "Public Finance, Monetary Policy & Financial Markets",
@@ -194,7 +194,7 @@ async function main() {
     {
       id: "mod-econ-dev",
       slug: "econ-growth-planning-agri",
-      parent: "dom-econ",
+      parent: "dom-economy",
       level: 2,
       key: "Indian Economy & Budget",
       en: "Growth, Planning, Poverty & Agriculture-Industry",
@@ -207,7 +207,7 @@ async function main() {
     {
       id: "mod-econ-ext",
       slug: "econ-external-theory",
-      parent: "dom-econ",
+      parent: "dom-economy",
       level: 2,
       key: "Indian Economy & Budget",
       en: "External Sector, Global Institutions & Economic Theory",

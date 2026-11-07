@@ -24,7 +24,7 @@ export const SyllabusExplorerView: React.FC<SyllabusExplorerViewProps> = ({
   onOpenCheatSheet,
 }) => {
   const [expandedDomains, setExpandedDomains] = useState<Record<string, boolean>>(() => {
-    const init: Record<string, boolean> = { "dom-econ": true, "dom-polity": true };
+    const init: Record<string, boolean> = { "dom-economy": true, "dom-polity": true };
     data.tree.slice(0, 2).forEach((d) => {
       init[d.id] = true;
     });
