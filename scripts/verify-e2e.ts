@@ -264,14 +264,30 @@ async function main() {
   const otherUserDeck = (await otherUserDeckRes.json()) as { personalCount: number };
   assert.equal(otherUserDeck.personalCount, 0, "Private personal flashcards MUST NOT leak across users");
 
-  const dueCards = await reqJson<{ cards: Array<{ flashcardId: string }> }>("/api/v1/srs/due");
+  const dueCards = await reqJson<{
+    deckDueCount: number;
+    scheduledLaterCount: number;
+    cards: Array<{ flashcardId: string }>;
+  }>("/api/v1/srs/due");
   assert.ok(dueCards.data.cards.length > 0, "Must have flashcards available");
+  const targetCardId = dueCards.data.cards[0]!.flashcardId;
   const reviewRes = await reqJson<{ ok: boolean; nextIntervalDays: number }>("/api/v1/srs/review", {
     method: "POST",
-    body: JSON.stringify({ flashcardId: dueCards.data.cards[0]!.flashcardId, rating: 3 }),
+    body: JSON.stringify({ flashcardId: targetCardId, rating: 3 }),
   });
   assert.equal(reviewRes.data.ok, true);
   assert.ok(reviewRes.data.nextIntervalDays >= 2);
+
+  // Verify reviewed card leaves Due-Today queue until its revisit date, while still reachable in ALL_PRACTICE
+  const afterReviewDue = await reqJson<{
+    scheduledLaterCount: number;
+    cards: Array<{ flashcardId: string }>;
+  }>("/api/v1/srs/due?mode=DUE_ONLY");
+  assert.ok(
+    !afterReviewDue.data.cards.some((c) => c.flashcardId === targetCardId),
+    "Reviewed card scheduled 6d ahead must sleep until its due date in DUE_ONLY mode"
+  );
+  assert.ok(afterReviewDue.data.scheduledLaterCount >= 1);
 
   const delCard = await reqJson<{ ok: boolean }>(`/api/v1/srs/cards/${createdCard.data.flashcardId}`, {
     method: "DELETE",
@@ -354,6 +370,14 @@ async function main() {
   );
   assert.equal(validVerify.status, 200);
   assert.equal(validVerify.data.planTier, "PRO_PASS");
+
+  // 8c. Verify Test-Mode Plan Reset back to FREE works cleanly
+  const resetPlan = await reqJson<{ ok: boolean; planTier: string }>(
+    "/api/v1/billing/reset-test-plan",
+    { method: "POST" }
+  );
+  assert.equal(resetPlan.status, 200);
+  assert.equal(resetPlan.data.planTier, "FREE");
 
   console.log(
     `[PASS 8/8] Live Razorpay Test API Order (${order2.data.orderId}, isSandbox=${order2.data.isSandbox}) + Web Crypto HMAC-SHA256 verified (tampered rejected 400; valid signature upgraded user to PRO_PASS)`

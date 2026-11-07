@@ -16,6 +16,8 @@ interface UpgradeModalProps {
   lang: LangCode;
   userEmail: string | null;
   userName: string;
+  currentPlanTier?: "FREE" | "PRO_PASS";
+  isTestBillingMode?: boolean;
   onClose: () => void;
   onSuccess: () => Promise<void>;
 }
@@ -24,6 +26,8 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   lang,
   userEmail,
   userName,
+  currentPlanTier = "FREE",
+  isTestBillingMode = true,
   onClose,
   onSuccess,
 }) => {
@@ -159,6 +163,38 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
         </div>
 
         <div className="p-6 space-y-5">
+          {currentPlanTier === "PRO_PASS" && (
+            <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="text-xs text-emerald-950 font-medium">
+                <span className="font-bold">Pro Pass Active:</span>{" "}
+                {lang === "HI"
+                  ? "आपका खाता वर्तमान में प्रो पास पर सक्रिय है। Razorpay पुनः टेस्ट करने हेतु नीचे रीसेट करें:"
+                  : "Your account currently has Pro Pass unlocked. You can still run another test checkout or reset to Free Tier:"}
+              </div>
+              {isTestBillingMode && (
+                <button
+                  type="button"
+                  disabled={processing}
+                  onClick={async () => {
+                    setProcessing(true);
+                    try {
+                      await api.resetTestBillingPlan();
+                      await onSuccess();
+                      setStatusMsg("Plan reset to FREE tier! Click Pay Securely below to test Razorpay.");
+                    } catch (e: unknown) {
+                      setErrorMsg(e instanceof Error ? e.message : "Reset failed");
+                    } finally {
+                      setProcessing(false);
+                    }
+                  }}
+                  className="shrink-0 rounded-lg bg-white border border-emerald-300 hover:bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-900 transition cursor-pointer"
+                >
+                  {lang === "HI" ? "Free प्लान पर रीसेट करें" : "Reset to Free (Test Mode)"}
+                </button>
+              )}
+            </div>
+          )}
+
           {loadingPlans ? (
             <div className="py-10 text-center text-sm text-slate-500">Loading subscription plans...</div>
           ) : (

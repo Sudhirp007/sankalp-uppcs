@@ -47,7 +47,30 @@ async function ensureUserRecord(
     .limit(1);
 
   if (existing.length > 0) {
-    return existing[0];
+    const row = existing[0]!;
+    if (
+      identity.isVerifiedFirebaseToken &&
+      ((identity.email && !row.email) ||
+        (identity.displayName &&
+          (row.displayName === "Sankalp Aspirant" || row.displayName === "UPPSC Aspirant")))
+    ) {
+      await db
+        .update(schema.users)
+        .set({
+          firebaseUid: identity.firebaseUid || row.firebaseUid,
+          email: identity.email || row.email,
+          displayName: identity.displayName || row.displayName,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.users.id, row.id));
+      return {
+        ...row,
+        firebaseUid: identity.firebaseUid || row.firebaseUid,
+        email: identity.email || row.email,
+        displayName: identity.displayName || row.displayName,
+      };
+    }
+    return row;
   }
 
   const newUser: typeof schema.users.$inferInsert = {
@@ -291,6 +314,7 @@ app.get("/api/v1/health", async (c) => {
 app.get("/api/v1/bootstrap", async (c) => {
   const db = createDb(c.env?.DATABASE_URL);
   const fbProject = c.env?.FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || "sankalp-uppcs-app";
+  const identity = await resolveRequestIdentity(c.req.raw, fbProject);
   const user = await ensureUserRecord(db, c.req.raw, fbProject);
   const lang = normalizeLang(user.preferredLanguage);
 
@@ -307,10 +331,15 @@ app.get("/api/v1/bootstrap", async (c) => {
       ),
   ]);
 
+  const keyId = c.env?.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || "";
+  const isTestBillingMode = !keyId || keyId.startsWith("rzp_test_");
+
   return c.json({
     user: {
       id: user.id,
       email: user.email,
+      phoneNumber: identity.phoneNumber,
+      isAuthenticated: identity.isVerifiedFirebaseToken,
       displayName: user.displayName,
       preferredLanguage: lang,
       activeExamId: user.activeExamId || "uppcs-prelims",
@@ -319,6 +348,7 @@ app.get("/api/v1/bootstrap", async (c) => {
       onboardingCompleted: user.onboardingCompleted,
       planTier: user.planTier,
       proExpiresAt: user.proExpiresAt,
+      isTestBillingMode,
       scratchpadNotes: user.scratchpadNotes || {},
     },
     exams: examPortfolio,
@@ -1302,6 +1332,8 @@ app.get("/api/v1/srs/due", async (c) => {
   const user = await ensureUserRecord(db, c.req.raw, fbProject);
   const lang = normalizeLang(user.preferredLanguage);
   const deckFilter = c.req.query("deck") || "ALL";
+  const queueMode = c.req.query("mode") || "DUE_ONLY"; // DUE_ONLY | ALL_PRACTICE
+  const dailySessionCap = Number(c.req.query("limit") || "25");
 
   const [srsRows, allCards, topics, masteryRows] = await Promise.all([
     db.select().from(schema.userItemSrs).where(eq(schema.userItemSrs.userId, user.id)),
@@ -1324,17 +1356,20 @@ app.get("/api/v1/srs/due", async (c) => {
     .map((fc) => {
       const srs = srsByCard.get(fc.id);
       const isPersonal = fc.createdByUserId === user.id;
-      const isDue = !srs || new Date(srs.nextDueAt).getTime() <= now;
+      const dueTimeMs = srs ? new Date(srs.nextDueAt).getTime() : now;
+      const isDue = !srs || dueTimeMs <= now;
+      const overdueDays = isDue && srs ? Math.max(0, Math.floor((now - dueTimeMs) / 86400000)) : 0;
       const t = topicMap.get(fc.topicId);
       const topicMasteryPct = Math.round(masteryMap.get(fc.topicId) ?? 55);
       const originType = isPersonal
         ? "PERSONAL_CARD"
         : (srs?.originType as "TEST_MISTAKE" | "TOPIC_DECK") || "TOPIC_DECK";
 
-      // Performance priority score (lower = shown earlier in session)
+      // Priority order: Due -> Test Mistakes -> Personal Cards -> Weak Topics (<60%) -> Most Overdue first
       const priorityRank =
-        (isDue ? 0 : 100) +
-        (originType === "TEST_MISTAKE" ? 0 : isPersonal ? 10 : topicMasteryPct < 60 ? 20 : 40) +
+        (isDue ? 0 : 200) +
+        (originType === "TEST_MISTAKE" ? 0 : isPersonal ? 12 : topicMasteryPct < 60 ? 24 : 45) -
+        Math.min(10, overdueDays) +
         topicMasteryPct * 0.1;
 
       return {
@@ -1370,6 +1405,8 @@ app.get("/api/v1/srs/due", async (c) => {
         mnemonic: pickText(lang, fc.mnemonicEn, fc.mnemonicHi),
         askedInLabel: pickText(lang, fc.askedInLabelEn, fc.askedInLabelHi),
         isDue,
+        overdueDays,
+        nextDueAt: srs?.nextDueAt ? new Date(srs.nextDueAt).toISOString() : new Date(now).toISOString(),
         intervalDays: srs?.intervalDays ?? 0,
         repetitions: srs?.repetitions ?? 0,
         priorityRank,
@@ -1377,19 +1414,35 @@ app.get("/api/v1/srs/due", async (c) => {
     })
     .sort((a, b) => a.priorityRank - b.priorityRank);
 
-  const filtered = mapped.filter((cItem) => {
+  const deckScoped = mapped.filter((cItem) => {
     if (deckFilter === "MISTAKE_DECK") return cItem.originType === "TEST_MISTAKE";
     if (deckFilter === "MY_CARDS") return cItem.isPersonal;
     if (deckFilter !== "ALL") return cItem.deckCategory === deckFilter;
     return true;
   });
 
+  const dueInDeck = deckScoped.filter((x) => x.isDue);
+  const sleepingInDeck = deckScoped
+    .filter((x) => !x.isDue)
+    .sort((a, b) => new Date(a.nextDueAt).getTime() - new Date(b.nextDueAt).getTime());
+
+  const cardsToServe =
+    queueMode === "ALL_PRACTICE"
+      ? deckScoped
+      : dueInDeck.slice(0, Math.max(1, dailySessionCap));
+
   return c.json({
     language: lang,
+    queueMode,
+    dailySessionCap,
     dueCount: mapped.filter((x) => x.isDue).length,
+    deckDueCount: dueInDeck.length,
+    overdueBacklogCount: dueInDeck.filter((x) => x.overdueDays >= 1).length,
+    scheduledLaterCount: sleepingInDeck.length,
+    nextScheduledDueAt: sleepingInDeck[0]?.nextDueAt || null,
     mistakeCount: mapped.filter((x) => x.originType === "TEST_MISTAKE").length,
     personalCount: mapped.filter((x) => x.isPersonal).length,
-    cards: filtered,
+    cards: cardsToServe,
   });
 });
 
@@ -1506,11 +1559,23 @@ app.post("/api/v1/srs/review", async (c) => {
 
   const prevReps = existing[0]?.repetitions ?? 0;
   const prevInterval = existing[0]?.intervalDays ?? 0;
+  const lastReviewedMs = existing[0]?.lastReviewedAt
+    ? new Date(existing[0].lastReviewedAt).getTime()
+    : Date.now();
+  const actualElapsedDays = Math.max(0, (Date.now() - lastReviewedMs) / 86400000);
+
+  // FSRS Overdue Bonus: if user returned late after N days and STILL recalled (Good/Easy),
+  // factor actual elapsed days so they aren't stuck repeating tiny intervals.
+  const effectiveBase =
+    rating >= 3
+      ? Math.max(prevInterval, Math.min(actualElapsedDays, Math.max(2, prevInterval * 3)))
+      : prevInterval;
+
   const nextInterval =
     rating === 1
       ? intervalMap[1]
-      : prevReps > 0 && prevInterval >= 2
-        ? Math.round(prevInterval * (rating === 4 ? 2.4 : rating === 3 ? 1.8 : 1.2) * 10) / 10
+      : prevReps > 0 && effectiveBase >= 2
+        ? Math.round(effectiveBase * (rating === 4 ? 2.4 : rating === 3 ? 1.8 : 1.2) * 10) / 10
         : intervalMap[rating] || 6;
 
   const nextDueAt = new Date(Date.now() + nextInterval * 24 * 60 * 60 * 1000);
@@ -1703,6 +1768,28 @@ app.post("/api/v1/billing/verify-payment", async (c) => {
     proExpiresAt,
     razorpayOrderId: body.razorpayOrderId,
   });
+});
+
+// Test-Mode Helper: Reset user's PRO_PASS back to FREE so Razorpay Checkout can be re-tested anytime
+app.post("/api/v1/billing/reset-test-plan", async (c) => {
+  const keyId = c.env?.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || "";
+  if (keyId && !keyId.startsWith("rzp_test_")) {
+    return c.json({ error: "Plan reset is only available in Razorpay Test Mode" }, 403);
+  }
+  const db = createDb(c.env?.DATABASE_URL);
+  const fbProject = c.env?.FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || "sankalp-uppcs-app";
+  const user = await ensureUserRecord(db, c.req.raw, fbProject);
+
+  await db
+    .update(schema.users)
+    .set({
+      planTier: "FREE",
+      proExpiresAt: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(schema.users.id, user.id));
+
+  return c.json({ ok: true, planTier: "FREE" });
 });
 
 // Server-to-Server Razorpay Webhook Handler (payment.captured / order.paid)

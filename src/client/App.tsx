@@ -16,6 +16,7 @@ import {
 import type { User as FirebaseUser } from "firebase/auth";
 import {
   api,
+  rotateNewGuestAspirantId,
   type BootstrapResponse,
   type GlobalExpertiseResponse,
   type JourneyDashboardResponse,
@@ -306,17 +307,22 @@ export const App: React.FC = () => {
               <span>{t.mediumLabel}</span>
             </button>
 
-            {/* Razorpay Pro Pass Upgrade / Active Badge */}
+            {/* Razorpay Pro Pass Upgrade / Active Badge (Always clickable to manage or re-test) */}
             {boot?.user.planTier === "PRO_PASS" ? (
-              <span className="inline-flex items-center gap-1 rounded-xl bg-emerald-100 text-emerald-900 border border-emerald-200 px-2.5 py-1.5 text-[11px] font-extrabold">
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(true)}
+                title="Manage Pro Pass or Reset in Test Mode"
+                className="inline-flex items-center gap-1 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-200 px-2.5 py-1.5 text-[11px] font-extrabold transition cursor-pointer"
+              >
                 <Crown className="w-3.5 h-3.5 text-amber-600" />
-                {t.proActiveBadge}
-              </span>
+                <span>{t.proActiveBadge}</span>
+              </button>
             ) : (
               <button
                 type="button"
                 onClick={() => setShowUpgradeModal(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold px-3 py-1.5 text-xs shadow-xs transition cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold px-2.5 sm:px-3 py-1.5 text-xs shadow-xs transition cursor-pointer"
               >
                 <Crown className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">{t.upgradePro}</span>
@@ -333,23 +339,39 @@ export const App: React.FC = () => {
             </button>
 
             {fbUser ? (
-              <button
-                type="button"
-                onClick={() => signOutFirebase()}
-                title={fbUser.email || "Signed In"}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">{t.signOut}</span>
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setShowAuthModal(true)}
+                  className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 text-xs font-bold text-emerald-900 hover:bg-emerald-100 cursor-pointer"
+                >
+                  <UserCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                  <span className="max-w-[110px] truncate">
+                    {fbUser.displayName || fbUser.phoneNumber || fbUser.email?.split("@")[0]}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await signOutFirebase();
+                    rotateNewGuestAspirantId();
+                    await refreshAll();
+                  }}
+                  title="Sign Out"
+                  className="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 px-2.5 py-1.5 text-xs font-bold text-rose-800 cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>{t.signOut}</span>
+                </button>
+              </div>
             ) : (
               <button
                 type="button"
                 onClick={() => setShowAuthModal(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#1E3A8A] hover:bg-indigo-900 text-white px-3 py-1.5 text-xs font-bold transition cursor-pointer"
               >
-                <UserCircle2 className="w-4 h-4 text-[#1E3A8A]" />
-                <span className="hidden xl:inline">{t.signIn}</span>
+                <UserCircle2 className="w-3.5 h-3.5" />
+                <span>{t.signIn}</span>
               </button>
             )}
           </div>
@@ -482,6 +504,8 @@ export const App: React.FC = () => {
           lang={lang}
           userEmail={fbUser?.email || boot.user.email}
           userName={fbUser?.displayName || boot.user.displayName}
+          currentPlanTier={boot.user.planTier}
+          isTestBillingMode={boot.user.isTestBillingMode}
           onClose={() => setShowUpgradeModal(false)}
           onSuccess={() => refreshAll()}
         />
@@ -490,6 +514,7 @@ export const App: React.FC = () => {
       {showAuthModal && (
         <AuthModal
           lang={lang}
+          fbUser={fbUser}
           onClose={() => setShowAuthModal(false)}
           onAuthenticated={() => refreshAll()}
         />

@@ -13,6 +13,13 @@ export function getOrCreateAspirantId(): string {
   return id;
 }
 
+export function rotateNewGuestAspirantId(): string {
+  const rand = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+  const id = `asp_${rand}`;
+  localStorage.setItem(ASPIRANT_STORAGE_KEY, id);
+  return id;
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers || {});
   headers.set("Content-Type", "application/json");
@@ -69,6 +76,8 @@ export interface ExamPortfolioCard {
 export interface UserProfileDTO {
   id: string;
   email: string | null;
+  phoneNumber?: string | null;
+  isAuthenticated?: boolean;
   displayName: string;
   preferredLanguage: LangCode;
   activeExamId: string;
@@ -77,6 +86,7 @@ export interface UserProfileDTO {
   onboardingCompleted: boolean;
   planTier: "FREE" | "PRO_PASS";
   proExpiresAt: string | null;
+  isTestBillingMode?: boolean;
   scratchpadNotes: Record<string, string>;
 }
 
@@ -278,6 +288,8 @@ export interface FlashcardItemDTO {
   mnemonic: string;
   askedInLabel: string;
   isDue: boolean;
+  overdueDays: number;
+  nextDueAt: string;
   intervalDays: number;
   repetitions: number;
 }
@@ -380,14 +392,20 @@ export const api = {
 
   getLearningStudio: () => apiFetch<{ language: LangCode; sheets: StudioSheet[] }>("/api/v1/studio"),
 
-  getDueFlashcards: (deck = "ALL") =>
+  getDueFlashcards: (deck = "ALL", mode: "DUE_ONLY" | "ALL_PRACTICE" = "DUE_ONLY") =>
     apiFetch<{
       language: LangCode;
+      queueMode: "DUE_ONLY" | "ALL_PRACTICE";
+      dailySessionCap: number;
       dueCount: number;
+      deckDueCount: number;
+      overdueBacklogCount: number;
+      scheduledLaterCount: number;
+      nextScheduledDueAt: string | null;
       mistakeCount: number;
       personalCount: number;
       cards: FlashcardItemDTO[];
-    }>(`/api/v1/srs/due?deck=${encodeURIComponent(deck)}`),
+    }>(`/api/v1/srs/due?deck=${encodeURIComponent(deck)}&mode=${encodeURIComponent(mode)}`),
 
   createPersonalFlashcard: (payload: {
     topicId?: string | null;
@@ -449,4 +467,9 @@ export const api = {
         body: JSON.stringify(payload),
       }
     ),
+
+  resetTestBillingPlan: () =>
+    apiFetch<{ ok: boolean; planTier: "FREE" }>("/api/v1/billing/reset-test-plan", {
+      method: "POST",
+    }),
 };

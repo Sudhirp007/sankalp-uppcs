@@ -1,1 +1,12 @@
-{}
+{
+  "auth": {
+    "providers": {
+      "anonymous": false,
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Sankalp UPPSC",
+        "supportEmail": "05sudhirpal@gmail.com"
+      }
+    }
+  }
+}

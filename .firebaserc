@@ -1,5 +1,7 @@
 {
   "projects": {
     "default": "sankalp-uppcs-app"
-  }
+  },
+  "targets": {},
+  "etags": {}
 }

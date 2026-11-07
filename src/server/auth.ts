@@ -2,6 +2,7 @@ export interface ResolvedIdentity {
   userId: string;
   firebaseUid: string | null;
   email: string | null;
+  phoneNumber: string | null;
   displayName: string;
   isVerifiedFirebaseToken: boolean;
 }
@@ -44,7 +45,7 @@ async function fetchGoogleJwks(): Promise<GoogleJwk[]> {
 export async function verifyFirebaseIdToken(
   token: string,
   expectedProjectId: string
-): Promise<{ uid: string; email?: string; name?: string } | null> {
+): Promise<{ uid: string; email?: string; phoneNumber?: string; name?: string } | null> {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return null;
@@ -81,6 +82,7 @@ export async function verifyFirebaseIdToken(
     return {
       uid: String(payload.sub),
       email: payload.email ? String(payload.email) : undefined,
+      phoneNumber: payload.phone_number ? String(payload.phone_number) : undefined,
       name: payload.name ? String(payload.name) : undefined,
     };
   } catch {
@@ -101,7 +103,12 @@ export async function resolveRequestIdentity(
         userId: `fb_${verified.uid}`,
         firebaseUid: verified.uid,
         email: verified.email || null,
-        displayName: verified.name || verified.email?.split("@")[0] || "Sankalp Aspirant",
+        phoneNumber: verified.phoneNumber || null,
+        displayName:
+          verified.name ||
+          verified.phoneNumber ||
+          verified.email?.split("@")[0] ||
+          "Sankalp Aspirant",
         isVerifiedFirebaseToken: true,
       };
     }
@@ -117,6 +124,7 @@ export async function resolveRequestIdentity(
     userId: safeId,
     firebaseUid: null,
     email: null,
+    phoneNumber: null,
     displayName: "UPPSC Aspirant",
     isVerifiedFirebaseToken: false,
   };

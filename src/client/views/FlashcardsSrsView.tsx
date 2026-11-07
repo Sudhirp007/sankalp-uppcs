@@ -22,7 +22,12 @@ export const FlashcardsSrsView: React.FC<FlashcardsSrsViewProps> = ({
   onReviewedCountChange,
 }) => {
   const [deck, setDeck] = useState<string>("ALL");
+  const [queueMode, setQueueMode] = useState<"DUE_ONLY" | "ALL_PRACTICE">("DUE_ONLY");
   const [cards, setCards] = useState<FlashcardItemDTO[]>([]);
+  const [deckDueCount, setDeckDueCount] = useState<number>(0);
+  const [overdueBacklogCount, setOverdueBacklogCount] = useState<number>(0);
+  const [scheduledLaterCount, setScheduledLaterCount] = useState<number>(0);
+  const [nextScheduledDueAt, setNextScheduledDueAt] = useState<string | null>(null);
   const [mistakeCount, setMistakeCount] = useState<number>(0);
   const [personalCount, setPersonalCount] = useState<number>(0);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -36,11 +41,15 @@ export const FlashcardsSrsView: React.FC<FlashcardsSrsViewProps> = ({
   const [newMnemonic, setNewMnemonic] = useState("");
   const [savingNewCard, setSavingNewCard] = useState(false);
 
-  const loadDeck = async (selectedDeck: string) => {
+  const loadDeck = async (selectedDeck: string, selectedMode: "DUE_ONLY" | "ALL_PRACTICE" = queueMode) => {
     setLoading(true);
     try {
-      const res = await api.getDueFlashcards(selectedDeck);
+      const res = await api.getDueFlashcards(selectedDeck, selectedMode);
       setCards(res.cards);
+      setDeckDueCount(res.deckDueCount);
+      setOverdueBacklogCount(res.overdueBacklogCount);
+      setScheduledLaterCount(res.scheduledLaterCount);
+      setNextScheduledDueAt(res.nextScheduledDueAt);
       setMistakeCount(res.mistakeCount);
       setPersonalCount(res.personalCount);
       setCurrentIndex(0);
@@ -51,8 +60,8 @@ export const FlashcardsSrsView: React.FC<FlashcardsSrsViewProps> = ({
   };
 
   useEffect(() => {
-    loadDeck(deck);
-  }, [deck, lang]);
+    loadDeck(deck, queueMode);
+  }, [deck, queueMode, lang]);
 
   const activeCard = cards[currentIndex];
 
@@ -232,6 +241,44 @@ export const FlashcardsSrsView: React.FC<FlashcardsSrsViewProps> = ({
         ))}
       </div>
 
+      {/* Queue Mode Toggle (Due Today vs Practice Ahead) + Overdue Backlog Banner */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="inline-flex rounded-xl bg-slate-200/70 p-1 gap-1">
+          <button
+            type="button"
+            onClick={() => setQueueMode("DUE_ONLY")}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+              queueMode === "DUE_ONLY"
+                ? "bg-white text-[#1E3A8A] shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            {lang === "HI" ? `आज देय (Due Now: ${deckDueCount})` : `Due Now (${deckDueCount})`}
+          </button>
+          <button
+            type="button"
+            onClick={() => setQueueMode("ALL_PRACTICE")}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+              queueMode === "ALL_PRACTICE"
+                ? "bg-white text-[#1E3A8A] shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            {lang === "HI"
+              ? `अग्रिम अभ्यास (+${scheduledLaterCount} आगामी)`
+              : `Practice Ahead (+${scheduledLaterCount} Scheduled)`}
+          </button>
+        </div>
+
+        {overdueBacklogCount > 0 && queueMode === "DUE_ONLY" && (
+          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200">
+            {lang === "HI"
+              ? `छूटे हुए दिनों के ${overdueBacklogCount} संचित कार्ड्स शामिल (दैनिक सीमा: 25)`
+              : `Includes ${overdueBacklogCount} accumulated overdue cards (Smart Cap: 25/session)`}
+          </span>
+        )}
+      </div>
+
       {/* Flashcard Stage */}
       {loading ? (
         <div className="rounded-2xl bg-white border border-slate-200 p-12 text-center text-sm text-slate-500">
@@ -241,21 +288,41 @@ export const FlashcardsSrsView: React.FC<FlashcardsSrsViewProps> = ({
         <div className="rounded-2xl bg-white border border-slate-200 p-12 text-center space-y-3">
           <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
           <h2 className="font-bold text-lg text-slate-900">
-            {lang === "HI" ? "इस डेक के सभी कार्ड पूरे हुए!" : "All Cards in This Queue Reviewed!"}
-          </h2>
-          <p className="text-xs text-slate-500">
             {lang === "HI"
-              ? "आपकी स्मृति अंतराल तालिका Neon डेटाबेस में अपडेट कर दी गई है।"
-              : "Your FSRS retention intervals have been persisted to Neon Postgres."}
+              ? "आज के सभी देय (Due) फ्लैशकार्ड पूरे हुए!"
+              : "All Due Cards for Right Now Are Complete!"}
+          </h2>
+          <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+            {scheduledLaterCount > 0 && nextScheduledDueAt
+              ? lang === "HI"
+                ? `${scheduledLaterCount} कार्ड भविष्य की तिथियों के लिए शेड्यूल हैं (अगला कार्ड देय: ${new Date(nextScheduledDueAt).toLocaleString()})।`
+                : `${scheduledLaterCount} reviewed cards are sleeping until their scheduled revisit date (Next due: ${new Date(nextScheduledDueAt).toLocaleString()}).`
+              : lang === "HI"
+                ? "आपकी स्मृति अंतराल तालिका Neon डेटाबेस में अपडेट कर दी गई है।"
+                : "Your FSRS retention intervals have been persisted to Neon Postgres."}
           </p>
-          <button
-            type="button"
-            onClick={() => setCurrentIndex(0)}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#1E3A8A] text-white font-semibold px-4 py-2 text-xs cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            {lang === "HI" ? "पुनः अभ्यास करें" : "Replay Deck"}
-          </button>
+          <div className="flex flex-wrap justify-center gap-2 pt-1">
+            {scheduledLaterCount > 0 && queueMode === "DUE_ONLY" && (
+              <button
+                type="button"
+                onClick={() => setQueueMode("ALL_PRACTICE")}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#1E3A8A] text-white font-semibold px-4 py-2 text-xs cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                {lang === "HI"
+                  ? `अग्रिम अभ्यास करें (${scheduledLaterCount} शेड्यूल कार्ड्स)`
+                  : `Practice Ahead (${scheduledLaterCount} Scheduled Cards)`}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => loadDeck(deck, queueMode)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-4 py-2 text-xs cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              {lang === "HI" ? "रीफ्रेश क्यू" : "Refresh Due Queue"}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="rounded-2xl bg-white border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
