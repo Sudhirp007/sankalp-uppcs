@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Topic Learning Studio — Sankalp Academic Precision</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-dim": "#4843b4",
+            "on-error": "#fff7f7",
+            "error-container": "#f97386",
+            "on-secondary-fixed": "#004931",
+            "primary-fixed": "#8c88fd",
+            "primary": "#5450c1",
+            "on-error-container": "#6e0523",
+            "surface-variant": "#dce4e8",
+            "surface-container-low": "#f0f4f7",
+            "surface-container-high": "#e3e9ed",
+            "secondary-container": "#85f8c4",
+            "surface-bright": "#f7f9fb",
+            "on-primary-fixed": "#000000",
+            "surface-dim": "#d4dbdf",
+            "surface-container-lowest": "#ffffff",
+            "primary-container": "#8c88fd",
+            "tertiary-fixed": "#fe932c",
+            "secondary-fixed-dim": "#76eab6",
+            "on-secondary-fixed-variant": "#006948",
+            "inverse-surface": "#0b0f10",
+            "on-primary": "#fbf7ff",
+            "surface-container": "#eaeff2",
+            "surface-tint": "#5450c1",
+            "on-primary-container": "#0c005c",
+            "inverse-on-surface": "#9a9d9f",
+            "on-secondary-container": "#005e40",
+            "error-dim": "#6b0221",
+            "on-tertiary-fixed-variant": "#572c00",
+            "inverse-primary": "#8c88fd",
+            "surface": "#f7f9fb",
+            "tertiary-container": "#fe932c",
+            "on-tertiary-container": "#4a2500",
+            "background": "#f7f9fb",
+            "secondary-dim": "#005f41",
+            "on-tertiary-fixed": "#240f00",
+            "tertiary-fixed-dim": "#ed871e",
+            "outline": "#747c80",
+            "on-secondary": "#e6ffef",
+            "on-surface": "#2c3437",
+            "surface-container-highest": "#dce4e8",
+            "primary-fixed-dim": "#7f7bef",
+            "secondary": "#006d4b",
+            "outline-variant": "#acb3b7",
+            "on-background": "#2c3437",
+            "on-tertiary": "#fff7f4",
+            "error": "#a8364b",
+            "tertiary-dim": "#804300",
+            "on-surface-variant": "#596064",
+            "tertiary": "#914d00",
+            "secondary-fixed": "#85f8c4",
+            "on-primary-fixed-variant": "#14007b"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans", "sans-serif"],
+            "display": ["Plus Jakarta Sans", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "label": ["Public Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f0f4f7;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #acb3b7;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body antialiased min-h-screen flex flex-col selection:bg-primary selection:text-on-primary">
+<!-- Top Navigation Bar (Shared Component Execution) -->
+<header class="bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none docked full-width top-0 sticky z-50">
+<div class="w-full px-6 py-3 flex items-center justify-between mx-auto max-w-7xl">
+<!-- Left: Logo & Journey Switcher -->
+<div class="flex items-center gap-6">
+<a class="flex items-center gap-2 group" href="#">
+<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary font-headline font-bold text-lg shadow-sm">
+            S
+          </div>
+<span class="font-headline font-bold text-lg text-primary dark:text-inverse-primary tracking-tight">Sankalp</span>
+<span class="hidden sm:inline-block text-[11px] font-mono tracking-wide px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-medium">PRECISION</span>
+</a>
+<!-- Active Exam Journey Switcher Pill -->
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low border border-outline-variant hover:bg-surface-container text-xs font-semibold text-on-surface transition-colors" title="Switch Target Examination">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span>Active Journey: UPPCS Prelims 2026</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">expand_more</span>
+</button>
+</div>
+<!-- Center: Navigation Links -->
+<nav class="hidden md:flex items-center space-x-7 font-headline font-semibold text-sm tracking-tight font-body">
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary font-medium transition-colors" href="#">Journey Home</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary font-medium transition-colors" href="#">Global Expertise</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary font-medium transition-colors" href="#">Syllabus &amp; Practice</a>
+<!-- Active Nav Item -->
+<a class="text-primary dark:text-inverse-primary font-semibold border-b-2 border-primary dark:border-inverse-primary pb-1 flex items-center gap-1.5" href="#">
+<span>Learning Studio</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
+</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary font-medium transition-colors flex items-center gap-1.5" href="#">
+<span>Flashcards (SRS)</span>
+<span class="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-error-container text-on-error-container font-bold">18 Due</span>
+</a>
+</nav>
+<!-- Right: Utility & Aspirant Profile -->
+<div class="flex items-center gap-3">
+<!-- Language Medium Indicator Pill -->
+<span class="hidden lg:inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container text-xs font-medium text-on-surface-variant border border-outline-variant">
+<span class="material-symbols-outlined text-[14px]">translate</span>
+          Medium: English
+        </span>
+<button class="p-1 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Account Settings">
+<span class="material-symbols-outlined text-2xl" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- 3-Column Studio Workspace Canvas -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex flex-col gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- COLUMN 1: LEFT SIDEBAR (Syllabus Topic Library ~ 260px / 3 cols) -->
+<aside class="lg:col-span-3 bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col gap-4 sticky top-20">
+<!-- Search Input -->
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant text-xs text-on-surface placeholder:text-on-surface-variant rounded-lg pl-9 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Search cheat sheets &amp; tables..." type="text"/>
+</div>
+<!-- Filter Pills Bar -->
+<div class="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar text-[11px] font-medium text-on-surface-variant">
+<button class="px-2.5 py-1 rounded-full bg-primary text-on-primary whitespace-nowrap font-semibold">All Sheets</button>
+<button class="px-2.5 py-1 rounded-full bg-surface-container-low hover:bg-surface-container border border-outline-variant whitespace-nowrap">Tables</button>
+<button class="px-2.5 py-1 rounded-full bg-surface-container-low hover:bg-surface-container border border-outline-variant whitespace-nowrap">Chronology</button>
+<button class="px-2.5 py-1 rounded-full bg-surface-container-low hover:bg-surface-container border border-outline-variant whitespace-nowrap text-error font-medium">Weak (3)</button>
+</div>
+<!-- Category & Module Tree -->
+<div class="flex flex-col gap-1.5 pt-1">
+<div class="flex items-center justify-between text-[11px] font-bold text-on-surface-variant uppercase tracking-wider px-1">
+<span>Indian Polity &amp; Governance</span>
+<span class="material-symbols-outlined text-[14px]">unfold_less</span>
+</div>
+<div class="text-xs font-semibold text-on-surface px-1 pb-1 flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+            Local Self-Government &amp; PRIs
+          </div>
+<!-- Items Stack -->
+<div class="flex flex-col gap-1.5">
+<!-- Item 1: Active Selected Topic -->
+<a class="p-2.5 rounded-lg border-2 border-primary bg-primary/5 text-on-surface flex flex-col gap-1.5 transition-all" href="#">
+<div class="flex items-start justify-between gap-1">
+<span class="text-xs font-semibold font-headline leading-tight text-primary">Panchayati Raj Committees &amp; 73rd Amendment</span>
+<span class="text-[10px] font-mono text-on-surface-variant flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[11px]">schedule</span> 3m
+                </span>
+</div>
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-secondary-container text-on-secondary-container">
+<span class="material-symbols-outlined text-[11px]">check_circle</span> 24 UPPSC PYQs
+                </span>
+<span class="text-[10px] font-semibold text-primary uppercase tracking-wider">Active</span>
+</div>
+</a>
+<!-- Item 2 -->
+<a class="p-2.5 rounded-lg border border-transparent hover:border-outline-variant hover:bg-surface-container-low text-on-surface flex flex-col gap-1 transition-colors" href="#">
+<div class="flex items-start justify-between gap-1">
+<span class="text-xs font-medium font-headline leading-tight text-on-surface">11th Schedule (29 Subjects) Mnemonics</span>
+<span class="text-[10px] font-mono text-on-surface-variant">3 min</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant">9 PYQs</span>
+<span class="text-[10px] text-on-surface-variant">High Yield</span>
+</div>
+</a>
+<!-- Item 3: Weak Topic Warning -->
+<a class="p-2.5 rounded-lg border border-error/20 bg-error-container/10 hover:bg-error-container/20 text-on-surface flex flex-col gap-1 transition-colors" href="#">
+<div class="flex items-start justify-between gap-1">
+<span class="text-xs font-medium font-headline leading-tight text-on-surface">PESA Act 1996 vs 5th Schedule</span>
+<span class="text-[10px] font-mono text-error font-semibold">36% Mastery</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-semibold bg-error text-on-error">Weak Topic</span>
+<span class="text-[10px] text-on-surface-variant font-mono">11 PYQs</span>
+</div>
+</a>
+<!-- Item 4 -->
+<a class="p-2.5 rounded-lg border border-transparent hover:border-outline-variant hover:bg-surface-container-low text-on-surface flex flex-col gap-1 transition-colors" href="#">
+<div class="flex items-start justify-between gap-1">
+<span class="text-xs font-medium font-headline leading-tight text-on-surface">Constitutional Bodies Matrix</span>
+<span class="text-[10px] font-mono text-on-surface-variant">5 min</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant">Cheat Sheet</span>
+<span class="text-[10px] font-mono text-secondary font-medium">92% Done</span>
+</div>
+</a>
+<!-- Item 5 -->
+<a class="p-2.5 rounded-lg border border-transparent hover:border-outline-variant hover:bg-surface-container-low text-on-surface flex flex-col gap-1 transition-colors" href="#">
+<div class="flex items-start justify-between gap-1">
+<span class="text-xs font-medium font-headline leading-tight text-on-surface">Emergency Provisions (352, 356, 360)</span>
+<span class="text-[10px] font-mono text-on-surface-variant">4 min</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant">Comparison Table</span>
+</div>
+</a>
+</div>
+</div>
+<div class="mt-auto pt-3 border-t border-outline-variant flex items-center justify-between text-xs text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">auto_stories</span>
+            5 / 24 Local Govt Modules
+          </span>
+<span class="font-mono text-[11px] font-semibold text-primary">21%</span>
+</div>
+</aside>
+<!-- COLUMN 2: CENTER READING STAGE (Editorial Academic Study Sheet ~ 6 cols) -->
+<section class="lg:col-span-6 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Context & Breadcrumb Bar -->
+<div class="px-6 py-3.5 border-b border-outline-variant bg-surface-container-low flex items-center justify-between gap-4 flex-wrap">
+<nav class="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
+<span>Polity</span>
+<span class="text-outline-variant">/</span>
+<span>Local Governance</span>
+<span class="text-outline-variant">/</span>
+<span class="text-primary font-semibold">Panchayati Raj Evolution</span>
+</nav>
+<div class="flex items-center gap-2">
+<button class="px-2.5 py-1 text-xs rounded border border-outline-variant bg-surface-container-lowest hover:bg-surface-container text-on-surface font-medium flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[15px]">bookmark_border</span>
+              Bookmark
+            </button>
+<button class="p-1 rounded border border-outline-variant bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" title="Download High-Res PDF">
+<span class="material-symbols-outlined text-[17px]">download</span>
+</button>
+<button class="p-1 rounded border border-outline-variant bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" title="Print Study Sheet">
+<span class="material-symbols-outlined text-[17px]">print</span>
+</button>
+</div>
+</div>
+<!-- Sheet Header Block -->
+<div class="p-6 border-b border-outline-variant flex flex-col gap-3">
+<div class="flex flex-wrap items-center gap-2">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-surface-container text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">timer</span> 3 Min Read
+            </span>
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-secondary-container text-on-secondary-container flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">military_tech</span> Directly Answers 24 UPPSC PYQs (2017–2025)
+            </span>
+<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-tertiary-container/30 text-on-tertiary-container flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">bolt</span> High-Yield Priority
+            </span>
+</div>
+<h1 class="text-xl sm:text-2xl font-bold font-headline text-on-surface leading-tight tracking-tight">
+            High-Yield Cheat Sheet: Panchayati Raj Evolution &amp; Constitutional Articles
+          </h1>
+<div class="flex items-center gap-4 text-xs text-on-surface-variant pt-1 border-t border-outline-variant/60">
+<span class="flex items-center gap-1 text-secondary font-medium">
+<span class="material-symbols-outlined text-[15px]">verified</span>
+              Canonical Source: Laxmikanth 7th Ed. &amp; Constitution of India (Bare Act)
+            </span>
+<span class="text-outline-variant">•</span>
+<span class="font-mono text-[11px]">Confidence Level: 1.0 (Strictly Verified)</span>
+</div>
+</div>
+<!-- Reading Canvas Body -->
+<div class="p-6 flex flex-col gap-8 text-on-surface">
+<!-- SECTION 1: MASTER COMMITTEE COMPARISON MATRIX -->
+<div>
+<div class="flex items-center justify-between mb-3">
+<h2 class="text-base font-bold font-headline text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-4 bg-primary rounded-full"></span>
+                Master Committee Comparison Matrix (1957 – 1986)
+              </h2>
+<span class="text-xs font-mono text-on-surface-variant">Core Prelims Match-the-Following</span>
+</div>
+<!-- Crisp High-Legibility Structured Table -->
+<div class="border border-outline-variant rounded-lg overflow-x-auto shadow-sm">
+<table class="w-full text-left text-xs border-collapse">
+<thead>
+<tr class="bg-surface-container border-b border-outline-variant font-headline text-on-surface">
+<th class="py-3 px-3.5 font-bold w-1/4">Committee &amp; Year</th>
+<th class="py-3 px-3 font-bold w-1/5">Tier Structure</th>
+<th class="py-3 px-3.5 font-bold w-2/5">Key Examiner Trap / Landmark Recommendation</th>
+<th class="py-3 px-3 font-bold w-1/6 font-mono text-center">PYQ Frequency</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/70 font-body">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-3 px-3.5 align-top">
+<div class="font-semibold text-on-surface">Balwant Rai Mehta</div>
+<div class="font-mono text-[11px] text-primary font-bold">1957</div>
+</td>
+<td class="py-3 px-3 align-top">
+<span class="font-semibold text-on-surface">3-Tier System</span>
+<p class="text-[11px] text-on-surface-variant mt-0.5">Gram (Village), Panchayat Samiti (Block), Zila Parishad (District)</p>
+</td>
+<td class="py-3 px-3.5 align-top text-on-surface-variant leading-relaxed">
+                      Coined <span class="font-semibold text-on-surface">‘Democratic Decentralization’</span>. Panchayat Samiti as executive body; First inaugurated at Nagaur, Rajasthan on <span class="font-mono font-medium text-on-surface">Oct 2, 1959</span>.
+                    </td>
+<td class="py-3 px-3 align-top text-center">
+<span class="inline-block px-2 py-0.5 rounded bg-primary/10 text-primary font-mono font-bold text-[11px]">Asked 7x</span>
+<div class="text-[10px] text-on-surface-variant mt-1 font-mono">’18, ’20, ’22, ’24</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-low/30">
+<td class="py-3 px-3.5 align-top">
+<div class="font-semibold text-on-surface">Ashok Mehta</div>
+<div class="font-mono text-[11px] text-primary font-bold">1977</div>
+</td>
+<td class="py-3 px-3 align-top">
+<span class="font-semibold text-tertiary">2-Tier System</span>
+<p class="text-[11px] text-on-surface-variant mt-0.5">Zila Parishad &amp; Mandal Panchayat (15k-20k pop)</p>
+</td>
+<td class="py-3 px-3.5 align-top leading-relaxed">
+<span class="px-1.5 py-0.2 rounded bg-error-container/20 text-on-error-container text-[11px] font-semibold">Examiner Trap:</span>
+<span class="text-on-surface font-medium"> Recommended OPEN participation of political parties</span> (NOT party-less); Nyaya Panchayats headed by qualified judges; Compulsory taxation powers.
+                    </td>
+<td class="py-3 px-3 align-top text-center">
+<span class="inline-block px-2 py-0.5 rounded bg-primary/10 text-primary font-mono font-bold text-[11px]">Asked 6x</span>
+<div class="text-[10px] text-on-surface-variant mt-1 font-mono">’19, ’21, ’23</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-3 px-3.5 align-top">
+<div class="font-semibold text-on-surface">G.V.K. Rao</div>
+<div class="font-mono text-[11px] text-primary font-bold">1985</div>
+</td>
+<td class="py-3 px-3 align-top">
+<span class="font-semibold text-on-surface">District-Centric</span>
+<p class="text-[11px] text-on-surface-variant mt-0.5">Zila Parishad as pivot of all development planning</p>
+</td>
+<td class="py-3 px-3.5 align-top text-on-surface-variant leading-relaxed">
+                      Landmark Phrase: Termed PRIs as <span class="italic font-semibold text-on-surface">"Grass without roots"</span> due to bureaucratic control. Recommended post of <span class="font-medium text-on-surface">District Development Commissioner (DDC)</span>.
+                    </td>
+<td class="py-3 px-3 align-top text-center">
+<span class="inline-block px-2 py-0.5 rounded bg-primary/10 text-primary font-mono font-bold text-[11px]">Asked 4x</span>
+<div class="text-[10px] text-on-surface-variant mt-1 font-mono">’17, ’21</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-low/30">
+<td class="py-3 px-3.5 align-top">
+<div class="font-semibold text-on-surface">L.M. Singhvi</div>
+<div class="font-mono text-[11px] text-primary font-bold">1986</div>
+</td>
+<td class="py-3 px-3 align-top">
+<span class="font-semibold text-secondary">Constitutional Shield</span>
+<p class="text-[11px] text-on-surface-variant mt-0.5">Constitutional recognition &amp; financial viability</p>
+</td>
+<td class="py-3 px-3.5 align-top text-on-surface-variant leading-relaxed">
+                      First committee to emphatically demand <span class="font-semibold text-on-surface">Constitutional status &amp; protection</span> for PRIs. Declared Gram Sabha as bedrock of direct democracy.
+                    </td>
+<td class="py-3 px-3 align-top text-center">
+<span class="inline-block px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-mono font-bold text-[11px]">Asked 7x</span>
+<div class="text-[10px] text-on-surface-variant mt-1 font-mono">Repeated RO/ARO</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- SECTION 2: MUST-MEMORIZE ARTICLES (73rd AMENDMENT) QUICK GRID -->
+<div>
+<div class="mb-3">
+<h2 class="text-base font-bold font-headline text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-4 bg-secondary rounded-full"></span>
+                High-Recall Article Blueprint (Art 243 to 243-O)
+              </h2>
+<p class="text-xs text-on-surface-variant mt-0.5">UPPSC matches Articles directly with clause definitions in Paper 1 Question Papers.</p>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+<!-- Card 1: 243-A -->
+<div class="p-3.5 rounded-lg border border-outline-variant bg-surface-container-low/50 hover:border-primary transition-all">
+<div class="flex items-center justify-between mb-1.5">
+<span class="px-2 py-0.5 rounded font-mono font-bold text-xs bg-primary text-on-primary">Article 243-A</span>
+<span class="text-[10px] font-mono text-on-surface-variant">Village Level</span>
+</div>
+<h3 class="text-xs font-bold text-on-surface mb-1">Gram Sabha</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+                  A body consisting of persons registered in the electoral rolls of a village. Exercises powers &amp; performs functions as provided by the <span class="text-on-surface font-medium">State Legislature</span>.
+                </p>
+</div>
+<!-- Card 2: 243-D -->
+<div class="p-3.5 rounded-lg border border-outline-variant bg-surface-container-low/50 hover:border-primary transition-all">
+<div class="flex items-center justify-between mb-1.5">
+<span class="px-2 py-0.5 rounded font-mono font-bold text-xs bg-primary text-on-primary">Article 243-D</span>
+<span class="text-[10px] font-mono text-error font-semibold">High Trap Rate</span>
+</div>
+<h3 class="text-xs font-bold text-on-surface mb-1">Reservation of Seats</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+                  Mandatory reservation for SCs &amp; STs in proportion to population. <span class="font-semibold text-on-surface">Not less than 1/3rd</span> of total seats reserved for women (including SC/ST women).
+                </p>
+</div>
+<!-- Card 3: 243-I -->
+<div class="p-3.5 rounded-lg border border-outline-variant bg-surface-container-low/50 hover:border-primary transition-all">
+<div class="flex items-center justify-between mb-1.5">
+<span class="px-2 py-0.5 rounded font-mono font-bold text-xs bg-primary text-on-primary">Article 243-I</span>
+<span class="text-[10px] font-mono text-secondary font-medium">Every 5th Year</span>
+</div>
+<h3 class="text-xs font-bold text-on-surface mb-1">State Finance Commission</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+                  Constituted by the <span class="font-semibold text-on-surface">Governor</span> every fifth year to review financial position and recommend distribution of net proceeds of taxes, duties, and tolls.
+                </p>
+</div>
+<!-- Card 4: 243-K -->
+<div class="p-3.5 rounded-lg border border-outline-variant bg-surface-container-low/50 hover:border-primary transition-all">
+<div class="flex items-center justify-between mb-1.5">
+<span class="px-2 py-0.5 rounded font-mono font-bold text-xs bg-primary text-on-primary">Article 243-K</span>
+<span class="text-[10px] font-mono text-on-surface-variant">Constitutional Body</span>
+</div>
+<h3 class="text-xs font-bold text-on-surface mb-1">State Election Commission</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+                  Superintendence, direction and control of preparation of electoral rolls and conduct of all panchayat elections. State Election Commissioner is appointed by <span class="font-semibold text-on-surface">Governor</span>.
+                </p>
+</div>
+</div>
+</div>
+<!-- SECTION 3: EXAMINER'S MNEMONIC & CHRONOLOGY LOCK BOX -->
+<div class="rounded-xl border-2 border-tertiary-fixed bg-surface-container-low p-4 relative overflow-hidden">
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-lg bg-tertiary-container text-on-tertiary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-lg">lightbulb</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between flex-wrap gap-2">
+<h4 class="text-xs font-bold font-headline uppercase tracking-wider text-tertiary">Chronology Memory Lock</h4>
+<span class="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary-container">B - A - G - L - T</span>
+</div>
+<p class="text-xs font-medium text-on-surface mt-1.5">
+                  Balwant Rai (1957) <span class="text-primary font-bold">➔</span> Ashok Mehta (1977) <span class="text-primary font-bold">➔</span> G.V.K. Rao (1985) <span class="text-primary font-bold">➔</span> L.M. Singhvi (1986) <span class="text-primary font-bold">➔</span> P.K. Thungon (1988)
+                </p>
+<div class="mt-2.5 text-[11px] text-on-surface-variant bg-surface-container-lowest p-2 rounded border border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[15px] text-secondary">verified_user</span>
+<span><strong>Examiner Quick-Check Rule:</strong> Whenever UPPSC asks for chronological arrangement in Prelims Paper 1, verify if L.M. Singhvi precedes Thungon.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- COLUMN 3: RIGHT ACTION RAIL (Mastery & Recall ~ 280px / 3 cols) -->
+<aside class="lg:col-span-3 flex flex-col gap-5 sticky top-20">
+<!-- CARD 1: Topic Mastery Status -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold font-headline uppercase tracking-wide text-on-surface-variant">Topic Health</span>
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-secondary-container text-on-secondary-container">78% Strong</span>
+</div>
+<!-- Progress bar -->
+<div class="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
+<div class="bg-secondary h-2 rounded-full" style="width: 78%"></div>
+</div>
+<div class="bg-surface-container-low p-2.5 rounded-lg border border-outline-variant text-[11px] text-on-surface-variant flex flex-col gap-1">
+<div class="flex items-center justify-between font-medium">
+<span>Predicted 2026 Recurrence:</span>
+<span class="font-bold text-on-surface font-mono">2 – 3 MCQs</span>
+</div>
+<div class="flex items-center justify-between text-secondary">
+<span>Score Potential:</span>
+<span class="font-bold font-mono">+3.99 to +5.32 Marks</span>
+</div>
+</div>
+</div>
+<!-- CARD 2: Lock It Into Memory (Direct Recall CTA) -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col gap-3.5">
+<div class="flex items-center gap-1.5 text-xs font-bold font-headline text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary">psychology</span>
+            Active Recall Drills
+          </div>
+<!-- Primary Drill Button -->
+<button class="w-full p-3 rounded-lg bg-primary hover:bg-primary-dim text-on-primary font-headline text-xs font-bold flex flex-col items-center gap-1 shadow-sm transition-all active:scale-[0.98]">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+<span>Test Yourself: 10 Linked Questions</span>
+</div>
+<span class="text-[10px] font-mono font-normal opacity-90">6 Real PYQs + 4 Concept Traps</span>
+</button>
+<!-- Secondary SRS Button -->
+<button class="w-full py-2.5 px-3 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface font-headline text-xs font-semibold flex items-center justify-between transition-colors">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-secondary">style</span>
+<span>Flip 14 Topic Flashcards</span>
+</div>
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant">4m SRS</span>
+</button>
+</div>
+<!-- CARD 3: Completion Toggle & Personal Scratchpad -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col gap-3">
+<!-- Interactive Toggle Checkbox -->
+<label class="flex items-center gap-2.5 p-2 rounded-lg bg-surface-container-low border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4" type="checkbox"/>
+<div class="text-xs">
+<span class="font-bold text-on-surface">Mark Sheet Completed</span>
+<p class="text-[10px] text-secondary font-mono">+1 to Daily Revision Streak</p>
+</div>
+</label>
+<!-- Personal Notes Scratchpad -->
+<div class="flex flex-col gap-2 pt-1">
+<div class="flex items-center justify-between text-xs font-semibold text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">edit_note</span> Aspirant Scratchpad
+              </span>
+<span class="text-[10px] font-mono text-outline">Auto-Saved</span>
+</div>
+<!-- Existing Note -->
+<div class="p-2.5 rounded bg-surface-container-low text-[11px] leading-relaxed text-on-surface border border-outline-variant font-mono">
+<p>“Ashok Mehta = 2-tier + OPEN political party contest. Balwant Rai = 3-tier party-less concept.”</p>
+</div>
+<!-- Add Note Input -->
+<div class="flex items-center gap-1.5">
+<input class="w-full text-[11px] bg-surface-container-low border border-outline-variant rounded px-2.5 py-1.5 text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Add personal mnemonic note..." type="text"/>
+<button class="p-1.5 rounded bg-surface-container border border-outline-variant text-on-surface-variant hover:text-on-surface" title="Add Note">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Global Footer (Shared Component Execution) -->
+<footer class="bg-surface dark:bg-inverse-surface border-t border-outline-variant dark:border-outline docked full-width bottom-0 w-full mt-auto">
+<div class="w-full py-6 px-6 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 font-body text-xs text-on-surface-variant dark:text-inverse-on-surface leading-relaxed">
+<div class="flex items-center gap-3">
+<span class="font-headline font-bold text-sm text-on-surface dark:text-inverse-on-surface">Sankalp</span>
+<span class="text-outline-variant">|</span>
+<span>© 2026 Sankalp Academic Precision. Civil Services Preparation Portal. All rights reserved.</span>
+</div>
+<div class="flex items-center gap-6 flex-wrap">
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary transition-colors" href="#">Honor Code</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary transition-colors" href="#">Syllabus Archive</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary transition-colors" href="#">Marking Scheme Rules</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary transition-colors" href="#">Accessibility</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary transition-colors" href="#">Support Desk</a>
+</div>
+</div>
+</footer>
+</body></html>

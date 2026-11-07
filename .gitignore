@@ -1,0 +1,40 @@
+# Secrets & Environment Variables (NEVER COMMIT)
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+harvester/.env
+/AI API Key*.png
+/*API Key*.png
+/*.pdf
+
+# Dependencies & Build Outputs
+node_modules/
+dist/
+build/
+.wrangler/
+.vercel/
+.neon/
+*.tsbuildinfo
+
+# Harvester Local Data & Virtualenv
+harvester/.venv/
+harvester/venv/
+harvester/__pycache__/
+harvester/**/__pycache__/
+harvester/data/raw/
+harvester/data/processed/
+harvester/data/logs/
+harvester/data/manifests/
+harvester/data/*.db
+harvester/data/*.db-journal
+harvester/data/*.db-wal
+harvester/data/*.db-shm
+.agents/
+mcp_config.json
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.log

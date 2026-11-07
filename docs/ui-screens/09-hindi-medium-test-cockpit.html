@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface" lang="hi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>संकल्प | यूपीपीसीएस परीक्षा कॉकपिट (Pure Hindi-Medium)</title>
+<!-- Fonts: Plus Jakarta Sans, Inter, Noto Sans Devanagari, JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600;700&amp;family=Noto+Sans+Devanagari:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Public+Sans:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary": "#5450c1",
+            "on-tertiary": "#fff7f4",
+            "error-dim": "#6b0221",
+            "secondary": "#006d4b",
+            "error": "#a8364b",
+            "on-secondary-fixed-variant": "#006948",
+            "surface-dim": "#d4dbdf",
+            "on-primary-fixed-variant": "#14007b",
+            "on-primary": "#fbf7ff",
+            "secondary-fixed-dim": "#76eab6",
+            "on-error": "#fff7f7",
+            "on-error-container": "#6e0523",
+            "surface": "#f7f9fb",
+            "inverse-surface": "#0b0f10",
+            "tertiary-fixed-dim": "#ed871e",
+            "inverse-on-surface": "#9a9d9f",
+            "tertiary-container": "#fe932c",
+            "surface-container": "#eaeff2",
+            "secondary-dim": "#005f41",
+            "on-secondary-fixed": "#004931",
+            "surface-bright": "#f7f9fb",
+            "surface-tint": "#5450c1",
+            "background": "#f7f9fb",
+            "surface-container-high": "#e3e9ed",
+            "on-primary-fixed": "#000000",
+            "on-background": "#2c3437",
+            "on-tertiary-fixed-variant": "#572c00",
+            "primary-fixed": "#8c88fd",
+            "tertiary-fixed": "#fe932c",
+            "outline": "#747c80",
+            "on-secondary-container": "#005e40",
+            "outline-variant": "#acb3b7",
+            "surface-container-low": "#f0f4f7",
+            "on-tertiary-fixed": "#240f00",
+            "on-tertiary-container": "#4a2500",
+            "secondary-fixed": "#85f8c4",
+            "primary-fixed-dim": "#7f7bef",
+            "tertiary": "#914d00",
+            "surface-variant": "#dce4e8",
+            "primary-dim": "#4843b4",
+            "on-surface-variant": "#596064",
+            "on-surface": "#2c3437",
+            "primary-container": "#8c88fd",
+            "secondary-container": "#85f8c4",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary": "#e6ffef",
+            "surface-container-highest": "#dce4e8",
+            "tertiary-dim": "#804300",
+            "on-primary-container": "#0c005c",
+            "inverse-primary": "#8c88fd",
+            "error-container": "#f97386"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans", "Noto Sans Devanagari", "sans-serif"],
+            "display": ["Plus Jakarta Sans", "Noto Sans Devanagari", "sans-serif"],
+            "body": ["Inter", "Noto Sans Devanagari", "sans-serif"],
+            "label": ["Public Sans", "Noto Sans Devanagari", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+    }
+    .devanagari-stem {
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+      line-height: 1.8;
+    }
+    /* Pulsing indicators */
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    .pulse-dot {
+      animation: pulse-subtle 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col bg-background text-on-surface antialiased overflow-hidden select-none">
+<!-- ========================================================================= -->
+<!-- 1. TOP EXAM HEADER BAR (Sticky, distraction-free test cockpit banner)     -->
+<!-- ========================================================================= -->
+<header class="w-full bg-surface-container-lowest border-b border-outline-variant/40 shadow-sm z-50 shrink-0">
+<div class="px-5 py-2.5 flex items-center justify-between gap-4">
+<!-- Brand & Exam Title Cluster -->
+<div class="flex items-center gap-3.5 min-w-0">
+<!-- Brand Glyph -->
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-[20px]">school</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-headline font-extrabold text-base tracking-tight text-primary leading-none">संकल्प</span>
+<span class="font-mono text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary">परीक्षालय</span>
+</div>
+<span class="text-[11px] text-on-surface-variant font-medium">सिविल सेवा परीक्षा कॉकपिट</span>
+</div>
+</div>
+<div class="h-6 w-px bg-outline-variant/50 mx-1 hidden sm:block"></div>
+<!-- Exam Paper Title -->
+<div class="hidden lg:flex items-center gap-2 truncate">
+<h1 class="text-sm font-headline font-bold text-on-surface truncate">
+            यूपीपीसीएस प्रारंभिक परीक्षा 2025 — सामान्य अध्ययन प्रश्नपत्र-I
+          </h1>
+<span class="text-xs px-2 py-0.5 bg-surface-container rounded-full text-on-surface-variant font-mono font-medium">
+            सेट: A
+          </span>
+</div>
+</div>
+<!-- Center Metadata Badges -->
+<div class="flex items-center gap-2">
+<!-- Active Question Progress Pill -->
+<div class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container border border-outline-variant/30 text-xs">
+<span class="material-symbols-outlined text-[15px] text-primary">assignment</span>
+<span class="text-on-surface-variant font-medium">प्रगति:</span>
+<span class="font-mono font-bold text-on-surface">115 / 150</span>
+</div>
+<!-- Marking Scheme Badge -->
+<div class="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-low border border-outline-variant/30 text-xs">
+<span class="text-secondary font-bold font-mono">+1.33</span>
+<span class="text-on-surface-variant font-medium">सही</span>
+<span class="text-outline-variant">|</span>
+<span class="text-error font-bold font-mono">-0.44</span>
+<span class="text-on-surface-variant font-medium">ऋणात्मक (1/3)</span>
+</div>
+<!-- Language Medium Badge -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/10 border border-secondary/20 text-xs text-secondary font-semibold">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span>माध्यम: हिन्दी (HI)</span>
+</div>
+</div>
+<!-- Right Controls & Timer & Submit CTA -->
+<div class="flex items-center gap-3 shrink-0">
+<!-- Fullscreen Toggle -->
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors hidden sm:inline-flex" title="पूर्ण स्क्रीन (Fullscreen)" type="button">
+<span class="material-symbols-outlined text-[20px]">fullscreen</span>
+</button>
+<!-- Pause / Save Draft -->
+<button class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">pause_circle</span>
+<span>सत्र रोकें / ड्राफ्ट सहेजें</span>
+</button>
+<!-- Monospace Live Countdown Timer -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/50 font-mono text-sm shadow-inner">
+<span class="w-2 h-2 rounded-full bg-error pulse-dot"></span>
+<span class="font-bold tracking-tight text-on-surface" id="countdown-timer">01:14:09</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">timer</span>
+</div>
+<!-- Submit Paper Primary CTA -->
+<button class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary hover:bg-primary-dim active:scale-[0.98] text-on-primary text-xs font-headline font-bold shadow-sm transition-all" type="button">
+<span>परीक्षा सबमिट करें</span>
+<span class="material-symbols-outlined text-[16px]">done_all</span>
+</button>
+</div>
+</div>
+</header>
+<!-- ========================================================================= -->
+<!-- 2. MAIN 3-COLUMN COCKPIT LAYOUT (Distraction-Free Full Viewport)           -->
+<!-- ========================================================================= -->
+<main class="flex-1 flex overflow-hidden">
+<!-- ======================================================================= -->
+<!-- COLUMN 1: LEFT NAVIGATION & FILTER SIDEBAR (250px)                     -->
+<!-- ======================================================================= -->
+<aside class="w-[250px] shrink-0 bg-surface-container-lowest border-r border-outline-variant/30 flex flex-col justify-between overflow-y-auto">
+<div class="p-3.5 space-y-3.5">
+<!-- Active Section Card -->
+<div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/30">
+<div class="flex items-center justify-between mb-1.5">
+<span class="text-[11px] font-bold tracking-wide uppercase text-on-surface-variant">सक्रिय खंड (Section)</span>
+<span class="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">खंड IV</span>
+</div>
+<div class="font-headline font-bold text-sm text-on-surface leading-snug">
+            सामान्य विज्ञान एवं कृषि
+          </div>
+<div class="mt-1 flex items-center justify-between text-xs text-on-surface-variant">
+<span>प्रश्नावली: Q101 – Q135</span>
+<span class="font-mono font-medium">कुल 35 प्रश्न</span>
+</div>
+</div>
+<!-- Question Metadata Card -->
+<div class="p-3 rounded-xl bg-surface-container-lowest border border-outline-variant/30 space-y-2">
+<div class="text-[11px] font-bold uppercase text-on-surface-variant tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">info</span>
+<span>प्रश्न अभिलक्षण</span>
+</div>
+<div class="flex items-center justify-between text-xs py-1 border-b border-surface-container">
+<span class="text-on-surface-variant">प्रारूप:</span>
+<span class="font-medium text-on-surface">बहु-कथन (Statement)</span>
+</div>
+<div class="flex items-center justify-between text-xs py-1 border-b border-surface-container">
+<span class="text-on-surface-variant">कठिनाई:</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+              मध्यम (Medium)
+            </span>
+</div>
+<div class="flex items-center justify-between text-xs pt-0.5">
+<span class="text-on-surface-variant">स्रोत प्रामाणिकता:</span>
+<span class="text-[11px] font-medium text-secondary truncate max-w-[120px]" title="आयोग आधिकारिक प्रश्न पत्र 2021">
+              PYQ (आयोग 2021)
+            </span>
+</div>
+</div>
+<!-- Filter Question Categories -->
+<div class="space-y-1.5">
+<div class="text-[11px] font-bold uppercase text-on-surface-variant tracking-wider px-1">
+            प्रश्नावलोकन फ़िल्टर
+          </div>
+<div class="space-y-1">
+<!-- All -->
+<button class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-surface-container transition-colors text-on-surface" type="button">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">ballot</span>
+<span>सभी प्रश्न</span>
+</div>
+<span class="font-mono text-[11px] font-bold px-1.5 py-0.2 rounded bg-surface-container text-on-surface">150</span>
+</button>
+<!-- Attempted -->
+<button class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-900 border border-emerald-200/60 transition-colors" type="button">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-emerald-700">check_circle</span>
+<span>उत्तरित प्रश्न</span>
+</div>
+<span class="font-mono text-[11px] font-bold px-1.5 py-0.2 rounded bg-emerald-200/60 text-emerald-900">87</span>
+</button>
+<!-- Unattempted -->
+<button class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-surface-container transition-colors text-on-surface" type="button">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">radio_button_unchecked</span>
+<span>अनुत्तरित शेष</span>
+</div>
+<span class="font-mono text-[11px] font-bold px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant">58</span>
+</button>
+<!-- Marked for Review -->
+<button class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-surface-container transition-colors text-on-surface" type="button">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-amber-600">bookmark</span>
+<span>पुनर्विचार हेतु चिह्नित</span>
+</div>
+<span class="font-mono text-[11px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-900">05</span>
+</button>
+<!-- 50-50 Eliminated -->
+<button class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-surface-container transition-colors text-on-surface" type="button">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-rose-600">strikethrough_s</span>
+<span>50-50 निष्कासित</span>
+</div>
+<span class="font-mono text-[11px] font-bold px-1.5 py-0.2 rounded bg-rose-100 text-rose-900">12</span>
+</button>
+</div>
+</div>
+<!-- Shortcuts Helper Card -->
+<div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 text-[11px] space-y-1.5">
+<div class="font-bold text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">keyboard</span>
+<span>त्वरित शॉर्टकट कुंजी</span>
+</div>
+<div class="space-y-1 text-on-surface-variant">
+<div class="flex items-center justify-between">
+<span>विकल्प चयन:</span>
+<span class="font-mono px-1 py-0.5 bg-surface-container-lowest rounded border border-outline-variant/40 text-[10px] text-on-surface font-semibold">A / B / C / D</span>
+</div>
+<div class="flex items-center justify-between">
+<span>50-50 निष्कासन:</span>
+<span class="font-mono px-1 py-0.5 bg-surface-container-lowest rounded border border-outline-variant/40 text-[10px] text-on-surface font-semibold">Alt + Click</span>
+</div>
+<div class="flex items-center justify-between">
+<span>पुनर्विचार चिह्नित:</span>
+<span class="font-mono px-1 py-0.5 bg-surface-container-lowest rounded border border-outline-variant/40 text-[10px] text-on-surface font-semibold">R</span>
+</div>
+<div class="flex items-center justify-between">
+<span>सहेजें और अगला:</span>
+<span class="font-mono px-1 py-0.5 bg-surface-container-lowest rounded border border-outline-variant/40 text-[10px] text-on-surface font-semibold">Space / Enter</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Proctor/System Status Footer -->
+<div class="p-3 border-t border-outline-variant/20 bg-surface-container/40 text-[11px] text-on-surface-variant flex items-center justify-between">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>नेटवर्क स्थिति: सक्रिय</span>
+</span>
+<span class="font-mono">ping 24ms</span>
+</div>
+</aside>
+<!-- ======================================================================= -->
+<!-- COLUMN 2: CENTER EXAM QUESTION CANVAS & INTERACTIVE SHEET (Flexible)   -->
+<!-- ======================================================================= -->
+<section class="flex-1 flex flex-col bg-surface overflow-y-auto px-6 py-4">
+<!-- Central White Exam Card Container -->
+<div class="max-w-4xl w-full mx-auto bg-surface-container-lowest rounded-2xl border border-outline-variant/40 shadow-sm flex flex-col my-auto">
+<!-- Question Card Top Bar -->
+<div class="px-6 py-4 border-b border-outline-variant/30 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="px-3 py-1 rounded-lg bg-primary text-on-primary font-mono font-bold text-sm tracking-tight shadow-sm">
+              प्रश्न संख्या 115
+            </span>
+<div class="flex items-center gap-2 text-xs text-on-surface-variant font-medium">
+<span>सामान्य अध्ययन-I</span>
+<span>•</span>
+<span class="font-mono">UPPCS-PRE-2025</span>
+<span>•</span>
+<span class="text-secondary font-semibold">अंक भार: +1.33</span>
+</div>
+</div>
+<!-- Utility Icons -->
+<div class="flex items-center gap-1.5">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs text-on-surface-variant hover:text-tertiary hover:bg-tertiary/10 transition-colors" title="बुकमार्क करें" type="button">
+<span class="material-symbols-outlined text-[18px]">bookmark_add</span>
+<span class="hidden sm:inline">पसंदीदा</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs text-on-surface-variant hover:text-error hover:bg-error/10 transition-colors" title="त्रुटि रिपोर्ट करें" type="button">
+<span class="material-symbols-outlined text-[18px]">flag</span>
+<span class="hidden sm:inline">त्रुटि रिपोर्ट</span>
+</button>
+<div class="h-4 w-px bg-outline-variant/40 mx-1"></div>
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface" title="फॉन्ट आकार बढ़ाएं" type="button">
+<span class="material-symbols-outlined text-[18px]">format_size</span>
+</button>
+</div>
+</div>
+<!-- Question Stem (Clean High-Legibility Devanagari) -->
+<div class="p-6 md:p-8 space-y-5">
+<!-- Introduction Stem -->
+<div class="devanagari-stem text-lg font-semibold text-on-surface leading-relaxed">
+            “कृषि विज्ञान केंद्र (के.वी.के. / KVK)” के संदर्भ में, निम्नलिखित कथनों पर विचार कीजिए:
+          </div>
+<!-- Numbered Statements in Boxed Format -->
+<div class="space-y-3 pl-2 sm:pl-4">
+<!-- Statement 1 -->
+<div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-start gap-3">
+<span class="font-mono font-bold text-primary text-sm px-2 py-0.5 bg-surface-container-lowest rounded shadow-xs shrink-0">
+                1
+              </span>
+<p class="devanagari-stem text-base text-on-surface leading-relaxed">
+                भारत का पहला कृषि विज्ञान केंद्र वर्ष 1974 में तमिलनाडु कृषि विश्वविद्यालय (TNAU) के प्रशासनिक नियंत्रण में पुडुचेरी (पांडिचेरी) में स्थापित किया गया था।
+              </p>
+</div>
+<!-- Statement 2 -->
+<div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-start gap-3">
+<span class="font-mono font-bold text-primary text-sm px-2 py-0.5 bg-surface-container-lowest rounded shadow-xs shrink-0">
+                2
+              </span>
+<p class="devanagari-stem text-base text-on-surface leading-relaxed">
+                केवीके योजना भारतीय कृषि अनुसंधान परिषद (ICAR) के अंतर्गत भारत सरकार द्वारा 100% केंद्रीय वित्तपोषित योजना है।
+              </p>
+</div>
+</div>
+<!-- Prompt Question -->
+<div class="pt-2 font-medium devanagari-stem text-base text-on-surface font-semibold text-primary">
+            उपर्युक्त कथनों में से कौन-सा/से सही है/हैं?
+          </div>
+<!-- =============================================================== -->
+<!-- 4 OPTION CARDS (Demonstrating Selection & 50-50 Strikethrough)   -->
+<!-- =============================================================== -->
+<div aria-label="उत्तर विकल्प" class="space-y-3 pt-1" role="radiogroup">
+<!-- OPTION (A) - SELECTED STATE (Royal Indigo Border & Tint) -->
+<div class="group relative flex items-center justify-between p-4 rounded-xl border-2 border-primary bg-primary/5 transition-all shadow-sm cursor-pointer ring-2 ring-primary/20">
+<div class="flex items-center gap-3.5 min-w-0">
+<!-- Custom Radio Marker -->
+<div class="w-6 h-6 rounded-full border-2 border-primary bg-primary flex items-center justify-center text-on-primary shrink-0 shadow-xs">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</div>
+<div class="devanagari-stem text-base font-semibold text-primary leading-normal">
+<span class="font-mono font-bold mr-1.5">(A)</span> 1 और 2 दोनों
+                </div>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full bg-primary text-on-primary text-[11px] font-semibold tracking-wide">
+                  चयनित (Selected)
+                </span>
+<span class="text-[11px] font-mono font-medium text-primary hidden sm:inline">[कुंजी: A]</span>
+</div>
+</div>
+<!-- OPTION (B) - DEFAULT UNSELECTED -->
+<div class="group relative flex items-center justify-between p-4 rounded-xl border border-outline-variant/40 bg-surface-container-lowest hover:border-outline hover:bg-surface-container-low transition-all cursor-pointer">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant group-hover:border-primary/60 flex items-center justify-center shrink-0">
+</div>
+<div class="devanagari-stem text-base text-on-surface leading-normal">
+<span class="font-mono font-medium mr-1.5 text-on-surface-variant">(B)</span> केवल 2
+                </div>
+</div>
+<div class="flex items-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+<button class="text-[11px] font-medium text-on-surface-variant hover:text-error flex items-center gap-1 px-2 py-0.5 rounded hover:bg-surface-container" title="50-50 निष्कासन (Eliminate)" type="button">
+<span class="material-symbols-outlined text-[14px]">strikethrough_s</span>
+<span class="hidden sm:inline">निष्कासित करें</span>
+</button>
+<span class="text-[11px] font-mono text-on-surface-variant hidden sm:inline">[कुंजी: B]</span>
+</div>
+</div>
+<!-- OPTION (C) - 50-50 ELIMINATED STATE (Rose Tint & Strikethrough) -->
+<div class="group relative flex items-center justify-between p-4 rounded-xl border border-rose-200 bg-rose-50/70 text-rose-950 transition-all opacity-85">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="w-6 h-6 rounded-full border-2 border-rose-300 bg-rose-100 flex items-center justify-center shrink-0 text-rose-700">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</div>
+<!-- Strikethrough text styling -->
+<div class="devanagari-stem text-base line-through text-rose-900/80 decoration-rose-600 decoration-2 leading-normal">
+<span class="font-mono font-medium mr-1.5 text-rose-700">(C)</span> न तो 1 और न ही 2
+                </div>
+</div>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 text-[11px] font-semibold">
+<span class="material-symbols-outlined text-[13px]">strikethrough_s</span>
+<span>50-50 हटाया गया</span>
+</span>
+<button class="text-[11px] font-semibold text-rose-700 underline hover:text-rose-900 px-1 py-0.5" type="button">
+                  पूर्ववत करें (Undo)
+                </button>
+</div>
+</div>
+<!-- OPTION (D) - DEFAULT UNSELECTED -->
+<div class="group relative flex items-center justify-between p-4 rounded-xl border border-outline-variant/40 bg-surface-container-lowest hover:border-outline hover:bg-surface-container-low transition-all cursor-pointer">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant group-hover:border-primary/60 flex items-center justify-center shrink-0">
+</div>
+<div class="devanagari-stem text-base text-on-surface leading-normal">
+<span class="font-mono font-medium mr-1.5 text-on-surface-variant">(D)</span> केवल 1
+                </div>
+</div>
+<div class="flex items-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+<button class="text-[11px] font-medium text-on-surface-variant hover:text-error flex items-center gap-1 px-2 py-0.5 rounded hover:bg-surface-container" title="50-50 निष्कासन (Eliminate)" type="button">
+<span class="material-symbols-outlined text-[14px]">strikethrough_s</span>
+<span class="hidden sm:inline">निष्कासित करें</span>
+</button>
+<span class="text-[11px] font-mono text-on-surface-variant hidden sm:inline">[कुंजी: D]</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Aspirant Confidence & Bottom Submission Action Bar -->
+<div class="px-6 py-4 bg-surface-container-low/70 border-t border-outline-variant/30 rounded-b-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+<!-- Confidence Level Selector -->
+<div class="flex items-center gap-2 w-full md:w-auto">
+<span class="text-xs font-semibold text-on-surface-variant shrink-0 flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-tertiary">psychology</span>
+<span>आत्म-विश्वास रेटिंग:</span>
+</span>
+<div class="inline-flex rounded-lg p-0.5 bg-surface-container border border-outline-variant/40 text-xs">
+<button class="px-2.5 py-1 rounded-md bg-secondary text-on-secondary font-semibold shadow-xs flex items-center gap-1" type="button">
+<span>✓ 100% निश्चित</span>
+</button>
+<button class="px-2.5 py-1 rounded-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+<span>50-50 अनुमान</span>
+</button>
+<button class="px-2.5 py-1 rounded-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+<span>अनुमान (Tukke)</span>
+</button>
+</div>
+</div>
+<!-- Bottom Action Buttons Cluster -->
+<div class="flex items-center gap-2.5 w-full md:w-auto justify-end">
+<!-- Clear Answer -->
+<button class="px-3 py-2 rounded-lg border border-outline-variant text-xs font-semibold text-on-surface-variant hover:text-error hover:border-error transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">clear</span>
+<span>उत्तर मिटाएं</span>
+</button>
+<!-- Mark for Review & Next -->
+<button class="px-3.5 py-2 rounded-lg border border-amber-500/50 bg-amber-500/10 text-amber-900 hover:bg-amber-500/20 text-xs font-semibold transition-colors flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[16px] text-amber-700">bookmark</span>
+<span>पुनर्विचार हेतु चिह्नित करें &amp; अगला</span>
+</button>
+<!-- Save & Next (Primary Action) -->
+<button class="px-4 py-2 rounded-lg bg-primary hover:bg-primary-dim text-on-primary text-xs font-headline font-bold shadow-sm transition-all flex items-center gap-1.5 active:scale-[0.98]" type="button">
+<span>सहेजें और अगला</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- ======================================================================= -->
+<!-- COLUMN 3: RIGHT OMR QUESTION PALETTE (310px width)                    -->
+<!-- ======================================================================= -->
+<aside class="w-[310px] shrink-0 bg-surface-container-lowest border-l border-outline-variant/30 flex flex-col justify-between overflow-y-auto">
+<div class="p-4 space-y-4">
+<!-- Header -->
+<div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">apps</span>
+<h2 class="font-headline font-bold text-sm text-on-surface">ओएमआर प्रश्न पैलेट</h2>
+</div>
+<span class="text-[11px] font-mono text-on-surface-variant font-medium">Q101–Q135</span>
+</div>
+<!-- Quick Status Summary Badges -->
+<div class="grid grid-cols-3 gap-1.5 text-center">
+<div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200/80">
+<div class="font-mono font-bold text-base text-emerald-800 leading-none">87</div>
+<div class="text-[10px] text-emerald-700 font-medium mt-1">उत्तरित</div>
+</div>
+<div class="p-2 rounded-lg bg-amber-50 border border-amber-200/80">
+<div class="font-mono font-bold text-base text-amber-800 leading-none">05</div>
+<div class="text-[10px] text-amber-700 font-medium mt-1">चिह्नित</div>
+</div>
+<div class="p-2 rounded-lg bg-surface-container border border-outline-variant/30">
+<div class="font-mono font-bold text-base text-on-surface-variant leading-none">58</div>
+<div class="text-[10px] text-on-surface-variant font-medium mt-1">शेष</div>
+</div>
+</div>
+<!-- Palette Section Marker -->
+<div class="flex items-center justify-between text-xs text-on-surface-variant px-0.5">
+<span class="font-semibold text-on-surface">खंड: विज्ञान एवं कृषि</span>
+<span class="text-[11px]">35 प्रश्न</span>
+</div>
+<!-- =============================================================== -->
+<!-- CIRCULAR 5-COLUMN OMR GRID (Q101 to Q135 with Q115 Highlighted) -->
+<!-- =============================================================== -->
+<div aria-label="प्रश्न ओएमआर शीट" class="grid grid-cols-5 gap-2 p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30" role="navigation">
+<!-- 101 to 110 (Attempted: Emerald green) -->
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-secondary text-on-secondary shadow-xs hover:opacity-90 flex items-center justify-center" type="button">101</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-secondary text-on-secondary shadow-xs hover:opacity-90 flex items-center justify-center" type="button">102</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-secondary text-on-secondary shadow-xs hover:opacity-90 flex items-center justify-center" type="button">103</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-secondary text-on-secondary shadow-xs hover:opacity-90 flex items-center justify-center" type="button">104</button>
+<!-- 105 Marked for Review (Amber) -->
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-amber-500 text-white shadow-xs hover:opacity-90 flex items-center justify-center relative" type="button">
+            105
+            <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-700"></span>
+</button>
+<!-- 106 to 110 -->
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-secondary text-on-secondary shadow-xs hover:opacity-90 flex items-center justify-center" type="button">106</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-secondary text-on-secondary shadow-xs hover:opacity-90 flex items-center justify-center" type="button">107</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-secondary text-on-secondary shadow-xs hover:opacity-90 flex items-center justify-center" type="button">108</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-secondary text-on-secondary shadow-xs hover:opacity-90 flex items-center justify-center" type="button">109</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-secondary text-on-secondary shadow-xs hover:opacity-90 flex items-center justify-center" type="button">110</button>
+<!-- 111 to 115 -->
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-secondary text-on-secondary shadow-xs hover:opacity-90 flex items-center justify-center" type="button">111</button>
+<!-- 112 Marked for Review -->
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-amber-500 text-white shadow-xs hover:opacity-90 flex items-center justify-center relative" type="button">
+            112
+            <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-700"></span>
+</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-secondary text-on-secondary shadow-xs hover:opacity-90 flex items-center justify-center" type="button">113</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-bold bg-secondary text-on-secondary shadow-xs hover:opacity-90 flex items-center justify-center" type="button">114</button>
+<!-- 115 ACTIVE QUESTION (Indigo with Pulsing Glow Ring) -->
+<button aria-current="true" class="w-10 h-10 rounded-full font-mono text-xs font-extrabold bg-primary text-on-primary ring-4 ring-primary/30 ring-offset-2 ring-offset-surface-container-low shadow-md flex items-center justify-center scale-105 transition-transform" type="button">
+            115
+          </button>
+<!-- 116 to 125 (Unattempted: Crisp White with subtle outline) -->
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">116</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">117</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">118</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">119</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">120</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">121</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">122</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">123</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">124</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">125</button>
+<!-- 126 to 135 -->
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">126</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">127</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">128</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">129</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">130</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">131</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">132</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">133</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">134</button>
+<button class="w-10 h-10 rounded-full font-mono text-xs font-semibold bg-surface-container-lowest text-on-surface border border-outline-variant/60 hover:border-primary transition-colors flex items-center justify-center" type="button">135</button>
+</div>
+<!-- Palette Color Legend -->
+<div class="grid grid-cols-2 gap-y-1.5 gap-x-2 text-[11px] text-on-surface-variant pt-1">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span>उत्तरित (Answered)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-amber-500"></span>
+<span>पुनर्विचार (Review)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-surface-container-lowest border border-outline-variant"></span>
+<span>अनुत्तरित (Unanswered)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-primary ring-2 ring-primary/30"></span>
+<span>वर्तमान सक्रिय (Active)</span>
+</div>
+</div>
+<!-- Pacing Meter Card -->
+<div class="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/60 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-emerald-700">speed</span>
+<div>
+<div class="text-[11px] font-bold text-emerald-950">गति मापक (Pacing)</div>
+<div class="text-[11px] text-emerald-800 font-medium">अनुकूल गति (+6 मिनट आगे)</div>
+</div>
+</div>
+<span class="font-mono text-xs font-bold px-2 py-0.5 bg-emerald-200/60 rounded text-emerald-900">
+            48s/Q
+          </span>
+</div>
+</div>
+<!-- Bottom Palette Modal Trigger -->
+<div class="p-3.5 border-t border-outline-variant/20 bg-surface-container-low/50">
+<button class="w-full py-2 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-surface-container text-on-surface text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs" type="button">
+<span class="material-symbols-outlined text-[16px] text-primary">qr_code_2</span>
+<span>संपूर्ण 150 प्रश्न ग्रिड देखें</span>
+</button>
+</div>
+</aside>
+</main>
+<!-- ========================================================================= -->
+<!-- 3. FOOTER (Strict Minimal Academic Honor Code & Attribution Bar)          -->
+<!-- ========================================================================= -->
+<footer class="w-full bg-surface-container-lowest border-t border-outline-variant/30 px-6 py-2 shrink-0 z-40">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-on-surface-variant font-body">
+<!-- Hindi Copyright and Academic Integrity Note -->
+<div class="flex items-center gap-2 text-center md:text-left">
+<span class="material-symbols-outlined text-[15px] text-primary">verified_user</span>
+<span>© 2026 संकल्प अकादमिक परिशुद्धता • सिविल सेवा परीक्षा मंच • सर्वस्व सुरक्षित।</span>
+</div>
+<!-- Hindi Exam Navigation Links -->
+<div class="flex items-center gap-4 text-[11px] font-medium">
+<a class="hover:text-primary transition-colors" href="#honor">आचार संहिता</a>
+<span class="text-outline-variant/50">•</span>
+<a class="hover:text-primary transition-colors" href="#syllabus">पाठ्यक्रम अभिलेखागार</a>
+<span class="text-outline-variant/50">•</span>
+<a class="hover:text-primary transition-colors" href="#marking">अंकन नियम</a>
+<span class="text-outline-variant/50">•</span>
+<a class="hover:text-primary transition-colors" href="#accessibility">सुगम्यता</a>
+<span class="text-outline-variant/50">•</span>
+<a class="hover:text-primary transition-colors flex items-center gap-1" href="#support">
+<span class="material-symbols-outlined text-[13px]">help_center</span>
+<span>सहायता डेस्क</span>
+</a>
+</div>
+</div>
+</footer>
+<!-- Interactive Demo Micro-Interactions Script -->
+<script>
+    // Live Countdown Timer Simulation
+    let totalSeconds = (1 * 3600) + (14 * 60) + 9;
+    const timerElement = document.getElementById('countdown-timer');
+
+    function updateTimer() {
+      if (totalSeconds > 0) {
+        totalSeconds--;
+        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+        if (timerElement) {
+          timerElement.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+      }
+    }
+    setInterval(updateTimer, 1000);
+
+    // Keyboard Shortcuts Listener for Test Cockpit realism
+    document.addEventListener('keydown', (e) => {
+      // Toggle shortcuts or feedback
+      if (['a', 'b', 'c', 'd', 'A', 'B', 'C', 'D'].includes(e.key)) {
+        console.log(`विकल्प कुंजी दबाई गई: ${e.key.toUpperCase()}`);
+      }
+    });
+  </script>
+</body></html>

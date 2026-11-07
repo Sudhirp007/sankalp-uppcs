@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sankalp - UPPCS Prelims 2026 Learning Journey</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-container": "#fe932c",
+            "primary-fixed-dim": "#7f7bef",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-container": "#4a2500",
+            "secondary-container": "#85f8c4",
+            "primary-dim": "#4843b4",
+            "outline": "#747c80",
+            "on-primary-fixed-variant": "#14007b",
+            "surface-variant": "#dce4e8",
+            "secondary-dim": "#005f41",
+            "on-tertiary-fixed": "#240f00",
+            "tertiary-fixed": "#fe932c",
+            "on-primary-container": "#0c005c",
+            "on-tertiary-fixed-variant": "#572c00",
+            "surface-bright": "#f7f9fb",
+            "primary-container": "#8c88fd",
+            "on-secondary": "#e6ffef",
+            "on-primary": "#fbf7ff",
+            "on-error": "#fff7f7",
+            "on-tertiary": "#fff7f4",
+            "on-surface-variant": "#596064",
+            "on-error-container": "#6e0523",
+            "primary-fixed": "#8c88fd",
+            "surface-tint": "#5450c1",
+            "secondary-fixed-dim": "#76eab6",
+            "on-background": "#2c3437",
+            "background": "#f7f9fb",
+            "error": "#a8364b",
+            "on-surface": "#2c3437",
+            "surface-dim": "#d4dbdf",
+            "primary": "#5450c1",
+            "outline-variant": "#acb3b7",
+            "inverse-primary": "#8c88fd",
+            "surface-container-high": "#e3e9ed",
+            "inverse-on-surface": "#9a9d9f",
+            "tertiary": "#914d00",
+            "secondary": "#006d4b",
+            "on-secondary-fixed-variant": "#006948",
+            "tertiary-fixed-dim": "#ed871e",
+            "error-dim": "#6b0221",
+            "secondary-fixed": "#85f8c4",
+            "inverse-surface": "#0b0f10",
+            "on-primary-fixed": "#000000",
+            "on-secondary-container": "#005e40",
+            "error-container": "#f97386",
+            "tertiary-dim": "#804300",
+            "surface-container-highest": "#dce4e8",
+            "surface": "#f7f9fb",
+            "on-secondary-fixed": "#004931",
+            "surface-container-low": "#f0f4f7",
+            "surface-container": "#eaeff2"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans", "sans-serif"],
+            "display": ["Plus Jakarta Sans", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "label": ["Public Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container">
+<!-- GLOBAL TOP NAVIGATION BAR (Anchored via Shared Components JSON) -->
+<header class="bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none docked full-width top-0 sticky z-50">
+<div class="w-full px-6 py-3 flex items-center justify-between mx-auto max-w-7xl">
+<!-- Left: Brand Logo & Exam Journey Switcher Pill -->
+<div class="flex items-center gap-4">
+<a class="font-headline font-bold text-lg text-primary dark:text-inverse-primary tracking-tight flex items-center gap-2" href="#">
+<span class="w-7 h-7 rounded-lg bg-primary text-on-primary flex items-center justify-center font-headline font-bold text-base shadow-sm">S</span>
+<span>Sankalp</span>
+</a>
+<!-- Exam Journey Switcher Pill -->
+<div class="hidden sm:flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded-full border border-outline-variant hover:border-primary transition-colors cursor-pointer group">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label text-xs font-semibold text-on-surface group-hover:text-primary">Active Journey: UPPCS 2026</span>
+<span class="text-[10px] font-mono font-medium bg-surface-container px-1.5 py-0.5 rounded text-on-surface-variant">2 Active</span>
+<span class="material-symbols-outlined text-xs text-on-surface-variant group-hover:text-primary">expand_more</span>
+</div>
+</div>
+<!-- Center: Navigation Links -->
+<nav class="hidden md:flex items-center gap-6 font-headline font-semibold text-sm tracking-tight">
+<a class="text-primary dark:text-inverse-primary font-semibold border-b-2 border-primary dark:border-inverse-primary pb-1" href="#">
+          Journey Home
+        </a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary font-medium transition-colors" href="#">
+          Global Expertise
+        </a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary font-medium transition-colors" href="#">
+          Syllabus &amp; Practice
+        </a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary font-medium transition-colors" href="#">
+          Learning Studio
+        </a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary font-medium transition-colors flex items-center gap-1.5" href="#">
+<span>Flashcards (SRS)</span>
+<span class="font-mono text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-error-container text-on-error-container">18</span>
+</a>
+</nav>
+<!-- Right: Utility Cluster (Streak, Medium & Profile) -->
+<div class="flex items-center gap-3">
+<!-- Streak badge -->
+<div class="hidden lg:flex items-center gap-1.5 bg-surface-container-low px-2.5 py-1 rounded-full border border-outline-variant text-tertiary">
+<span class="material-symbols-outlined text-base fill-icon text-tertiary-fixed-dim">local_fire_department</span>
+<span class="font-mono text-xs font-bold text-on-surface">14d</span>
+</div>
+<!-- Medium Pill -->
+<div class="flex items-center gap-1 bg-surface-container-low text-on-surface-variant px-2.5 py-1 rounded-full border border-outline-variant text-xs font-label font-medium">
+<span class="material-symbols-outlined text-sm">translate</span>
+<span>Medium: English</span>
+</div>
+<!-- Aspirant User Profile Avatar -->
+<button class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container text-primary hover:bg-surface-variant transition-colors" title="Aspirant Profile">
+<span class="material-symbols-outlined text-xl">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- SUB-HEADER METRIC STATUS STRIP -->
+<aside class="bg-surface-container-low border-b border-outline-variant text-xs font-mono text-on-surface-variant py-2 px-6">
+<div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-y-1.5 gap-x-4">
+<div class="flex items-center gap-3 flex-wrap">
+<span class="flex items-center gap-1 text-on-surface font-semibold">
+<span class="material-symbols-outlined text-sm text-primary">target</span>
+<span>Cycle: UPPCS 2026</span>
+</span>
+<span class="text-outline-variant">•</span>
+<span>Prelims Target: Oct 2026 <strong class="text-primary font-semibold">(182 Days Left)</strong></span>
+<span class="text-outline-variant">•</span>
+<span class="inline-flex items-center gap-1 text-error font-medium">
+<span class="material-symbols-outlined text-sm text-error">warning</span>
+<span>Negative Marking: 1/3 (-0.66 marks)</span>
+</span>
+<span class="text-outline-variant hidden sm:inline">•</span>
+<span class="text-on-surface-variant hidden sm:inline">Pattern: State Commission GS-I</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-secondary font-semibold">Sync Status: 100% Synced</span>
+</div>
+</div>
+</aside>
+<!-- MAIN CANVAS BENTO GRID -->
+<main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+<!-- ROW 1: DIAGNOSTIC READINESS & ADAPTIVE SMART DRILL (7 col : 5 col) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- HERO LEFT: DIAGNOSTIC PROBABILITY CARD (7 Columns) -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm flex flex-col justify-between hover:border-outline transition-colors">
+<div>
+<!-- Header Tag & Metadata -->
+<div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+<div class="flex items-center gap-2">
+<span class="font-mono text-[10px] tracking-wider font-bold uppercase bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded">
+                Diagnostic Probability
+              </span>
+<span class="font-label text-xs font-semibold text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">verified</span>
+                Calibrated on 14,200 Aspirants
+              </span>
+</div>
+<span class="font-mono text-xs text-on-surface-variant">Model v4.2</span>
+</div>
+<h1 class="font-headline font-bold text-xl sm:text-2xl text-on-surface tracking-tight mb-5">
+            UPPCS Prelims 2026 Readiness
+          </h1>
+<!-- Gauge + Probability Analysis Callout -->
+<div class="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center pb-5 border-b border-outline-variant">
+<!-- Circular Gauge Visualization (SVG) -->
+<div class="sm:col-span-4 flex flex-col items-center justify-center p-2 bg-surface-container-low rounded-lg border border-outline-variant">
+<div class="relative w-28 h-28 flex items-center justify-center">
+<svg class="w-28 h-28 transform -rotate-90" viewbox="0 0 100 100">
+<!-- Gauge Background Circle -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#dce4e8" stroke-width="9"></circle>
+<!-- Gauge Active Progress (68%) -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#006d4b" stroke-dasharray="251.2" stroke-dashoffset="80.38" stroke-linecap="round" stroke-width="9"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-mono text-2xl font-bold text-on-surface">68%</span>
+<span class="text-[10px] font-label font-semibold text-secondary uppercase tracking-tight">Ready</span>
+</div>
+</div>
+<span class="font-mono text-[11px] text-on-surface-variant mt-1.5">Confidence: 91%</span>
+</div>
+<!-- Insight Callout -->
+<div class="sm:col-span-8 flex flex-col justify-center space-y-2">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-secondary-container text-on-secondary-container text-xs font-semibold w-fit">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                High Probability Zone (Tier 1)
+              </div>
+<p class="text-sm font-body text-on-surface leading-relaxed">
+                Your consistent accuracy in <strong>Indian Polity &amp; UP Special</strong> offsets current weaknesses in Macroeconomics. Maintain a net +5% margin over the next 60 days to lock provisional cut-off security.
+              </p>
+</div>
+</div>
+<!-- 3 Data Metric Tiles -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-5">
+<!-- Tile 1 -->
+<div class="bg-surface-container-low p-3.5 rounded-lg border border-outline-variant">
+<div class="text-[11px] font-label text-on-surface-variant font-medium mb-1">Predicted Cutoff Margin</div>
+<div class="font-mono text-base font-bold text-secondary">+6.4 Marks</div>
+<div class="text-[11px] text-on-surface-variant font-mono mt-0.5">Est. 94.8 / Cutoff ~88.4</div>
+</div>
+<!-- Tile 2 -->
+<div class="bg-surface-container-low p-3.5 rounded-lg border border-outline-variant">
+<div class="text-[11px] font-label text-on-surface-variant font-medium mb-1">Syllabus Coverage</div>
+<div class="font-mono text-base font-bold text-on-surface">74 / 112 Topics</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full mt-1.5 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 66%;"></div>
+</div>
+</div>
+<!-- Tile 3 -->
+<div class="bg-surface-container-low p-3.5 rounded-lg border border-outline-variant">
+<div class="text-[11px] font-label text-on-surface-variant font-medium mb-1">Negative Marking Net</div>
+<div class="font-mono text-base font-bold text-secondary">+4.2 Net Gain</div>
+<div class="text-[11px] text-on-surface-variant font-mono mt-0.5">Elimination Acc: 62%</div>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-3 flex justify-between items-center text-xs border-t border-outline-variant">
+<span class="text-on-surface-variant font-mono">Last refreshed: 06:00 AM Today</span>
+<a class="font-headline font-semibold text-primary hover:text-primary-dim inline-flex items-center gap-1 group" href="#">
+            Detailed Diagnostic Report
+            <span class="material-symbols-outlined text-sm group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- HERO RIGHT: TODAY'S 15-MIN ADAPTIVE SMART DRILL (5 Columns) -->
+<div class="lg:col-span-5 bg-on-primary-container text-on-primary rounded-xl p-6 shadow-md flex flex-col justify-between relative overflow-hidden">
+<!-- Subtle Academic Geometric Watermark Pattern -->
+<div class="absolute -right-8 -bottom-8 opacity-10 pointer-events-none">
+<span class="material-symbols-outlined" style="font-size: 160px;">psychology</span>
+</div>
+<div>
+<!-- Drill Header -->
+<div class="flex items-center justify-between mb-3">
+<span class="font-mono text-[10px] tracking-wider uppercase font-bold bg-primary px-2.5 py-1 rounded-full text-white inline-flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-xs">bolt</span>
+              Today's 15-Min Adaptive Drill
+            </span>
+<span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-on-surface/20 text-white border border-white/20">
+              20 Qs
+            </span>
+</div>
+<h2 class="font-headline font-bold text-lg text-white tracking-tight mb-1">
+            Dynamic Weak-Spot Targeting
+          </h2>
+<p class="text-xs text-white/80 font-body mb-4 leading-relaxed">
+            Calibrated from your recurring error log &amp; official UPPSC commission high-yield question patterns.
+          </p>
+<!-- Drill Composition Breakdown -->
+<div class="space-y-2.5">
+<!-- Item 1 -->
+<div class="bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-white/15 flex items-start justify-between gap-2 hover:bg-white/15 transition-colors">
+<div class="space-y-0.5">
+<div class="text-xs font-semibold text-white">8 Overdue Mistake PYQs</div>
+<div class="text-[11px] text-white/70">Polity Articles &amp; Writs, Modern History Sessions</div>
+</div>
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider bg-tertiary-container text-on-tertiary-container px-2 py-0.5 rounded shrink-0">
+                High Recurrence
+              </span>
+</div>
+<!-- Item 2 -->
+<div class="bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-white/15 flex items-start justify-between gap-2 hover:bg-white/15 transition-colors">
+<div class="space-y-0.5">
+<div class="text-xs font-semibold text-white">7 Weak Economy Builders</div>
+<div class="text-[11px] text-white/70">Macro Deficits, Union &amp; UP State Budget Outlays</div>
+</div>
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider bg-error text-white px-2 py-0.5 rounded shrink-0">
+                Sub-40% Acc
+              </span>
+</div>
+<!-- Item 3 -->
+<div class="bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-white/15 flex items-start justify-between gap-2 hover:bg-white/15 transition-colors">
+<div class="space-y-0.5">
+<div class="text-xs font-semibold text-white">5 Repeated UPPSC Special Qs</div>
+<div class="text-[11px] text-white/70">UP Special Geography, Census &amp; Rural Schemes</div>
+</div>
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded shrink-0">
+                Retention
+              </span>
+</div>
+</div>
+</div>
+<!-- Action CTAs -->
+<div class="mt-6 pt-4 border-t border-white/15 flex flex-col sm:flex-row gap-3">
+<button class="flex-1 bg-surface-container-lowest text-on-primary-container hover:bg-white font-headline font-bold text-xs py-3 px-4 rounded-lg flex items-center justify-center gap-1.5 shadow-md active:scale-[0.98] transition-transform">
+<span>Start Smart Drill (20 Qs)</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<button class="flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 text-white font-headline font-medium text-xs py-3 px-3 rounded-lg border border-white/20 active:scale-[0.98] transition-transform">
+<span class="material-symbols-outlined text-sm">cached</span>
+<span>Flip 18 Flashcards (4 mins)</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ROW 2: EXAM-WEIGHTED SUBJECT MASTERY (8 cols) & PRIORITY WEAK MICRO-TOPICS (4 cols) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- LEFT: EXAM-WEIGHTED SUBJECT MASTERY BREAKDOWN (8 Columns) -->
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-outline-variant gap-2">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline font-bold text-lg text-on-surface">
+                Exam-Weighted Subject Mastery (GS Paper-I)
+              </h2>
+<span class="font-mono text-[10px] font-bold bg-surface-container text-on-surface-variant px-2 py-0.5 rounded">
+                8-Year Weighting
+              </span>
+</div>
+<p class="text-xs text-on-surface-variant font-body mt-0.5">
+              Calibrated against official UPPCS Prelims papers (2018–2025) • Updated today at 06:00 AM
+            </p>
+</div>
+<span class="text-xs font-mono font-medium text-primary">Sort: Official Weight ▾</span>
+</div>
+<!-- Subject Rows List -->
+<div class="divide-y divide-outline-variant pt-2">
+<!-- Row 1: Indian Polity -->
+<div class="py-3.5 space-y-2">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-2.5">
+<span class="font-mono text-[11px] font-semibold text-on-surface-variant bg-surface-container-low px-1.5 py-0.5 rounded border border-outline-variant">
+                  Weight: 18%
+                </span>
+<span class="font-headline font-bold text-on-surface text-sm">Indian Polity &amp; Governance</span>
+<span class="font-mono text-[10px] text-secondary font-semibold hidden sm:inline">(+4% this week)</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-mono font-bold text-secondary text-sm">84%</span>
+<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container">Mastered</span>
+</div>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 84%;"></div>
+</div>
+<div class="flex justify-between items-center text-[11px] text-on-surface-variant font-mono">
+<span>96/114 PYQs Mastered • High Articles Accuracy</span>
+<a class="text-primary hover:underline font-label font-medium" href="#">Practice Writs Drill →</a>
+</div>
+</div>
+<!-- Row 2: History -->
+<div class="py-3.5 space-y-2">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-2.5">
+<span class="font-mono text-[11px] font-semibold text-on-surface-variant bg-surface-container-low px-1.5 py-0.5 rounded border border-outline-variant">
+                  Weight: 20%
+                </span>
+<span class="font-headline font-bold text-on-surface text-sm">Modern &amp; Ancient Indian History</span>
+<span class="font-mono text-[10px] text-on-surface-variant hidden sm:inline">142 PYQs Practiced</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-mono font-bold text-secondary text-sm">76%</span>
+<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container">Strong</span>
+</div>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 76%;"></div>
+</div>
+<div class="flex justify-between items-center text-[11px] text-on-surface-variant font-mono">
+<span>National Movement solid • Chronology tests pending</span>
+<a class="text-primary hover:underline font-label font-medium" href="#">Chronology Timelines →</a>
+</div>
+</div>
+<!-- Row 3: Environment -->
+<div class="py-3.5 space-y-2">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-2.5">
+<span class="font-mono text-[11px] font-semibold text-on-surface-variant bg-surface-container-low px-1.5 py-0.5 rounded border border-outline-variant">
+                  Weight: 14%
+                </span>
+<span class="font-headline font-bold text-on-surface text-sm">Environment &amp; Ecology</span>
+<span class="font-mono text-[10px] text-tertiary hidden sm:inline">85 PYQs Practiced</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-mono font-bold text-tertiary text-sm">64%</span>
+<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary-container">Developing</span>
+</div>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full rounded-full" style="width: 64%;"></div>
+</div>
+<div class="flex justify-between items-center text-[11px] text-on-surface-variant font-mono">
+<span>National Parks &amp; Protocols consistent • Ramsar sites unstable</span>
+<a class="text-primary hover:underline font-label font-medium" href="#">Protected Areas Map →</a>
+</div>
+</div>
+<!-- Row 4: Geography -->
+<div class="py-3.5 space-y-2">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-2.5">
+<span class="font-mono text-[11px] font-semibold text-on-surface-variant bg-surface-container-low px-1.5 py-0.5 rounded border border-outline-variant">
+                  Weight: 16%
+                </span>
+<span class="font-headline font-bold text-on-surface text-sm">Indian &amp; World Geography</span>
+<span class="font-mono text-[10px] text-tertiary hidden sm:inline">Need physical geo drills</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-mono font-bold text-tertiary text-sm">59%</span>
+<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary-container">Developing</span>
+</div>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full rounded-full" style="width: 59%;"></div>
+</div>
+<div class="flex justify-between items-center text-[11px] text-on-surface-variant font-mono">
+<span>River tributaries &amp; Mountain passes require spatial review</span>
+<a class="text-primary hover:underline font-label font-medium" href="#">Peninsular River Drills →</a>
+</div>
+</div>
+<!-- Row 5: Indian Economy -->
+<div class="py-3.5 space-y-2">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-2.5">
+<span class="font-mono text-[11px] font-semibold text-on-surface-variant bg-surface-container-low px-1.5 py-0.5 rounded border border-outline-variant">
+                  Weight: 15%
+                </span>
+<span class="font-headline font-bold text-on-surface text-sm">Indian Economy &amp; Budget</span>
+<span class="font-mono text-[10px] text-error font-semibold hidden sm:inline">High Urgency Alert</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-mono font-bold text-error text-sm">42%</span>
+<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-error-container text-on-error-container">Weak</span>
+</div>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 42%;"></div>
+</div>
+<div class="flex justify-between items-center text-[11px] font-mono">
+<span class="text-error">Frequent errors in Deficit definitions &amp; Banking indicators</span>
+<a class="text-primary hover:underline font-label font-bold flex items-center gap-1" href="#">
+<span>Open Cheat Sheets</span>
+<span class="material-symbols-outlined text-xs">open_in_new</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT: PRIORITY WEAK MICRO-TOPICS (4 Columns) -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm flex flex-col justify-between">
+<div>
+<!-- Header -->
+<div class="flex items-center justify-between mb-2">
+<h2 class="font-headline font-bold text-lg text-on-surface">Critical Gap Alerts</h2>
+<span class="font-mono text-[10px] font-bold tracking-tight bg-error-container text-on-error-container px-2 py-0.5 rounded">
+              High Yield • Low Acc
+            </span>
+</div>
+<p class="text-xs text-on-surface-variant font-body mb-4 leading-relaxed">
+            Micro-concepts repeatedly tested in UPPSC where your recent mock accuracy drops under 50%.
+          </p>
+<!-- Micro-topic Cards -->
+<div class="space-y-3">
+<!-- Micro Gap 1 -->
+<div class="p-3.5 bg-surface-container-low rounded-lg border border-outline-variant space-y-2 hover:border-error transition-colors">
+<div class="flex items-start justify-between gap-1">
+<div>
+<div class="text-xs font-headline font-bold text-on-surface">Fiscal Policy &amp; FRBM Act</div>
+<div class="text-[11px] text-on-surface-variant font-body">Public Finance • Budgetary Deficits</div>
+</div>
+<span class="font-mono text-xs font-bold text-error bg-error-container/40 px-1.5 py-0.5 rounded shrink-0">
+                  34% Acc
+                </span>
+</div>
+<div class="flex items-center gap-2 pt-1">
+<button class="bg-surface-container-lowest hover:bg-surface-container text-on-surface text-[11px] font-label font-medium px-2.5 py-1 rounded border border-outline-variant">
+                  3-Min Cheat Sheet
+                </button>
+<button class="bg-primary hover:bg-primary-dim text-white text-[11px] font-label font-semibold px-2.5 py-1 rounded">
+                  Drill 10 Qs
+                </button>
+</div>
+</div>
+<!-- Micro Gap 2 -->
+<div class="p-3.5 bg-surface-container-low rounded-lg border border-outline-variant space-y-2 hover:border-tertiary transition-colors">
+<div class="flex items-start justify-between gap-1">
+<div>
+<div class="text-xs font-headline font-bold text-on-surface">Drainage &amp; Peninsular Rivers</div>
+<div class="text-[11px] text-on-surface-variant font-body">Physical Geography • Left vs Right Bank</div>
+</div>
+<span class="font-mono text-xs font-bold text-tertiary bg-tertiary-container/30 px-1.5 py-0.5 rounded shrink-0">
+                  41% Acc
+                </span>
+</div>
+<div class="flex items-center gap-2 pt-1">
+<button class="bg-surface-container-lowest hover:bg-surface-container text-on-surface text-[11px] font-label font-medium px-2.5 py-1 rounded border border-outline-variant">
+                  Comparison Table
+                </button>
+<button class="bg-primary hover:bg-primary-dim text-white text-[11px] font-label font-semibold px-2.5 py-1 rounded">
+                  Drill 10 Qs
+                </button>
+</div>
+</div>
+<!-- Micro Gap 3 -->
+<div class="p-3.5 bg-surface-container-low rounded-lg border border-outline-variant space-y-2 hover:border-tertiary transition-colors">
+<div class="flex items-start justify-between gap-1">
+<div>
+<div class="text-xs font-headline font-bold text-on-surface">Ramsar Wetlands &amp; Wildlife in UP</div>
+<div class="text-[11px] text-on-surface-variant font-body">UP Special GK • Districts &amp; Bird Sanctuaries</div>
+</div>
+<span class="font-mono text-xs font-bold text-tertiary bg-tertiary-container/30 px-1.5 py-0.5 rounded shrink-0">
+                  45% Acc
+                </span>
+</div>
+<div class="flex items-center gap-2 pt-1">
+<button class="bg-surface-container-lowest hover:bg-surface-container text-on-surface text-[11px] font-label font-medium px-2.5 py-1 rounded border border-outline-variant">
+                  Review Flashcards
+                </button>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant">
+<a class="text-xs font-headline font-semibold text-primary hover:text-primary-dim flex items-center justify-between group" href="#">
+<span>View All 9 Weak Micro-Topics</span>
+<span class="material-symbols-outlined text-sm group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- ROW 3: PAST YEARS PAPERS & SIMULATED MOCKS (GS PAPER-I) -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-outline-variant gap-2 mb-5">
+<div>
+<h2 class="font-headline font-bold text-lg text-on-surface">
+            Past Years Papers &amp; Simulated Mocks (GS Paper-I)
+          </h2>
+<p class="text-xs text-on-surface-variant font-body mt-0.5">
+            Full-length 150-question simulations conforming to exact UPPSC negative marking (-0.66 per incorrect response).
+          </p>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-xs font-label font-medium px-3 py-1 rounded bg-surface-container text-on-surface border border-outline-variant">All Types</button>
+<button class="text-xs font-label font-medium px-3 py-1 rounded bg-surface-container-low text-on-surface-variant hover:text-on-surface">Official PYQs</button>
+<button class="text-xs font-label font-medium px-3 py-1 rounded bg-surface-container-low text-on-surface-variant hover:text-on-surface">Sankalp Originals</button>
+</div>
+</div>
+<!-- 3 Exam Simulation Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+<!-- Card 1: Official UPPCS 2025 -->
+<div class="bg-surface-container-low rounded-xl border border-outline-variant p-4 flex flex-col justify-between hover:border-primary transition-all">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-mono text-[10px] font-bold uppercase bg-surface-container text-on-surface-variant px-2 py-0.5 rounded">
+                Official Commission Paper
+              </span>
+<span class="font-mono text-xs font-semibold text-on-surface-variant">Not Started</span>
+</div>
+<h3 class="font-headline font-bold text-base text-on-surface mb-1">
+              UPPCS Prelims 2025 GS Paper-I
+            </h3>
+<div class="font-mono text-xs text-on-surface-variant mb-4 flex items-center gap-2">
+<span>150 Qs</span>
+<span>•</span>
+<span>200 Marks</span>
+<span>•</span>
+<span>120 Mins</span>
+</div>
+<!-- Features Pill List -->
+<div class="space-y-1.5 mb-4 text-xs font-body text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-secondary">check_circle</span>
+<span>Original official question key verified</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-secondary">check_circle</span>
+<span>Includes 14 UP Special state items</span>
+</div>
+</div>
+</div>
+<button class="w-full bg-primary hover:bg-primary-dim text-white font-headline font-semibold text-xs py-2.5 px-4 rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+<span>Take in Exam Mode (120 Mins)</span>
+<span class="material-symbols-outlined text-sm">timer</span>
+</button>
+</div>
+<!-- Card 2: Completed UPPCS 2024 -->
+<div class="bg-surface-container-low rounded-xl border border-outline-variant p-4 flex flex-col justify-between hover:border-outline transition-all">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-mono text-[10px] font-bold uppercase bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded">
+                Completed Test
+              </span>
+<span class="font-mono text-xs font-bold text-secondary">94.2 Percentile</span>
+</div>
+<h3 class="font-headline font-bold text-base text-on-surface mb-1">
+              UPPCS Prelims 2024 GS Paper-I
+            </h3>
+<div class="font-mono text-xs text-on-surface-variant mb-3">
+              Taken on Mar 12, 2026 • 118 mins elapsed
+            </div>
+<!-- Scorecard Summary -->
+<div class="bg-surface-container-lowest p-3 rounded-lg border border-outline-variant mb-4 grid grid-cols-2 gap-2 text-xs">
+<div>
+<span class="text-on-surface-variant text-[11px] block">Net Score:</span>
+<span class="font-mono font-bold text-base text-secondary">102.4 / 200</span>
+</div>
+<div>
+<span class="text-on-surface-variant text-[11px] block">Negative Penalty:</span>
+<span class="font-mono font-bold text-base text-error">-15.84 Mks</span>
+</div>
+</div>
+</div>
+<button class="w-full bg-surface-container-lowest hover:bg-surface-container text-primary hover:text-primary-dim border border-outline-variant font-headline font-semibold text-xs py-2.5 px-4 rounded-lg flex items-center justify-center gap-1.5 transition-colors">
+<span>Review Mistakes (24 Qs)</span>
+<span class="material-symbols-outlined text-sm">fact_check</span>
+</button>
+</div>
+<!-- Card 3: Sankalp Concept Mock #04 -->
+<div class="bg-surface-container-low rounded-xl border border-primary/40 p-4 flex flex-col justify-between hover:border-primary transition-all relative overflow-hidden">
+<div class="absolute top-0 right-0 bg-primary text-white text-[9px] font-mono font-bold uppercase px-3 py-0.5 rounded-bl">
+            Live Simulation
+          </div>
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-mono text-[10px] font-bold uppercase bg-tertiary-container text-on-tertiary-container px-2 py-0.5 rounded">
+                New Release
+              </span>
+</div>
+<h3 class="font-headline font-bold text-base text-on-surface mb-1">
+              Sankalp Concept Mock #04
+            </h3>
+<div class="font-mono text-xs text-on-surface-variant mb-4 flex items-center gap-2">
+<span>150 Questions</span>
+<span>•</span>
+<span>Live All-India Ranking</span>
+</div>
+<!-- Features Pill List -->
+<div class="space-y-1.5 mb-4 text-xs font-body text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-primary">analytics</span>
+<span>Predictive Rank vs 8,400 Aspirants</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-primary">balance</span>
+<span>Strict 1/3 Negative Marking rules</span>
+</div>
+</div>
+</div>
+<button class="w-full bg-primary hover:bg-primary-dim text-white font-headline font-semibold text-xs py-2.5 px-4 rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+<span>Start Timed Simulation</span>
+<span class="material-symbols-outlined text-sm">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- FOOTER (Anchored via Shared Components JSON) -->
+<footer class="bg-surface dark:bg-inverse-surface border-t border-outline-variant dark:border-outline docked full-width bottom-0 w-full mt-auto">
+<div class="w-full py-6 px-6 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 font-body text-xs text-on-surface-variant dark:text-inverse-on-surface leading-relaxed">
+<!-- Left: Copyright and Academic Precision Attribution -->
+<div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
+<span class="font-headline font-bold text-sm text-on-surface dark:text-inverse-on-surface">Sankalp</span>
+<span>© 2026 Sankalp Academic Precision. Civil Services Preparation Portal. All rights reserved.</span>
+</div>
+<!-- Right: Standard Legal & Syllabus Links -->
+<nav class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary transition-colors" href="#">Honor Code</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary transition-colors" href="#">Syllabus Archive</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary transition-colors" href="#">Marking Scheme Rules</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary transition-colors" href="#">Accessibility</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary transition-colors" href="#">Support Desk</a>
+</nav>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,116 @@
+{
+  "stitchProjectId": "2315155628795540596",
+  "stitchProjectResource": "projects/2315155628795540596",
+  "stitchProjectUrl": "https://stitch.withgoogle.com/projects/2315155628795540596",
+  "designSystemAsset": "assets/17837163511000186861",
+  "screens": [
+    {
+      "slug": "01-onboarding-language-exam-setup",
+      "title": "Onboarding ? Preferred Language Medium & Target Exam Journey Setup",
+      "screenResource": "projects/2315155628795540596/screens/b7742edd2885415184d0f15dc3d1c148",
+      "pngFile": "01-onboarding-language-exam-setup.png",
+      "htmlFile": "01-onboarding-language-exam-setup.html",
+      "pngBytes": 706036,
+      "htmlBytes": 23593,
+      "dimensions": {
+        "mimeType": "png"
+      }
+    },
+    {
+      "slug": "02-per-exam-journey-dashboard",
+      "title": "Per-Exam Learning Journey Dashboard (UPPCS Prelims 2026)",
+      "screenResource": "projects/2315155628795540596/screens/7f8aac8aa8e24203ad23fa9d5e77358c",
+      "pngFile": "02-per-exam-journey-dashboard.png",
+      "htmlFile": "02-per-exam-journey-dashboard.html",
+      "pngBytes": 911586,
+      "htmlBytes": 37909,
+      "dimensions": {
+        "mimeType": "png"
+      }
+    },
+    {
+      "slug": "03-global-cross-exam-expertise",
+      "title": "Global Cross-Exam Expertise & Readiness Portfolio",
+      "screenResource": "projects/2315155628795540596/screens/2a6741b25ce6463588786de664db11ba",
+      "pngFile": "03-global-cross-exam-expertise.png",
+      "htmlFile": "03-global-cross-exam-expertise.html",
+      "pngBytes": 1009247,
+      "htmlBytes": 44477,
+      "dimensions": {
+        "mimeType": "png"
+      }
+    },
+    {
+      "slug": "04-syllabus-explorer-practice-builder",
+      "title": "3-Tier Syllabus Explorer & Custom Practice Builder",
+      "screenResource": "projects/2315155628795540596/screens/7de7349676c84acda057cbed4c60daaf",
+      "pngFile": "04-syllabus-explorer-practice-builder.png",
+      "htmlFile": "04-syllabus-explorer-practice-builder.html",
+      "pngBytes": 862849,
+      "htmlBytes": 43320,
+      "dimensions": {
+        "mimeType": "png"
+      }
+    },
+    {
+      "slug": "05-exam-test-cockpit-english",
+      "title": "Distraction-Free 3-Column Exam Test Cockpit (English Medium)",
+      "screenResource": "projects/2315155628795540596/screens/7891d9ff278642c1b6a6f0d318e71d1d",
+      "pngFile": "05-exam-test-cockpit-english.png",
+      "htmlFile": "05-exam-test-cockpit-english.html",
+      "pngBytes": 535445,
+      "htmlBytes": 41628,
+      "dimensions": {
+        "mimeType": "png"
+      }
+    },
+    {
+      "slug": "06-post-test-deep-review-provenance",
+      "title": "Post-Test Deep Review, Answer Key Provenance & Mistake Diagnosis",
+      "screenResource": "projects/2315155628795540596/screens/3ef63a0c3e1d44aab964f68b7ce4751b",
+      "pngFile": "06-post-test-deep-review-provenance.png",
+      "htmlFile": "06-post-test-deep-review-provenance.html",
+      "pngBytes": 1220983,
+      "htmlBytes": 42616,
+      "dimensions": {
+        "mimeType": "png"
+      }
+    },
+    {
+      "slug": "07-topic-learning-studio-cheat-sheets",
+      "title": "Topic Learning Studio ? High-Yield Cheat Sheets & Comparison Tables",
+      "screenResource": "projects/2315155628795540596/screens/eacf8e999bdf4802954b68cde0dcda34",
+      "pngFile": "07-topic-learning-studio-cheat-sheets.png",
+      "htmlFile": "07-topic-learning-studio-cheat-sheets.html",
+      "pngBytes": 914961,
+      "htmlBytes": 34617,
+      "dimensions": {
+        "mimeType": "png"
+      }
+    },
+    {
+      "slug": "08-active-recall-srs-flashcards",
+      "title": "Active-Recall Flashcards & Mistake Deck (Spaced Repetition Player)",
+      "screenResource": "projects/2315155628795540596/screens/a4fac23d0c7e461698d6bbb78970c253",
+      "pngFile": "08-active-recall-srs-flashcards.png",
+      "htmlFile": "08-active-recall-srs-flashcards.html",
+      "pngBytes": 509358,
+      "htmlBytes": 23423,
+      "dimensions": {
+        "mimeType": "png"
+      }
+    },
+    {
+      "slug": "09-hindi-medium-test-cockpit",
+      "title": "Pure Hindi-Medium Experience ? 3-Column Exam Test Cockpit (?????? ??????)",
+      "screenResource": "projects/2315155628795540596/screens/ce6836c1633041bdb99ccd71a852b1c2",
+      "pngFile": "09-hindi-medium-test-cockpit.png",
+      "htmlFile": "09-hindi-medium-test-cockpit.html",
+      "pngBytes": 604502,
+      "htmlBytes": 45612,
+      "dimensions": {
+        "mimeType": "png"
+      }
+    }
+  ]
+}

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sankalp Academic Precision — Test Cockpit</title>
+<!-- Google Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration matching provided Design System tokens -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed-dim": "#7f7bef",
+            "on-error-container": "#6e0523",
+            "secondary-container": "#85f8c4",
+            "on-background": "#2c3437",
+            "on-surface-variant": "#596064",
+            "on-primary-fixed-variant": "#14007b",
+            "outline": "#747c80",
+            "surface-variant": "#dce4e8",
+            "secondary": "#006d4b",
+            "error": "#a8364b",
+            "surface-bright": "#f7f9fb",
+            "surface-dim": "#d4dbdf",
+            "primary": "#5450c1",
+            "on-secondary-fixed-variant": "#006948",
+            "on-primary-container": "#0c005c",
+            "inverse-primary": "#8c88fd",
+            "tertiary-container": "#fe932c",
+            "error-dim": "#6b0221",
+            "tertiary-fixed": "#fe932c",
+            "on-tertiary-fixed": "#240f00",
+            "surface-tint": "#5450c1",
+            "tertiary-fixed-dim": "#ed871e",
+            "inverse-surface": "#0b0f10",
+            "secondary-fixed-dim": "#76eab6",
+            "on-primary-fixed": "#000000",
+            "on-surface": "#2c3437",
+            "on-secondary": "#e6ffef",
+            "primary-fixed": "#8c88fd",
+            "on-error": "#fff7f7",
+            "on-tertiary-container": "#4a2500",
+            "on-secondary-fixed": "#004931",
+            "primary-container": "#8c88fd",
+            "on-tertiary": "#fff7f4",
+            "secondary-fixed": "#85f8c4",
+            "on-secondary-container": "#005e40",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-fixed-variant": "#572c00",
+            "surface-container": "#eaeff2",
+            "tertiary-dim": "#804300",
+            "on-primary": "#fbf7ff",
+            "surface": "#f7f9fb",
+            "background": "#f7f9fb",
+            "surface-container-highest": "#dce4e8",
+            "error-container": "#f97386",
+            "inverse-on-surface": "#9a9d9f",
+            "surface-container-high": "#e3e9ed",
+            "secondary-dim": "#005f41",
+            "primary-dim": "#4843b4",
+            "surface-container-low": "#f0f4f7",
+            "tertiary": "#914d00",
+            "outline-variant": "#acb3b7"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans", "sans-serif"],
+            "display": ["Plus Jakarta Sans", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "label": ["Public Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #acb3b7;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #747c80;
+    }
+    .strikethrough-eliminated {
+      position: relative;
+    }
+    .strikethrough-eliminated::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 2px;
+      background-color: #a8364b;
+      transform: translateY(-50%);
+      opacity: 0.85;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body antialiased flex flex-col h-screen overflow-hidden select-none">
+<!-- ========================================================================= -->
+<!-- 1. FOCUSED TOP EXAM BAR (Full Width, Sticky Top)                          -->
+<!-- ========================================================================= -->
+<header class="w-full bg-surface-container-lowest border-b border-surface-container-highest px-6 py-2.5 flex items-center justify-between shrink-0 z-50 shadow-sm">
+<!-- Left: Brand Emblem + Exam Title + Badges -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 pr-3 border-r border-surface-container-highest">
+<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary font-headline font-bold text-base shadow-sm">
+          S
+        </div>
+<div>
+<span class="font-headline font-bold text-sm text-primary tracking-tight block leading-tight">Sankalp</span>
+<span class="font-mono text-[10px] tracking-wider text-on-surface-variant uppercase font-semibold">Academic Test Cockpit</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<h1 class="font-headline font-bold text-sm text-on-surface tracking-tight">
+          UPPCS Prelims 2025 — General Studies Paper I
+        </h1>
+<!-- Question Badge -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-surface-container-high text-on-surface border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+          Question 42 of 150
+        </span>
+<!-- Marking Scheme Badge -->
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-mono font-medium bg-surface-container text-on-surface-variant border border-outline-variant/30">
+<span class="text-secondary font-semibold">+1.33</span> Correct
+          <span class="mx-0.5 text-outline-variant">|</span>
+<span class="text-error font-semibold">-0.44</span> Wrong (1/3rd)
+        </span>
+</div>
+</div>
+<!-- Right: Monospace Timer + Tools + Action Buttons -->
+<div class="flex items-center gap-3">
+<!-- Live Monospace Timer Pill -->
+<div class="flex items-center gap-2 bg-surface-container-low border border-surface-container-highest px-3 py-1.5 rounded-lg shadow-sm" title="Time Remaining in Exam Session">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+<span class="text-xs font-medium text-on-surface-variant font-label tracking-wide">Remaining:</span>
+<span class="font-mono font-bold text-sm tracking-widest text-primary-dim" id="countdown-timer">01:38:24</span>
+</div>
+<!-- Action: Fullscreen Toggle -->
+<button aria-label="Toggle Fullscreen" class="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-md transition-colors" title="Toggle distraction-free full screen" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="fullscreen">fullscreen</span>
+</button>
+<!-- Action: Pause / Save Draft -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-headline font-semibold text-on-surface-variant bg-surface-container hover:bg-surface-container-high transition-colors active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="pause_circle">pause_circle</span>
+        Pause / Save Draft
+      </button>
+<!-- Primary Action: Submit Paper -->
+<button class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-headline font-bold text-on-primary bg-primary hover:bg-primary-dim transition-all shadow-sm active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="task_alt">task_alt</span>
+        Submit Paper
+      </button>
+</div>
+</header>
+<!-- ========================================================================= -->
+<!-- 2. MAIN 3-COLUMN COCKPIT LAYOUT                                           -->
+<!-- ========================================================================= -->
+<main class="flex-1 grid grid-cols-12 overflow-hidden bg-background">
+<!-- ----------------------------------------------------------------------- -->
+<!-- LEFT COLUMN: CONTEXT, METADATA & QUICK FILTERS (Cols 1-2, ~260px)       -->
+<!-- ----------------------------------------------------------------------- -->
+<aside class="col-span-2 border-r border-surface-container-highest bg-surface-container-lowest flex flex-col justify-between p-4 overflow-y-auto custom-scrollbar">
+<div class="space-y-5">
+<!-- Section Switcher & Header -->
+<div class="space-y-1.5">
+<label class="text-[11px] font-label font-semibold text-on-surface-variant tracking-wider uppercase">Active Section</label>
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low border border-surface-container-highest cursor-pointer hover:border-primary-fixed transition-colors">
+<div class="truncate">
+<span class="font-headline font-bold text-xs text-on-surface block truncate">Indian Polity &amp; Governance</span>
+<span class="font-mono text-[10px] text-on-surface-variant">35 Questions (Q31-Q65)</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Question Metadata Card -->
+<div class="p-3 rounded-lg bg-surface-bright border border-surface-container-highest space-y-2.5">
+<div class="flex items-center justify-between border-b border-surface-container pb-2">
+<span class="text-[11px] font-label text-on-surface-variant">Question Type</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-surface-container-high text-on-surface">Multi-Statement</span>
+</div>
+<div class="flex items-center justify-between border-b border-surface-container pb-2">
+<span class="text-[11px] font-label text-on-surface-variant">Difficulty</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-tertiary-container/20 text-tertiary">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-container"></span>
+              MEDIUM
+            </span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-label text-on-surface-variant">Origin Source</span>
+<span class="text-[10px] font-mono font-medium text-on-surface truncate text-right">UPPCS PYQ (2021)</span>
+</div>
+</div>
+<!-- Question Palette Quick Filter Toggles -->
+<div class="space-y-2">
+<label class="text-[11px] font-label font-semibold text-on-surface-variant tracking-wider uppercase">Filter Questions</label>
+<div class="space-y-1">
+<button class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium text-primary bg-primary/10 border border-primary/20">
+<span class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                All Questions
+              </span>
+<span class="font-mono text-[11px] font-bold">150</span>
+</button>
+<button class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">
+<span class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full border border-outline-variant bg-surface-container-lowest"></span>
+                Unattempted
+              </span>
+<span class="font-mono text-[11px] text-outline">94</span>
+</button>
+<button class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium text-tertiary hover:bg-tertiary-container/10 transition-colors">
+<span class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary-container"></span>
+                Marked for Review
+              </span>
+<span class="font-mono text-[11px] font-semibold text-tertiary">6</span>
+</button>
+<button class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium text-error hover:bg-error-container/10 transition-colors">
+<span class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error-container"></span>
+                50-50 Eliminated
+              </span>
+<span class="font-mono text-[11px] font-semibold text-error">8</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Bottom Docked: Keyboard Shortcuts Cheatsheet -->
+<div class="pt-4 border-t border-surface-container-highest">
+<div class="p-3 rounded-lg bg-surface-container-low border border-surface-container-highest text-[11px] space-y-2">
+<div class="flex items-center justify-between text-on-surface-variant font-label font-semibold">
+<span>KEYBOARD COMMANDS</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="keyboard">keyboard</span>
+</div>
+<div class="grid grid-cols-2 gap-1.5 font-mono text-[10px] text-on-surface">
+<div class="flex items-center gap-1.5">
+<kbd class="px-1.5 py-0.5 bg-surface-container-lowest border border-surface-container-highest rounded shadow-xs font-semibold">A–D</kbd>
+<span class="text-on-surface-variant font-body">Select Option</span>
+</div>
+<div class="flex items-center gap-1.5">
+<kbd class="px-1.5 py-0.5 bg-surface-container-lowest border border-surface-container-highest rounded shadow-xs font-semibold">R</kbd>
+<span class="text-on-surface-variant font-body">Review</span>
+</div>
+<div class="flex items-center gap-1.5 col-span-2">
+<kbd class="px-1 py-0.5 bg-surface-container-lowest border border-surface-container-highest rounded shadow-xs font-semibold">Alt</kbd> + <kbd class="px-1 py-0.5 bg-surface-container-lowest border border-surface-container-highest rounded shadow-xs font-semibold">Click</kbd>
+<span class="text-on-surface-variant font-body">50-50 Eliminate</span>
+</div>
+<div class="flex items-center gap-1.5 col-span-2">
+<kbd class="px-1 py-0.5 bg-surface-container-lowest border border-surface-container-highest rounded shadow-xs font-semibold">←</kbd> / <kbd class="px-1 py-0.5 bg-surface-container-lowest border border-surface-container-highest rounded shadow-xs font-semibold">→</kbd>
+<span class="text-on-surface-variant font-body">Prev / Next</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- ----------------------------------------------------------------------- -->
+<!-- CENTER COLUMN: FLUID MAIN STAGE (Cols 3-9, Fluid White Exam Card)       -->
+<!-- ----------------------------------------------------------------------- -->
+<section class="col-span-7 flex flex-col justify-between overflow-y-auto custom-scrollbar p-6 bg-background">
+<div class="max-w-3xl w-full mx-auto bg-surface-container-lowest rounded-xl border border-surface-container-highest shadow-sm p-7 space-y-6">
+<!-- Question Top Bar with actions -->
+<div class="flex items-center justify-between border-b border-surface-container pb-4">
+<div class="flex items-center gap-3">
+<span class="px-3 py-1 bg-surface-container-high text-on-surface font-headline font-bold text-sm rounded-lg">
+              Question 42
+            </span>
+<span class="text-xs font-mono text-on-surface-variant">General Studies I • Paper Code: UP-2025-A</span>
+</div>
+<div class="flex items-center gap-2">
+<!-- Bookmark Button -->
+<button class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-label text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-lg transition-colors" title="Bookmark for quick recall" type="button">
+<span class="material-symbols-outlined text-[18px] text-tertiary" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-medium text-tertiary">Bookmarked</span>
+</button>
+<!-- Report Issue Button -->
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-label text-on-surface-variant hover:text-error hover:bg-surface-container-low rounded-lg transition-colors" title="Flag errata or typo" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="flag">flag</span>
+<span>Report</span>
+</button>
+</div>
+</div>
+<!-- Question Stem (Clean single language Inter font 16px, 1.65 line-height) -->
+<article class="space-y-4">
+<div class="font-body text-base text-on-surface leading-[1.68] font-normal">
+            With reference to the recommendations of the <strong class="font-semibold text-on-surface">Ashok Mehta Committee (1977)</strong> on Panchayati Raj Institutions in India, consider the following statements:
+          </div>
+<!-- Statement List -->
+<ol class="space-y-2.5 pl-4 font-body text-base text-on-surface leading-[1.65]">
+<li class="flex items-start gap-2.5">
+<span class="font-mono font-bold text-primary text-sm pt-0.5">1.</span>
+<span>The three-tier system of Panchayati Raj should be replaced by a two-tier system consisting of Zila Parishad at the district level and Mandal Panchayat at the cluster level.</span>
+</li>
+<li class="flex items-start gap-2.5">
+<span class="font-mono font-bold text-primary text-sm pt-0.5">2.</span>
+<span>Nyaya Panchayats should be kept as separate bodies from developmental panchayats and presided over by a qualified judge.</span>
+</li>
+<li class="flex items-start gap-2.5">
+<span class="font-mono font-bold text-primary text-sm pt-0.5">3.</span>
+<span>There should be no official participation of political parties at any tier of Panchayat elections.</span>
+</li>
+</ol>
+<p class="font-headline font-semibold text-sm text-on-surface pt-2">
+            Which of the statements given above is/are correct?
+          </p>
+</article>
+<!-- 4 Options demonstrating the 50-50 Elimination & Selected states -->
+<div class="space-y-3 pt-2">
+<!-- OPTION A: Selected State -->
+<div class="relative group flex items-center justify-between p-4 rounded-xl border-2 border-primary bg-primary/5 cursor-pointer transition-all duration-150 shadow-xs">
+<label class="flex items-center gap-3.5 cursor-pointer flex-1">
+<div class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center bg-primary shrink-0">
+<span class="w-2 h-2 rounded-full bg-surface-container-lowest"></span>
+</div>
+<span class="font-headline font-bold text-sm text-primary">(A)</span>
+<span class="font-body text-sm font-semibold text-on-surface">1 and 2 only</span>
+</label>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-primary text-on-primary">Selected</span>
+<button class="p-1 rounded text-on-surface-variant hover:text-error hover:bg-surface-container transition-colors" title="Strikethrough this option (Alt + Click)" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="strikethrough_s">strikethrough_s</span>
+</button>
+</div>
+</div>
+<!-- OPTION B: Eliminated via 50-50 Strikethrough Tool -->
+<div class="relative group flex items-center justify-between p-4 rounded-xl border border-surface-container-highest bg-surface-container-low/70 opacity-60 cursor-pointer hover:opacity-80 transition-all duration-150">
+<label class="flex items-center gap-3.5 cursor-pointer flex-1 strikethrough-eliminated">
+<div class="w-5 h-5 rounded-full border border-outline-variant flex items-center justify-center bg-surface-container-lowest shrink-0"></div>
+<span class="font-headline font-semibold text-sm text-on-surface-variant">(B)</span>
+<span class="font-body text-sm text-on-surface-variant">2 and 3 only</span>
+</label>
+<div class="flex items-center gap-2 shrink-0 z-10">
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-error-container text-on-error-container border border-error/30">
+                50-50 Eliminated
+              </span>
+<button class="flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-label font-medium text-error hover:bg-surface-container rounded transition-colors" title="Undo distractor elimination" type="button">
+<span class="material-symbols-outlined text-[15px]" data-icon="undo">undo</span>
+<span>Undo</span>
+</button>
+</div>
+</div>
+<!-- OPTION C: Default Unselected Active State -->
+<div class="relative group flex items-center justify-between p-4 rounded-xl border border-surface-container-highest bg-surface-container-lowest hover:border-primary-fixed hover:bg-surface-bright cursor-pointer transition-all duration-150">
+<label class="flex items-center gap-3.5 cursor-pointer flex-1">
+<div class="w-5 h-5 rounded-full border border-outline flex items-center justify-center bg-surface-container-lowest shrink-0"></div>
+<span class="font-headline font-semibold text-sm text-on-surface">(C)</span>
+<span class="font-body text-sm text-on-surface">1 only</span>
+</label>
+<div class="flex items-center gap-2">
+<button class="opacity-40 group-hover:opacity-100 p-1 rounded text-on-surface-variant hover:text-error hover:bg-surface-container transition-all" title="Eliminate distractor (Alt + Click)" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="strikethrough_s">strikethrough_s</span>
+</button>
+</div>
+</div>
+<!-- OPTION D: Eliminated via 50-50 Strikethrough Tool -->
+<div class="relative group flex items-center justify-between p-4 rounded-xl border border-surface-container-highest bg-surface-container-low/70 opacity-60 cursor-pointer hover:opacity-80 transition-all duration-150">
+<label class="flex items-center gap-3.5 cursor-pointer flex-1 strikethrough-eliminated">
+<div class="w-5 h-5 rounded-full border border-outline-variant flex items-center justify-center bg-surface-container-lowest shrink-0"></div>
+<span class="font-headline font-semibold text-sm text-on-surface-variant">(D)</span>
+<span class="font-body text-sm text-on-surface-variant">1, 2 and 3</span>
+</label>
+<div class="flex items-center gap-2 shrink-0 z-10">
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-error-container text-on-error-container border border-error/30">
+                50-50 Eliminated
+              </span>
+<button class="flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-label font-medium text-error hover:bg-surface-container rounded transition-colors" title="Undo distractor elimination" type="button">
+<span class="material-symbols-outlined text-[15px]" data-icon="undo">undo</span>
+<span>Undo</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Cockpit Navigation & Response Controls (Docked inside Center Stage) -->
+<div class="max-w-3xl w-full mx-auto mt-4 pt-3 border-t border-surface-container-highest flex items-center justify-between">
+<!-- Left: Attempt Confidence Tag (Post-exam analytical telemetry) -->
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-label text-on-surface-variant font-medium">Confidence:</span>
+<div class="inline-flex rounded-lg p-0.5 bg-surface-container border border-surface-container-highest text-xs">
+<button class="px-2.5 py-1 rounded-md text-[11px] font-medium text-on-surface-variant hover:text-on-surface transition-colors">
+              100% Sure
+            </button>
+<button class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-tertiary-container/30 text-tertiary border border-tertiary-container/60 shadow-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="check">check</span>
+              50-50 Educated Guess
+            </button>
+<button class="px-2.5 py-1 rounded-md text-[11px] font-medium text-on-surface-variant hover:text-on-surface transition-colors">
+              Wild Guess
+            </button>
+</div>
+</div>
+<!-- Right: Primary Exam Action Button Group -->
+<div class="flex items-center gap-2.5">
+<!-- Clear Selection -->
+<button class="px-3 py-2 text-xs font-headline font-semibold text-on-surface-variant hover:text-error hover:bg-error-container/10 rounded-lg transition-colors active:scale-[0.98]" type="button">
+            Clear Response
+          </button>
+<!-- Mark for Review & Next -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-headline font-bold text-tertiary bg-tertiary-container/20 border border-tertiary-container hover:bg-tertiary-container/30 transition-colors active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="bookmark">bookmark</span>
+            Mark for Review &amp; Next
+          </button>
+<!-- Save & Next (Indigo Primary) -->
+<button class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-headline font-bold text-on-primary bg-primary hover:bg-primary-dim transition-all shadow-sm active:scale-[0.98]" type="button">
+<span>Save &amp; Next</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</section>
+<!-- ----------------------------------------------------------------------- -->
+<!-- RIGHT COLUMN: LIVE OMR BUBBLE GRID & STATUS PALETTE (Cols 10-12, ~300px)-->
+<!-- ----------------------------------------------------------------------- -->
+<aside class="col-span-3 border-l border-surface-container-highest bg-surface-container-lowest flex flex-col justify-between p-4 overflow-hidden">
+<!-- Top: OMR Palette Header & Status Summary Legend -->
+<div class="space-y-4">
+<div class="flex items-center justify-between pb-2 border-b border-surface-container-highest">
+<div>
+<h2 class="font-headline font-bold text-sm text-on-surface">Question Palette</h2>
+<span class="text-[11px] font-mono text-on-surface-variant">General Studies (Paper I)</span>
+</div>
+<!-- Quick Jump input -->
+<div class="flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded border border-surface-container-highest">
+<span class="text-[10px] font-mono text-on-surface-variant">Q#</span>
+<input class="w-8 text-[11px] font-mono text-center bg-transparent border-0 p-0 focus:ring-0 text-on-surface font-bold" placeholder="42" type="text"/>
+</div>
+</div>
+<!-- Status Legend Matrix -->
+<div class="grid grid-cols-2 gap-2 text-xs">
+<!-- Answered Counter -->
+<div class="flex items-center gap-2 p-2 rounded-lg bg-secondary-container/20 border border-secondary/20">
+<span class="w-4 h-4 rounded-full bg-secondary flex items-center justify-center text-[9px] text-on-secondary font-mono font-bold">✓</span>
+<div>
+<span class="font-mono font-bold text-secondary block text-xs">48</span>
+<span class="text-[10px] font-label text-on-surface-variant">Answered</span>
+</div>
+</div>
+<!-- Marked for Review Counter -->
+<div class="flex items-center gap-2 p-2 rounded-lg bg-tertiary-container/15 border border-tertiary-container/30">
+<span class="w-4 h-4 rounded-full bg-tertiary-container flex items-center justify-center text-[9px] text-on-tertiary-container font-mono font-bold">★</span>
+<div>
+<span class="font-mono font-bold text-tertiary block text-xs">06</span>
+<span class="text-[10px] font-label text-on-surface-variant">Marked</span>
+</div>
+</div>
+<!-- Skipped Counter -->
+<div class="flex items-center gap-2 p-2 rounded-lg bg-surface-container-high border border-outline-variant/30">
+<span class="w-4 h-4 rounded-full bg-outline-variant flex items-center justify-center text-[9px] text-on-surface font-mono font-bold">-</span>
+<div>
+<span class="font-mono font-bold text-on-surface block text-xs">12</span>
+<span class="text-[10px] font-label text-on-surface-variant">Skipped</span>
+</div>
+</div>
+<!-- Not Visited Counter -->
+<div class="flex items-center gap-2 p-2 rounded-lg bg-surface-bright border border-surface-container-highest">
+<span class="w-4 h-4 rounded-full border border-outline-variant bg-surface-container-lowest"></span>
+<div>
+<span class="font-mono font-bold text-on-surface-variant block text-xs">84</span>
+<span class="text-[10px] font-label text-on-surface-variant">Not Visited</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Middle: Scrollable 5-per-row Tabular OMR Grid (Questions 1 to 75 illustrated) -->
+<div class="flex-1 overflow-y-auto custom-scrollbar my-3 pr-1">
+<div class="text-[10px] font-label font-bold text-on-surface-variant uppercase tracking-wider mb-2">
+          Section Questions (1 - 75)
+        </div>
+<div class="grid grid-cols-5 gap-2 pt-1 pb-4">
+<!-- Sample Questions Q1 - Q41 with authentic exam statuses -->
+<!-- Q1-Q5 -->
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center shadow-xs">01</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center shadow-xs">02</button>
+<button class="h-9 w-full rounded-lg bg-tertiary-container text-on-tertiary-container font-mono font-bold text-xs flex items-center justify-center relative shadow-xs">03<span class="absolute top-0.5 right-0.5 text-[8px]">★</span></button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center shadow-xs">04</button>
+<button class="h-9 w-full rounded-lg bg-surface-container-highest text-on-surface-variant font-mono font-bold text-xs flex items-center justify-center">05</button>
+<!-- Q6-Q10 -->
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">06</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">07</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">08</button>
+<button class="h-9 w-full rounded-lg bg-surface-container-highest text-on-surface-variant font-mono font-bold text-xs flex items-center justify-center">09</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">10</button>
+<!-- Q11-Q15 -->
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">11</button>
+<button class="h-9 w-full rounded-lg bg-tertiary-container text-on-tertiary-container font-mono font-bold text-xs flex items-center justify-center relative">12<span class="absolute top-0.5 right-0.5 text-[8px]">★</span></button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">13</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">14</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">15</button>
+<!-- Q16-Q20 -->
+<button class="h-9 w-full rounded-lg bg-surface-container-highest text-on-surface-variant font-mono font-bold text-xs flex items-center justify-center">16</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">17</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">18</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">19</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">20</button>
+<!-- Q21-Q25 -->
+<button class="h-9 w-full rounded-lg bg-tertiary-container text-on-tertiary-container font-mono font-bold text-xs flex items-center justify-center relative">21<span class="absolute top-0.5 right-0.5 text-[8px]">★</span></button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">22</button>
+<button class="h-9 w-full rounded-lg bg-surface-container-highest text-on-surface-variant font-mono font-bold text-xs flex items-center justify-center">23</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">24</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">25</button>
+<!-- Q26-Q30 -->
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">26</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">27</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">28</button>
+<button class="h-9 w-full rounded-lg bg-surface-container-highest text-on-surface-variant font-mono font-bold text-xs flex items-center justify-center">29</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">30</button>
+<!-- Q31-Q35 (Current Polity Section starts) -->
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">31</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">32</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">33</button>
+<button class="h-9 w-full rounded-lg bg-tertiary-container text-on-tertiary-container font-mono font-bold text-xs flex items-center justify-center relative">34<span class="absolute top-0.5 right-0.5 text-[8px]">★</span></button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">35</button>
+<!-- Q36-Q40 -->
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">36</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">37</button>
+<button class="h-9 w-full rounded-lg bg-surface-container-highest text-on-surface-variant font-mono font-bold text-xs flex items-center justify-center">38</button>
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">39</button>
+<button class="h-9 w-full rounded-lg bg-tertiary-container text-on-tertiary-container font-mono font-bold text-xs flex items-center justify-center relative">40<span class="absolute top-0.5 right-0.5 text-[8px]">★</span></button>
+<!-- Q41-Q45 -->
+<button class="h-9 w-full rounded-lg bg-secondary text-on-secondary font-mono font-bold text-xs flex items-center justify-center">41</button>
+<!-- Q42: CURRENT QUESTION (Highlighted with Active Pulse Indigo Ring) -->
+<button class="h-9 w-full rounded-lg bg-primary text-on-primary font-mono font-bold text-xs flex items-center justify-center ring-4 ring-primary/30 scale-105 shadow-md relative z-10">
+            42
+          </button>
+<!-- Q43-Q45 (Not yet visited) -->
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">43</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">44</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">45</button>
+<!-- Q46-Q50 -->
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">46</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">47</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">48</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">49</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">50</button>
+<!-- Q51-Q55 -->
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">51</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">52</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">53</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">54</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">55</button>
+<!-- Q56-Q60 -->
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">56</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">57</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">58</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">59</button>
+<button class="h-9 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface font-mono font-semibold text-xs flex items-center justify-center hover:bg-surface-container">60</button>
+</div>
+</div>
+<!-- Bottom: Summary Action / Navigation jump bar -->
+<div class="pt-3 border-t border-surface-container-highest space-y-2">
+<div class="flex items-center justify-between text-xs text-on-surface-variant font-mono">
+<span>Target Accuracy: &gt;82%</span>
+<span class="text-secondary font-bold">Pacing: Optimal (+4m)</span>
+</div>
+<button class="w-full py-2 px-3 rounded-lg text-xs font-headline font-semibold text-primary bg-primary/10 hover:bg-primary/15 border border-primary/20 transition-colors flex items-center justify-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="grid_view">grid_view</span>
+          Expand Full Paper Matrix
+        </button>
+</div>
+</aside>
+</main>
+<!-- ========================================================================= -->
+<!-- LIGHTWEIGHT INTERACTIVE SCRIPT (Countdown, 50-50 Strikethrough & Hotkeys) -->
+<!-- ========================================================================= -->
+<script>
+    // Live Countdown Timer
+    let totalSeconds = 1 * 3600 + 38 * 60 + 24;
+    const timerElement = document.getElementById('countdown-timer');
+
+    setInterval(() => {
+      if (totalSeconds > 0) {
+        totalSeconds--;
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        timerElement.textContent = 
+          String(hours).padStart(2, '0') + ':' + 
+          String(minutes).padStart(2, '0') + ':' + 
+          String(seconds).padStart(2, '0');
+      }
+    }, 1000);
+
+    // Keyboard Shortcuts Listener for Cockpit navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'r' || e.key === 'R') {
+        console.log("Marked for Review triggered");
+      }
+    });
+  </script>
+</body></html>

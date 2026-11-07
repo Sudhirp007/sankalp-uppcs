@@ -1,0 +1,47 @@
+{
+  "name": "sankalp-uppcs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sankalp — Adaptive Civil Services & UPPSC Learning Platform (Cloudflare Workers Hono API + React Tailwind PWA + Neon PostgreSQL)",
+  "scripts": {
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "wrangler dev --port 8787",
+    "dev:web": "vite --port 5173",
+    "build": "tsc --noEmit && vite build",
+    "preview": "wrangler dev --port 8787",
+    "deploy": "npm run build && wrangler deploy",
+    "db:migrate": "tsx scripts/migrate-schema.ts",
+    "db:sync-sqlite": "tsx scripts/migrate_sqlite_to_neon.ts",
+    "test:e2e": "tsx scripts/verify-e2e.ts"
+  },
+  "dependencies": {
+    "@neon/config": "^1.13.0",
+    "@neon/env": "^2.1.0",
+    "@neondatabase/serverless": "^1.2.0",
+    "clsx": "^2.1.1",
+    "dotenv": "^18.0.9",
+    "drizzle-orm": "^0.45.4",
+    "firebase": "^13.2.0",
+    "hono": "^4.13.17",
+    "lucide-react": "^1.70.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zustand": "^5.1.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261107.1",
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "concurrently": "^10.0.7",
+    "drizzle-kit": "^0.31.11",
+    "tailwindcss": "^4.3.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.6",
+    "wrangler": "^4.158.0"
+  }
+}

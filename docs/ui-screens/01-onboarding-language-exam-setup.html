@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background text-on-surface" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sankalp • Onboarding — Learning Engine Setup</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=JetBrains+Mono:wght@500;600&amp;family=Public+Sans:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container": "#eaeff2",
+            "secondary-dim": "#005f41",
+            "surface-variant": "#dce4e8",
+            "on-surface": "#2c3437",
+            "surface-container-low": "#f0f4f7",
+            "on-secondary-fixed-variant": "#006948",
+            "outline-variant": "#acb3b7",
+            "error": "#a8364b",
+            "background": "#f7f9fb",
+            "on-primary-fixed": "#000000",
+            "primary-dim": "#4843b4",
+            "primary-fixed": "#8c88fd",
+            "on-background": "#2c3437",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary": "#e6ffef",
+            "tertiary-container": "#fe932c",
+            "primary-container": "#8c88fd",
+            "surface": "#f7f9fb",
+            "on-secondary-fixed": "#004931",
+            "tertiary-dim": "#804300",
+            "on-error": "#fff7f7",
+            "on-primary-fixed-variant": "#14007b",
+            "inverse-surface": "#0b0f10",
+            "tertiary-fixed": "#fe932c",
+            "on-surface-variant": "#596064",
+            "on-primary-container": "#0c005c",
+            "primary": "#5450c1",
+            "on-error-container": "#6e0523",
+            "surface-tint": "#5450c1",
+            "surface-bright": "#f7f9fb",
+            "secondary": "#006d4b",
+            "on-tertiary-container": "#4a2500",
+            "tertiary": "#914d00",
+            "surface-container-highest": "#dce4e8",
+            "secondary-fixed-dim": "#76eab6",
+            "on-tertiary": "#fff7f4",
+            "outline": "#747c80",
+            "on-secondary-container": "#005e40",
+            "secondary-container": "#85f8c4",
+            "error-container": "#f97386",
+            "secondary-fixed": "#85f8c4",
+            "on-tertiary-fixed-variant": "#572c00",
+            "tertiary-fixed-dim": "#ed871e",
+            "primary-fixed-dim": "#7f7bef",
+            "error-dim": "#6b0221",
+            "on-primary": "#fbf7ff",
+            "inverse-primary": "#8c88fd",
+            "on-tertiary-fixed": "#240f00",
+            "inverse-on-surface": "#9a9d9f",
+            "surface-dim": "#d4dbdf",
+            "surface-container-high": "#e3e9ed"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans", "sans-serif"],
+            "display": ["Plus Jakarta Sans", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "label": ["Public Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body class="min-h-full font-body antialiased flex flex-col bg-background text-on-surface selection:bg-primary selection:text-on-primary">
+<!-- Top Context / Micro Brand Bar -->
+<header class="w-full bg-surface-container-lowest border-b border-surface-container-high py-3 px-6 sticky top-0 z-40">
+<div class="max-w-5xl mx-auto flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">assured_workload</span>
+</div>
+<div class="flex items-baseline space-x-2">
+<span class="font-headline font-bold text-lg text-primary tracking-tight">Sankalp</span>
+<span class="hidden sm:inline-block text-xs font-label text-on-surface-variant font-medium">State Civil Services Adaptive Engine</span>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-mono font-medium bg-surface-container text-on-surface-variant">
+<span class="material-symbols-outlined text-xs mr-1 text-secondary" style="font-variation-settings: 'FILL' 1;">verified</span>
+          UPPSC Standardized Architecture
+        </span>
+</div>
+</div>
+</header>
+<!-- Main Canvas Container -->
+<main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 md:py-12">
+<!-- Progress Indicator & Header -->
+<div class="mb-10 text-center md:text-left">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+<div class="inline-flex items-center gap-2 self-start bg-surface-container px-3 py-1.5 rounded-full border border-surface-container-high">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label text-xs font-semibold text-primary tracking-tight">Step 1 of 2: Personalize Your Learning Engine</span>
+</div>
+<div class="flex items-center gap-2 text-xs font-mono text-on-surface-variant self-start md:self-auto">
+<span>Engine Calibration</span>
+<span class="font-semibold text-primary">50% Completed</span>
+</div>
+</div>
+<!-- Progress Bar Track -->
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden mb-6">
+<div class="bg-primary h-full rounded-full transition-all duration-500 w-1/2"></div>
+</div>
+<h1 class="font-headline font-extrabold text-2xl sm:text-3xl lg:text-4xl text-on-surface tracking-tight leading-tight mb-3">
+        Set Your Language Medium &amp; Exam Journeys
+      </h1>
+<p class="font-body text-base sm:text-lg text-on-surface-variant max-w-2xl leading-relaxed">
+        Tailor your question banks, spaced repetition drills, and syllabus pathways to your exact examination focus.
+      </p>
+</div>
+<!-- Section A: Strict Single-Language Medium Selection -->
+<section class="mb-12">
+<div class="flex items-start justify-between mb-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">translate</span>
+<h2 class="font-headline font-bold text-lg sm:text-xl text-on-surface">Preferred Language Medium</h2>
+</div>
+<p class="text-xs sm:text-sm text-on-surface-variant">
+            All questions, explanations, cheat sheets, and flashcards will appear exclusively in your chosen medium—zero dual-language clutter. Changeable anytime in Profile.
+          </p>
+</div>
+</div>
+<!-- Comparison Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- English Card (SELECTED) -->
+<div class="relative bg-surface-container-lowest border-2 border-primary rounded-xl p-5 shadow-sm transition-all duration-150 cursor-pointer flex flex-col justify-between group">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-3">
+<div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-sm font-bold">check</span>
+</div>
+<h3 class="font-headline font-bold text-base text-on-surface">English Medium</h3>
+</div>
+<span class="px-2 py-0.5 rounded text-[11px] font-label font-bold bg-primary text-on-primary tracking-wide">Active Selection</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-4">Optimized terminology aligned with standard English UPSC/UPPCS standard reference literature.</p>
+<!-- Mock Preview Box -->
+<div class="bg-surface-container-low rounded-lg p-3.5 border border-surface-container-high text-xs font-body text-on-surface space-y-2">
+<div class="flex items-center justify-between text-[10px] font-mono text-on-surface-variant mb-1 border-b border-surface-container-high pb-1.5">
+<span class="font-semibold text-primary">GS Paper II • Polity &amp; Governance</span>
+<span>Question Stem Preview</span>
+</div>
+<p class="font-medium text-on-surface leading-snug">
+                Consider the following statements regarding Panchayati Raj 73rd Constitutional Amendment Act:
+              </p>
+<ul class="space-y-1 text-on-surface-variant pl-3 list-decimal text-[11px]">
+<li>It mandates a three-tier system of Panchayats in all States.</li>
+<li>Seats are reserved for SCs and STs in proportion to their population.</li>
+</ul>
+<p class="font-medium text-[11px] text-on-surface italic pt-0.5">Which of the statements given above is/are correct?</p>
+</div>
+</div>
+<div class="mt-4 flex items-center text-xs text-primary font-medium">
+<span class="material-symbols-outlined text-sm mr-1">done_all</span> All 18,500+ PYQs fully vetted in English
+          </div>
+</div>
+<!-- Hindi Card (UNSELECTED) -->
+<div class="relative bg-surface-container-lowest border border-outline-variant hover:border-outline rounded-xl p-5 transition-all duration-150 cursor-pointer flex flex-col justify-between group">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-3">
+<div class="w-5 h-5 rounded-full border-2 border-outline-variant group-hover:border-primary flex items-center justify-center"></div>
+<h3 class="font-headline font-bold text-base text-on-surface">हिन्दी माध्यम (Hindi Medium)</h3>
+</div>
+<span class="px-2 py-0.5 rounded text-[11px] font-label font-medium bg-surface-container text-on-surface-variant">Available</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-4">उत्तर प्रदेश लोक सेवा आयोग की प्रामाणिक शब्दावली एवं मानक संदर्भ ग्रन्थों पर आधारित।</p>
+<!-- Mock Preview Box -->
+<div class="bg-surface-container-low rounded-lg p-3.5 border border-surface-container-high text-xs font-body text-on-surface space-y-2">
+<div class="flex items-center justify-between text-[10px] font-mono text-on-surface-variant mb-1 border-b border-surface-container-high pb-1.5">
+<span class="font-semibold text-secondary">सामान्य अध्ययन द्वितीय प्रश्नपत्र • राजव्यवस्था</span>
+<span>प्रश्न प्रारूप पूर्वावलोकन</span>
+</div>
+<p class="font-medium text-on-surface leading-snug">
+                पंचायती राज (73वां संविधान संशोधन अधिनियम) के संदर्भ में निम्नलिखित कथनों पर विचार कीजिए:
+              </p>
+<ul class="space-y-1 text-on-surface-variant pl-3 list-decimal text-[11px]">
+<li>यह सभी राज्यों में पंचायतों की त्रि-स्तरीय प्रणाली का प्रावधान करता है।</li>
+<li>अनुसूचित जातियों और अनुसूचित जनजातियों के लिए उनकी जनसंख्या के अनुपात में सीटों का आरक्षण अनिवार्य है।</li>
+</ul>
+<p class="font-medium text-[11px] text-on-surface italic pt-0.5">उपर्युक्त कथनों में से कौन-सा/से सही है/हैं?</p>
+</div>
+</div>
+<div class="mt-4 flex items-center text-xs text-on-surface-variant font-medium">
+<span class="material-symbols-outlined text-sm mr-1">auto_stories</span> शुद्ध एवं परिष्कृत शब्दावली संकलन
+          </div>
+</div>
+</div>
+</section>
+<!-- Section B: Target Exam Journeys (Multi-Journey Grid) -->
+<section class="mb-12">
+<div class="flex items-start justify-between mb-3">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">hub</span>
+<h2 class="font-headline font-bold text-lg sm:text-xl text-on-surface">Select Target Exam Journeys</h2>
+</div>
+<p class="text-xs sm:text-sm text-on-surface-variant">Select all examinations you are targeting in the current academic year.</p>
+</div>
+</div>
+<!-- Architectural Note Banner -->
+<div class="mb-4 bg-surface-container border border-surface-container-high rounded-lg p-3 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-lg shrink-0">info</span>
+<p class="text-xs text-on-surface font-body leading-relaxed">
+<strong class="font-semibold text-primary">Unified Skill Graph:</strong> Each selected exam instantiates an independent, isolated Learning Journey while dynamically feeding your unified Global Skill Graph &amp; Topic Mastery.
+        </p>
+</div>
+<!-- 2x2 Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Card 1: Selected & Primary -->
+<div class="bg-surface-container-lowest border-2 border-primary rounded-xl p-5 shadow-sm relative cursor-pointer">
+<div class="flex items-start justify-between gap-3 mb-2">
+<div class="flex items-center gap-2.5">
+<div class="w-5 h-5 rounded bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-sm font-bold">check</span>
+</div>
+<h3 class="font-headline font-bold text-base text-on-surface">UPPCS Combined State (Prelims)</h3>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] font-label font-bold bg-primary text-on-primary whitespace-nowrap">Primary Active Journey</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-4 pl-7 leading-relaxed">
+            GS Paper I &amp; CSAT • +1.33 / -0.44 Marking • 2,450+ PYQs &amp; Concept Drills
+          </p>
+<div class="flex items-center justify-between border-t border-surface-container-high pt-3 pl-7">
+<span class="text-xs font-mono font-medium text-primary bg-surface-container px-2 py-0.5 rounded">Target: 2026 Cycle</span>
+<span class="text-[11px] font-mono text-secondary flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">analytics</span> 98.4% Syllabus Synced
+            </span>
+</div>
+</div>
+<!-- Card 2: Selected Secondary -->
+<div class="bg-surface-container-lowest border-2 border-primary-fixed-dim rounded-xl p-5 shadow-sm relative cursor-pointer">
+<div class="flex items-start justify-between gap-3 mb-2">
+<div class="flex items-center gap-2.5">
+<div class="w-5 h-5 rounded bg-primary-fixed-dim flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-sm font-bold">check</span>
+</div>
+<h3 class="font-headline font-bold text-base text-on-surface">UPPSC RO / ARO (Samiksha Adhikari)</h3>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] font-label font-semibold bg-secondary-container text-on-secondary-container whitespace-nowrap">Enrolled Journey</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-4 pl-7 leading-relaxed">
+            GS (140 Qs) + General Hindi (60 Qs) • 1/3rd Negative Marking • 1,820+ Questions
+          </p>
+<div class="flex items-center justify-between border-t border-surface-container-high pt-3 pl-7">
+<span class="text-xs font-mono font-medium text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">Target: Upcoming Cycle</span>
+<span class="text-[11px] font-mono text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">sync_alt</span> Cross-mapped with GS I
+            </span>
+</div>
+</div>
+<!-- Card 3: Unselected -->
+<div class="bg-surface-container-lowest border border-outline-variant hover:border-outline rounded-xl p-5 transition cursor-pointer group">
+<div class="flex items-start justify-between gap-3 mb-2">
+<div class="flex items-center gap-2.5">
+<div class="w-5 h-5 rounded border border-outline-variant group-hover:border-primary flex items-center justify-center"></div>
+<h3 class="font-headline font-bold text-base text-on-surface">UPPSC ACF / RFO (Forest Officer)</h3>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] font-label text-on-surface-variant bg-surface-container">Optional</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-4 pl-7 leading-relaxed">
+            General Studies &amp; Forestry/Environment Specialization • Strict Sectional Cutoffs
+          </p>
+<div class="flex items-center justify-between border-t border-surface-container-high pt-3 pl-7">
+<span class="text-xs font-mono text-on-surface-variant">Tap to Add Journey</span>
+<span class="material-symbols-outlined text-sm text-outline-variant group-hover:text-primary">add_circle</span>
+</div>
+</div>
+<!-- Card 4: Unselected -->
+<div class="bg-surface-container-lowest border border-outline-variant hover:border-outline rounded-xl p-5 transition cursor-pointer group">
+<div class="flex items-start justify-between gap-3 mb-2">
+<div class="flex items-center gap-2.5">
+<div class="w-5 h-5 rounded border border-outline-variant group-hover:border-primary flex items-center justify-center"></div>
+<h3 class="font-headline font-bold text-base text-on-surface">UPPSC GIC &amp; BEO Screening</h3>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] font-label text-on-surface-variant bg-surface-container">Optional</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-4 pl-7 leading-relaxed">
+            General Studies + Core Subject Screening (Block Education Officer / Lecturer)
+          </p>
+<div class="flex items-center justify-between border-t border-surface-container-high pt-3 pl-7">
+<span class="text-xs font-mono text-on-surface-variant">Tap to Add Journey</span>
+<span class="material-symbols-outlined text-sm text-outline-variant group-hover:text-primary">add_circle</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section C: Daily Study Commitment -->
+<section class="mb-12">
+<div class="flex items-start justify-between mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">timer</span>
+<h2 class="font-headline font-bold text-lg sm:text-xl text-on-surface">Daily Study Commitment</h2>
+</div>
+</div>
+<p class="text-xs sm:text-sm text-on-surface-variant mb-4">
+        Calibrates daily SRS flashcard intervals, rapid-fire MCQs, and question generation volume.
+      </p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+<!-- Commitment Pill 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant hover:border-outline p-4 rounded-xl cursor-pointer transition">
+<div class="flex items-center justify-between mb-1.5">
+<h4 class="font-headline font-semibold text-sm text-on-surface">20 mins/day</h4>
+<span class="text-[10px] font-mono font-medium text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded">Quick SRS</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">30 Flashcards &amp; 15 Drills</p>
+</div>
+<!-- Commitment Pill 2 (SELECTED) -->
+<div class="bg-surface-container-lowest border-2 border-primary p-4 rounded-xl cursor-pointer relative shadow-sm">
+<div class="flex items-center justify-between mb-1.5">
+<div class="flex items-center gap-1.5">
+<h4 class="font-headline font-bold text-sm text-primary">45 mins/day</h4>
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+</div>
+<span class="text-[10px] font-label font-bold text-on-primary bg-primary px-2 py-0.5 rounded">Recommended</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">60 Flashcards, 30 Drills &amp; 1 Daily PYQ Digest</p>
+</div>
+<!-- Commitment Pill 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant hover:border-outline p-4 rounded-xl cursor-pointer transition">
+<div class="flex items-center justify-between mb-1.5">
+<h4 class="font-headline font-semibold text-sm text-on-surface">90+ mins/day</h4>
+<span class="text-[10px] font-mono font-medium text-tertiary bg-surface-container px-1.5 py-0.5 rounded">Intensive</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Deep Concept Mastery &amp; Comprehensive Sectionals</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Sticky Prominent Bottom Action Bar -->
+<div class="sticky bottom-0 z-50 bg-surface-container-lowest border-t border-surface-container-high py-4 px-4 sm:px-6 shadow-md">
+<div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+<!-- Informational Guarantee Badge -->
+<div class="flex items-center gap-2 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary text-base" style="font-variation-settings: 'FILL' 1;">sync</span>
+<span>Your Global Cross-Exam Expertise updates automatically across all UPPSC exams.</span>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+<button class="px-4 py-2.5 rounded-lg border border-outline-variant text-xs sm:text-sm font-headline font-semibold text-on-surface hover:bg-surface-container active:scale-[0.98] transition" type="button">
+          Skip to Default Setup
+        </button>
+<button class="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-dim text-on-primary text-xs sm:text-sm font-headline font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition flex items-center gap-2" type="button">
+<span>Launch My UPPCS Prelims Journey</span>
+<span class="material-symbols-outlined text-base">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Shared Component: Footer (from Brand Anchors) -->
+<footer class="bg-surface text-primary border-t border-outline-variant">
+<div class="w-full py-6 px-6 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 font-body text-xs text-on-surface-variant leading-relaxed">
+<div class="flex items-center space-x-2">
+<span class="font-headline font-bold text-sm text-on-surface">Sankalp</span>
+<span>© 2026 Sankalp Academic Precision. Civil Services Preparation Portal. All rights reserved.</span>
+</div>
+<div class="flex flex-wrap items-center gap-4">
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Honor Code</a>
+<span class="text-outline-variant">•</span>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Syllabus Archive</a>
+<span class="text-outline-variant">•</span>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Marking Scheme Rules</a>
+<span class="text-outline-variant">•</span>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Accessibility</a>
+<span class="text-outline-variant">•</span>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Support Desk</a>
+</div>
+</div>
+</footer>
+</body></html>

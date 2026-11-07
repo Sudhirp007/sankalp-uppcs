@@ -1,0 +1,32 @@
+# Exam Harvester — direct dependencies (versions verified on Python 3.13, Windows)
+# Install:  python -m venv .venv && .venv\Scripts\pip install -r requirements.txt
+#           .venv\Scripts\playwright install chromium   (only needed for --render-js)
+
+# Crawling
+httpx==0.28.1
+playwright==1.64.1
+beautifulsoup4==4.15.0
+selectolax==1.0.2
+
+# Documents / OCR
+pymupdf==2.1
+pdfplumber==0.11.10
+pytesseract==0.3.13
+pillow==13.0.0
+
+# LLM structuring
+google-genai==3.0.0
+pydantic==2.14.3
+
+# Storage
+SQLAlchemy==2.1.8
+
+# CLI / Web Review UI / config
+typer==0.28.0
+rich==15.0.0
+python-dotenv==1.2.4
+fastapi==0.162.0
+uvicorn==0.54.0
+
+# Tests
+pytest==9.2.0

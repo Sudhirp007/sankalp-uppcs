@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sankalp — Post-Test Deep Review &amp; Mistake Diagnosis</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-fixed-variant": "#14007b",
+            "on-error-container": "#6e0523",
+            "on-primary-fixed": "#000000",
+            "on-surface": "#2c3437",
+            "surface-container": "#eaeff2",
+            "surface-variant": "#dce4e8",
+            "surface-tint": "#5450c1",
+            "tertiary-fixed-dim": "#ed871e",
+            "inverse-on-surface": "#9a9d9f",
+            "tertiary-container": "#fe932c",
+            "on-secondary-fixed": "#004931",
+            "tertiary-fixed": "#fe932c",
+            "secondary-dim": "#005f41",
+            "error-container": "#f97386",
+            "inverse-primary": "#8c88fd",
+            "surface-container-high": "#e3e9ed",
+            "primary-dim": "#4843b4",
+            "primary": "#5450c1",
+            "on-error": "#fff7f7",
+            "secondary": "#006d4b",
+            "outline-variant": "#acb3b7",
+            "error-dim": "#6b0221",
+            "secondary-fixed-dim": "#76eab6",
+            "secondary-fixed": "#85f8c4",
+            "surface": "#f7f9fb",
+            "on-surface-variant": "#596064",
+            "inverse-surface": "#0b0f10",
+            "on-tertiary-fixed-variant": "#572c00",
+            "secondary-container": "#85f8c4",
+            "tertiary-dim": "#804300",
+            "primary-container": "#8c88fd",
+            "on-secondary": "#e6ffef",
+            "outline": "#747c80",
+            "background": "#f7f9fb",
+            "surface-container-low": "#f0f4f7",
+            "surface-bright": "#f7f9fb",
+            "primary-fixed": "#8c88fd",
+            "on-primary-container": "#0c005c",
+            "on-background": "#2c3437",
+            "on-secondary-fixed-variant": "#006948",
+            "surface-dim": "#d4dbdf",
+            "on-secondary-container": "#005e40",
+            "tertiary": "#914d00",
+            "on-tertiary-container": "#4a2500",
+            "on-primary": "#fbf7ff",
+            "error": "#a8364b",
+            "primary-fixed-dim": "#7f7bef",
+            "surface-container-highest": "#dce4e8",
+            "on-tertiary": "#fff7f4",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-fixed": "#240f00"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans", "sans-serif"],
+            "display": ["Plus Jakarta Sans", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "label": ["Public Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #dce4e8;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body antialiased min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container">
+<!-- ========================================================
+       SHARED COMPONENT: TopNavBar (from Shared Components JSON)
+       Active Destination: Syllabus & Practice
+       ======================================================== -->
+<header class="docked full-width top-0 sticky z-50 bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none">
+<div class="w-full px-6 py-3 flex items-center justify-between mx-auto max-w-7xl">
+<!-- Left Brand & Navigation cluster -->
+<div class="flex items-center gap-8">
+<a class="font-headline font-bold text-lg text-primary dark:text-inverse-primary tracking-tight flex items-center gap-2" href="#">
+<span class="w-7 h-7 rounded bg-primary text-on-primary flex items-center justify-center font-extrabold text-sm tracking-tighter">S</span>
+<span>Sankalp</span>
+</a>
+<!-- Desktop Nav Links -->
+<nav class="hidden md:flex items-center gap-6 font-headline font-semibold text-sm tracking-tight font-body">
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary font-medium transition-colors" href="#">Journey Home</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary font-medium transition-colors" href="#">Global Expertise</a>
+<!-- Active Nav according to Screen Context (Test Review within Syllabus & Practice ecosystem) -->
+<a class="text-primary dark:text-inverse-primary font-semibold border-b-2 border-primary dark:border-inverse-primary pb-1" href="#">Syllabus &amp; Practice</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary font-medium transition-colors" href="#">Learning Studio</a>
+<a class="text-on-surface-variant dark:text-inverse-on-surface hover:text-on-surface dark:hover:text-on-primary font-medium transition-colors" href="#">Flashcards (SRS)</a>
+</nav>
+</div>
+<!-- Trailing Controls: Medium Pill, Active Journey & Account -->
+<div class="flex items-center gap-3">
+<!-- Profile Medium Pill -->
+<span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-surface-container text-on-surface-variant border border-outline-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+          Medium: English
+        </span>
+<!-- Active Journey Switcher Pill -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-primary-dim/10 text-primary border border-primary-dim/20 hover:bg-primary-dim/15 transition-colors">
+<span>Active Journey: UPPCS 2026</span>
+<span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+</button>
+<!-- Account Circle Icon -->
+<button aria-label="Aspirant Profile Avatar" class="p-1 rounded-full text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[26px]">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- ========================================================
+       TOP SUMMARY SCORECARD BANNER
+       ======================================================== -->
+<section class="w-full bg-surface-container-lowest border-b border-outline-variant">
+<div class="max-w-7xl mx-auto px-6 py-6">
+<!-- Sub-Navigation Breadcrumb / Meta Bar -->
+<div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-surface-container">
+<div class="flex items-center gap-2 text-xs font-medium text-on-surface-variant">
+<span class="hover:text-primary cursor-pointer">Syllabus &amp; Practice</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="hover:text-primary cursor-pointer">Test Series 2025</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-on-surface font-semibold">GS Paper I (Full Mock 04) — Provenance &amp; Mistake Audit</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-on-surface-variant font-mono">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">schedule</span>
+            Submitted: Oct 18, 2025 • 11:42 AM IST
+          </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">timer</span>
+            Time Utilized: 1h 48m / 2h 00m
+          </span>
+</div>
+</div>
+<!-- Main Scorecard Grid: Left Score | Center KPIs | Right Guesswork Audit -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+<!-- Left: Net Score Card (lg:col-span-3) -->
+<div class="lg:col-span-3 bg-surface-container-low rounded-xl p-5 border border-outline-variant flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-primary text-on-primary">GS PAPER I</span>
+<span class="text-xs text-on-surface-variant font-medium">UPPCS Prelims 2025</span>
+</div>
+<h1 class="text-sm font-bold text-on-surface font-headline leading-tight mt-1">Official Mock Evaluation</h1>
+</div>
+<div class="my-3">
+<div class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Net Verified Score</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-3xl font-extrabold text-on-surface font-mono tracking-tight">104.88</span>
+<span class="text-sm text-on-surface-variant font-mono">/ 200</span>
+</div>
+<div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary-container/40 border border-secondary text-secondary text-xs font-semibold">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>+11.8 Marks Above Est. Cutoff (88.4)</span>
+</div>
+</div>
+<div class="text-[11px] text-on-surface-variant pt-2 border-t border-surface-container-high flex items-center justify-between">
+<span>Accuracy: <strong>69.7%</strong></span>
+<span>Percentile: <strong>94.2th</strong></span>
+</div>
+</div>
+<!-- Center: KPIs Metric Cards (lg:col-span-5) -->
+<div class="lg:col-span-5 grid grid-cols-2 gap-3">
+<!-- Correct Card -->
+<div class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-xs font-semibold text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check</span>
+                Correct
+              </span>
+<span class="text-xs font-mono font-bold text-secondary bg-secondary-container/30 px-1.5 py-0.5 rounded">+1.33m / Q</span>
+</div>
+<div class="mt-3">
+<div class="text-2xl font-bold font-mono text-on-surface">92</div>
+<div class="text-xs font-semibold text-secondary font-mono mt-0.5">+122.6m Gross</div>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 mt-2 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 61.3%"></div>
+</div>
+</div>
+<!-- Wrong Card -->
+<div class="bg-surface-container-lowest rounded-xl p-4 border border-error-container/60 bg-error/5 flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-xs font-semibold text-error flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">close</span>
+                Wrong
+              </span>
+<span class="text-xs font-mono font-bold text-error bg-error-container/40 px-1.5 py-0.5 rounded">-0.44m (1/3)</span>
+</div>
+<div class="mt-3">
+<div class="text-2xl font-bold font-mono text-error">40</div>
+<div class="text-xs font-semibold text-error font-mono mt-0.5">-17.7m Penalty</div>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 mt-2 overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 26.6%"></div>
+</div>
+</div>
+<!-- Skipped Card -->
+<div class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-xs font-semibold text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">remove</span>
+                Skipped
+              </span>
+<span class="text-xs font-mono text-on-surface-variant">0 marks</span>
+</div>
+<div class="mt-3">
+<div class="text-2xl font-bold font-mono text-on-surface-variant">17</div>
+<div class="text-xs text-on-surface-variant font-mono mt-0.5">Conservative pass</div>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 mt-2 overflow-hidden">
+<div class="bg-outline-variant h-full rounded-full" style="width: 11.3%"></div>
+</div>
+</div>
+<!-- Canceled Card -->
+<div class="bg-surface-container-lowest rounded-xl p-4 border border-tertiary-fixed-dim/40 bg-tertiary-container/10 flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-xs font-semibold text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">flag</span>
+                Canceled ('X')
+              </span>
+<span class="text-xs font-mono font-semibold text-tertiary bg-tertiary-container/30 px-1.5 py-0.5 rounded">Pro-rata</span>
+</div>
+<div class="mt-3">
+<div class="text-2xl font-bold font-mono text-tertiary">1</div>
+<div class="text-xs text-tertiary font-mono mt-0.5">Evaluated / 149 Qs</div>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 mt-2 overflow-hidden">
+<div class="bg-tertiary h-full rounded-full" style="width: 0.8%"></div>
+</div>
+</div>
+</div>
+<!-- Right: Diagnostic Guesswork & Bias Audit (lg:col-span-4) -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-xl p-5 border border-outline-variant flex flex-col justify-between">
+<div class="flex items-center justify-between pb-2 border-b border-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">psychology_alt</span>
+<h2 class="text-xs font-bold font-headline uppercase tracking-wider text-on-surface">Guesswork &amp; Bias Audit</h2>
+</div>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-semibold">METRIC ENGINE v2.4</span>
+</div>
+<div class="my-3 text-xs leading-relaxed text-on-surface">
+            Guesswork Audit: You gained <span class="font-bold text-secondary font-mono bg-secondary-container/30 px-1 rounded">+6.22 net marks</span> on <span class="font-semibold">50-50 Educated Guesses</span>, but lost <span class="font-bold text-error font-mono bg-error-container/30 px-1 rounded">-3.55 marks</span> on <span class="font-semibold">Wild Guesses</span>.
+          </div>
+<div class="space-y-2">
+<!-- Meter 1: 50-50 Guesses -->
+<div>
+<div class="flex justify-between text-[11px] font-medium mb-1">
+<span class="text-on-surface-variant">50-50 Elimination Accuracy (14/22)</span>
+<span class="font-mono font-bold text-secondary">63.6%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 63.6%"></div>
+</div>
+</div>
+<!-- Meter 2: Wild Guesses -->
+<div>
+<div class="flex justify-between text-[11px] font-medium mb-1">
+<span class="text-on-surface-variant">Intuitive / Low-Info Gambles (2/8)</span>
+<span class="font-mono font-bold text-error">25.0%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 25%"></div>
+</div>
+</div>
+</div>
+<p class="text-[11px] text-on-surface-variant italic mt-3 pt-2 border-t border-surface-container">
+            Recommendation: Stick to strict 2-option elimination; eliminate unhedged gambles on factual modern history.
+          </p>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================================
+       MAIN SPLIT REVIEW WORKSPACE
+       (Left: 320px Question Filter List | Right: Fluid Deep Solution)
+       ======================================================== -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-6 py-6">
+<div class="flex flex-col lg:flex-row gap-6 items-start">
+<!-- ====================================================
+           1. LEFT QUESTION FILTER SIDEBAR (Width: 320px - 340px)
+           ==================================================== -->
+<aside class="w-full lg:w-[340px] shrink-0 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm flex flex-col overflow-hidden">
+<!-- Sidebar Header & Filter Tabs -->
+<div class="p-4 border-b border-outline-variant bg-surface-container-low/40">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-bold uppercase tracking-wider text-on-surface font-headline">Question Filter</span>
+<span class="text-xs font-mono text-on-surface-variant">Showing 40 Questions</span>
+</div>
+<!-- Filter Pills -->
+<div class="flex flex-wrap gap-1.5">
+<button class="px-2.5 py-1 text-xs font-medium rounded text-on-surface-variant hover:bg-surface-container transition-colors">
+              All (150)
+            </button>
+<button class="px-2.5 py-1 text-xs font-semibold rounded bg-error-container/40 text-error border border-error/30 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+              Wrong (40)
+            </button>
+<button class="px-2.5 py-1 text-xs font-medium rounded text-on-surface-variant hover:bg-surface-container transition-colors">
+              50-50 Guesses (22)
+            </button>
+<button class="px-2.5 py-1 text-xs font-medium rounded text-on-surface-variant hover:bg-surface-container transition-colors">
+              Disputed (3)
+            </button>
+</div>
+<!-- Filter Sub-Options & Search Input -->
+<div class="mt-3 relative">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full pl-8 pr-3 py-1.5 text-xs bg-surface-container-lowest border border-outline-variant rounded-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Search by topic, keyword, or Q#" type="text"/>
+</div>
+<div class="flex items-center justify-between text-[11px] text-on-surface-variant mt-2 pt-2 border-t border-surface-container">
+<span>Sort: <strong class="text-on-surface">Paper Sequence</strong></span>
+<button class="text-primary hover:underline flex items-center gap-0.5">
+<span>Filter by Subject</span>
+<span class="material-symbols-outlined text-[13px]">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Scrollable Question Cards List -->
+<div class="overflow-y-auto max-h-[720px] custom-scrollbar divide-y divide-surface-container">
+<!-- Card #42 (ACTIVE SELECTED STATE) -->
+<div class="p-3.5 bg-primary/5 border-l-4 border-primary transition-colors cursor-pointer relative">
+<div class="flex items-center justify-between mb-1.5">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-bold font-mono px-1.5 py-0.5 rounded bg-primary text-on-primary">Q42</span>
+<span class="text-xs font-semibold text-on-surface">Indian Polity</span>
+</div>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-tertiary-container/30 text-tertiary">
+<span class="material-symbols-outlined text-[12px]">balance</span>
+                50-50 Guess
+              </span>
+</div>
+<p class="text-xs text-on-surface font-medium line-clamp-2 leading-relaxed">
+              Ashok Mehta Committee (1977) recommendations on Panchayati Raj Institutions in India...
+            </p>
+<div class="mt-2.5 flex items-center justify-between text-[11px] font-mono">
+<div class="flex items-center gap-2">
+<span class="text-error font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[13px]">close</span>
+                  You: (D)
+                </span>
+<span class="text-secondary font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[13px]">check</span>
+                  Key: (A)
+                </span>
+</div>
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">timer</span>
+                54s
+              </span>
+</div>
+</div>
+<!-- Card #14 -->
+<div class="p-3.5 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex items-center justify-between mb-1.5">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-bold font-mono px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface">Q14</span>
+<span class="text-xs font-semibold text-on-surface">Modern History</span>
+</div>
+<span class="text-[10px] font-mono text-error font-semibold bg-error-container/20 px-1.5 py-0.5 rounded">-0.44m</span>
+</div>
+<p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
+              Ryotwari System boundaries and assessment settlements in Madras Presidency under Thomas Munro...
+            </p>
+<div class="mt-2.5 flex items-center justify-between text-[11px] font-mono">
+<div class="flex items-center gap-2">
+<span class="text-error font-semibold">You: (B)</span>
+<span class="text-secondary font-semibold">Key: (C)</span>
+</div>
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">timer</span>
+                1m 12s
+              </span>
+</div>
+</div>
+<!-- Card #28 -->
+<div class="p-3.5 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex items-center justify-between mb-1.5">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-bold font-mono px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface">Q28</span>
+<span class="text-xs font-semibold text-on-surface">Environment &amp; Ecology</span>
+</div>
+<span class="text-[10px] font-mono text-error font-semibold bg-error-container/20 px-1.5 py-0.5 rounded">-0.44m</span>
+</div>
+<p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
+              Ramsar Sites in Uttar Pradesh — Bakhira Wildlife Sanctuary and Haiderpur Wetland notification chronology...
+            </p>
+<div class="mt-2.5 flex items-center justify-between text-[11px] font-mono">
+<div class="flex items-center gap-2">
+<span class="text-error font-semibold">You: (A)</span>
+<span class="text-secondary font-semibold">Key: (D)</span>
+</div>
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">timer</span>
+                42s
+              </span>
+</div>
+</div>
+<!-- Card #63 -->
+<div class="p-3.5 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex items-center justify-between mb-1.5">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-bold font-mono px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface">Q63</span>
+<span class="text-xs font-semibold text-on-surface">UP Economy</span>
+</div>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-tertiary-container/30 text-tertiary">
+<span class="material-symbols-outlined text-[12px]">balance</span>
+                50-50 Guess
+              </span>
+</div>
+<p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
+              FRBM Deficit Targets in UP State Budget 2024-25 and Fiscal Deficit as percentage of GSDP...
+            </p>
+<div class="mt-2.5 flex items-center justify-between text-[11px] font-mono">
+<div class="flex items-center gap-2">
+<span class="text-error font-semibold">You: (C)</span>
+<span class="text-secondary font-semibold">Key: (B)</span>
+</div>
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">timer</span>
+                1m 45s
+              </span>
+</div>
+</div>
+<!-- Card #89 -->
+<div class="p-3.5 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex items-center justify-between mb-1.5">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-bold font-mono px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface">Q89</span>
+<span class="text-xs font-semibold text-on-surface">Geography</span>
+</div>
+<span class="text-[10px] font-mono text-error font-semibold bg-error-container/20 px-1.5 py-0.5 rounded">-0.44m</span>
+</div>
+<p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
+              Tributaries of Yamuna river confluence order from West to East: Chambal, Sindh, Betwa, Ken...
+            </p>
+<div class="mt-2.5 flex items-center justify-between text-[11px] font-mono">
+<div class="flex items-center gap-2">
+<span class="text-error font-semibold">You: (D)</span>
+<span class="text-secondary font-semibold">Key: (A)</span>
+</div>
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">timer</span>
+                38s
+              </span>
+</div>
+</div>
+</div>
+<!-- Sidebar Footer Action -->
+<div class="p-3 bg-surface-container border-t border-outline-variant text-center">
+<button class="text-xs font-semibold text-primary hover:underline flex items-center justify-center gap-1 mx-auto">
+<span>Download Wrong Attempts PDF with Explanations</span>
+<span class="material-symbols-outlined text-[15px]">download</span>
+</button>
+</div>
+</aside>
+<!-- ====================================================
+           2. RIGHT FLUID DEEP SOLUTION & REMEDIATION WORKSPACE
+           (Reviewing Question #42 — Wrong Attempt)
+           ==================================================== -->
+<section class="flex-1 w-full space-y-5">
+<!-- Top Provenance & Lineage Header Card -->
+<div class="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant shadow-sm">
+<!-- Syllabus Hierarchy Breadcrumb -->
+<div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium flex-wrap mb-3">
+<span class="font-semibold text-primary">Indian Polity &amp; Governance</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span>Local Self-Government &amp; Decentralization</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-on-surface font-semibold">Panchayati Raj Committees (73rd CAA)</span>
+</div>
+<!-- Badges & Lineage Grid -->
+<div class="flex flex-wrap items-center gap-2.5 pt-2 border-t border-surface-container">
+<!-- Official Trust Badge -->
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-secondary-container/40 border border-secondary text-secondary text-xs font-bold tracking-tight">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span>Official Final UPPSC Key (Confidence 1.0)</span>
+</div>
+<!-- High-Yield Repeat Lineage Badge -->
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-primary-fixed-dim/20 border border-primary text-primary-dim text-xs font-semibold">
+<span class="material-symbols-outlined text-[16px]">sync</span>
+<span>Repeated PYQ — Also asked in: UPPSC ACF/RFO 2021 (Q.19), RO/ARO 2018 (Q.64)</span>
+</div>
+<!-- Attempt Disposition Tag -->
+<div class="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold font-mono bg-error-container/30 text-error">
+<span>Result: WRONG (-0.44m)</span>
+</div>
+</div>
+</div>
+<!-- Question Stem & Options Comparison Display -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant shadow-sm">
+<!-- Stem Header -->
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold font-mono px-2 py-0.5 rounded bg-on-surface text-surface-container-lowest">QUESTION 42</span>
+<span class="text-xs text-on-surface-variant font-medium">Single Correct Choice • Standard MCQ</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-1.5 text-on-surface-variant hover:text-primary rounded transition-colors" title="Bookmark Question">
+<span class="material-symbols-outlined text-[20px]">bookmark</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary rounded transition-colors" title="Report Issue">
+<span class="material-symbols-outlined text-[20px]">flag</span>
+</button>
+</div>
+</div>
+<!-- Question Stem Text -->
+<div class="text-[15px] font-body text-on-surface leading-relaxed mb-5">
+<p class="font-medium text-base mb-3">
+              With reference to the recommendations of the <strong class="font-bold text-on-surface">Ashok Mehta Committee (1977)</strong> on Panchayati Raj Institutions in India, consider the following statements:
+            </p>
+<div class="space-y-2.5 bg-surface-container-low/50 p-4 rounded-lg border border-outline-variant/60 font-body text-[14.5px]">
+<div class="flex items-start gap-3">
+<span class="font-mono font-bold text-primary mt-0.5">1.</span>
+<span>It recommended replacing the three-tier system of Panchayati Raj with a two-tier system consisting of a Zila Parishad and Mandal Panchayat.</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="font-mono font-bold text-primary mt-0.5">2.</span>
+<span>It recommended that Nyaya Panchayats should be kept as separate bodies from developmental panchayats.</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="font-mono font-bold text-primary mt-0.5">3.</span>
+<span>It prohibited political parties from official participation and contesting in elections to Panchayati Raj Institutions.</span>
+</div>
+</div>
+<p class="mt-3.5 text-xs text-on-surface-variant font-semibold uppercase tracking-wider">
+              Which of the statements given above are correct?
+            </p>
+</div>
+<!-- Options Grid / List -->
+<div class="space-y-3">
+<!-- Option A: CORRECT ANSWER -->
+<div class="p-3.5 rounded-lg border-2 border-secondary bg-secondary-container/20 flex items-start justify-between relative transition-all">
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-secondary text-on-secondary text-xs font-mono font-bold flex items-center justify-center shrink-0 mt-0.5">A</span>
+<div>
+<div class="text-sm font-semibold text-on-surface">1 and 2 only</div>
+<div class="text-xs text-secondary font-medium mt-0.5">Verified canonical answer according to Commission Master Key.</div>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-secondary text-on-secondary text-xs font-bold tracking-tight shrink-0">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                Official Key
+              </span>
+</div>
+<!-- Option B: Eliminated -->
+<div class="p-3 rounded-lg border border-outline-variant bg-surface-container-lowest flex items-start justify-between opacity-80">
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-surface-container text-on-surface-variant text-xs font-mono font-bold flex items-center justify-center shrink-0 mt-0.5">B</span>
+<div>
+<div class="text-sm text-on-surface-variant">2 and 3 only</div>
+</div>
+</div>
+<span class="text-[11px] font-mono text-on-surface-variant italic">Eliminated via 50-50</span>
+</div>
+<!-- Option C -->
+<div class="p-3 rounded-lg border border-outline-variant bg-surface-container-lowest flex items-start justify-between opacity-80">
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-surface-container text-on-surface-variant text-xs font-mono font-bold flex items-center justify-center shrink-0 mt-0.5">C</span>
+<div>
+<div class="text-sm text-on-surface-variant">1 only</div>
+</div>
+</div>
+</div>
+<!-- Option D: YOUR ATTEMPT (WRONG) -->
+<div class="p-3.5 rounded-lg border-2 border-error bg-error-container/20 flex items-start justify-between relative transition-all">
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-error text-on-error text-xs font-mono font-bold flex items-center justify-center shrink-0 mt-0.5">D</span>
+<div>
+<div class="text-sm font-semibold text-error">1, 2 and 3</div>
+<div class="text-xs text-error font-medium mt-0.5">Misconception: Mistook Ashok Mehta's stance for Balwant Rai Mehta committee.</div>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-error text-on-error text-xs font-bold tracking-tight shrink-0">
+<span class="material-symbols-outlined text-[15px]">cancel</span>
+                Your Answer (Selected)
+              </span>
+</div>
+</div>
+<!-- Meta Strip -->
+<div class="mt-4 pt-3 border-t border-surface-container flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-on-surface-variant">
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">timer</span>
+                Time Spent: <strong class="text-on-surface">54s</strong> (Optimal: 45s)
+              </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">groups</span>
+                Aspirant Accuracy: <strong class="text-on-surface">42%</strong>
+</span>
+</div>
+<div class="flex items-center gap-1 text-error font-semibold">
+<span class="material-symbols-outlined text-[15px]">trending_down</span>
+<span>Topic ELO Impact: -14 pts (Local Government)</span>
+</div>
+</div>
+</div>
+<!-- Authoritative Canonical Explanation Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant shadow-sm space-y-4">
+<div class="flex items-center justify-between pb-3 border-b border-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]">menu_book</span>
+<h3 class="text-sm font-bold font-headline text-on-surface">Authoritative Canonical Explanation &amp; Statutory Reference</h3>
+</div>
+<span class="text-xs font-mono text-secondary font-semibold bg-secondary-container/40 px-2 py-0.5 rounded">Primary Source Verified</span>
+</div>
+<div class="space-y-3.5 text-sm text-on-surface leading-relaxed">
+<!-- Proof 1 -->
+<div class="p-3 rounded-lg bg-surface-container-low/60 border border-outline-variant/40">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px] mt-0.5" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<strong class="text-on-surface font-semibold">Statement 1 is CORRECT:</strong>
+<span class="text-on-surface-variant ml-1">
+                    The Ashok Mehta Committee (appointed in Dec 1977 by the Janata Government, submitted report in August 1978) explicitly recommended replacing the traditional 3-tier Panchayati Raj system with a <strong>2-tier system</strong> consisting of <em>Zila Parishad</em> at the district level and <em>Mandal Panchayat</em> at the cluster level (covering a group of villages with 15,000 to 20,000 population).
+                  </span>
+</div>
+</div>
+</div>
+<!-- Proof 2 -->
+<div class="p-3 rounded-lg bg-surface-container-low/60 border border-outline-variant/40">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px] mt-0.5" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<strong class="text-on-surface font-semibold">Statement 2 is CORRECT:</strong>
+<span class="text-on-surface-variant ml-1">
+                    It recommended that <strong>Nyaya Panchayats</strong> should be kept strictly as separate bodies from developmental panchayats and presided over by a qualified judge to maintain the dignity and impartiality of local judicial administration.
+                  </span>
+</div>
+</div>
+</div>
+<!-- Proof 3 -->
+<div class="p-3 rounded-lg bg-error-container/10 border border-error/20">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-error text-[18px] mt-0.5">cancel</span>
+<div>
+<strong class="text-error font-semibold">Statement 3 is INCORRECT:</strong>
+<span class="text-on-surface ml-1">
+                    Unlike earlier committees (such as the Balwant Rai Mehta Committee which favored party-less democracy), the Ashok Mehta Committee was the <strong>very first committee to explicitly recommend official participation of political parties</strong> at all levels of Panchayat elections with party symbols and open contests. Statement 3 asserts that it *prohibited* political participation, which is factually opposite to the report's groundbreaking recommendation.
+                  </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Canonical Citation -->
+<div class="p-3 rounded bg-surface-container text-xs text-on-surface-variant font-mono flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">library_books</span>
+<span>Citation Source: <em>Ashok Mehta Committee Report (1978), Ministry of Agriculture and Irrigation, Government of India, Chapter IV, Para 4.3.</em></span>
+</div>
+</div>
+<!-- Golden Rule / Key Takeaway Highlight Box -->
+<div class="bg-tertiary-container/10 border border-tertiary-container rounded-xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+<div class="space-y-1">
+<div class="flex items-center gap-1.5 text-xs font-bold text-tertiary uppercase tracking-wider font-headline">
+<span class="material-symbols-outlined text-[18px]">lightbulb</span>
+<span>Memory Anchor &amp; Golden Rule</span>
+</div>
+<p class="text-sm font-semibold text-on-surface leading-snug">
+              Ashok Mehta (1977) = 2-Tier + Open Party Participation + Constitutional Status + Nyaya Panchayats.
+            </p>
+<p class="text-xs text-on-surface-variant">
+              Quick Test Hack: Statement 3's negation eliminates options (B) and (D) in under 15 seconds.
+            </p>
+</div>
+<button class="shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-tertiary text-on-tertiary hover:bg-tertiary-dim text-xs font-semibold shadow-sm transition-all">
+<span class="material-symbols-outlined text-[16px]">bookmark_add</span>
+<span>Added to Mistake SRS Deck (Due Tomorrow)</span>
+</button>
+</div>
+<!-- Commission Key History Callout Banner -->
+<div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/80 flex items-start gap-3 text-xs text-on-surface">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">shield</span>
+<div class="space-y-0.5 leading-relaxed">
+<span class="font-bold text-primary font-headline">Commission Master Key Audit Trail:</span>
+<span>
+              Provisional Key released by UPPSC on Oct 20 initially marked option 'D'; subsequent review committee modified the canonical answer to 'A' in the Final Master Key after reviewing 1,420 representations citing the original Ashok Mehta Report Ch. IV statutory evidence.
+            </span>
+</div>
+</div>
+<!-- Closed-Loop Remediation Footer Bar -->
+<div class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-2 text-xs font-bold font-headline text-on-surface uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span>Remediate This Micro-Gap Now</span>
+</div>
+<div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+<!-- Outlined Secondary Button -->
+<button class="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary text-primary hover:bg-primary/5 text-xs font-semibold transition-colors">
+<span class="material-symbols-outlined text-[16px]">description</span>
+<span>Open 'Panchayati Raj Committees' Cheat Sheet (3 min)</span>
+</button>
+<!-- Solid Primary Remediation Button -->
+<button class="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-on-primary hover:bg-primary-dim text-xs font-bold shadow-sm transition-colors">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+<span>Practice 3 Semantically Similar Questions (pgvector)</span>
+</button>
+</div>
+<!-- Tertiary Link -->
+<div class="w-full md:w-auto text-right">
+<button class="text-xs text-on-surface-variant hover:text-primary transition-colors underline decoration-outline-variant">
+              Flag Question / Raise Doubt to Subject Faculty
+            </button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- ========================================================
+       SHARED COMPONENT: Footer (from Shared Components JSON)
+       ======================================================== -->
+<footer class="docked full-width bottom-0 w-full bg-surface dark:bg-inverse-surface border-t border-outline-variant dark:border-outline mt-12">
+<div class="w-full py-6 px-6 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="flex flex-col md:flex-row items-center gap-3">
+<span class="font-headline font-bold text-sm text-on-surface dark:text-inverse-on-surface">Sankalp Academic Precision</span>
+<span class="hidden md:inline text-outline-variant">|</span>
+<p class="font-body text-xs text-on-surface-variant dark:text-inverse-on-surface leading-relaxed text-center md:text-left">
+          © 2026 Sankalp Academic Precision. Civil Services Preparation Portal. All rights reserved.
+        </p>
+</div>
+<div class="flex flex-wrap items-center justify-center gap-6 font-body text-xs text-on-surface-variant dark:text-inverse-on-surface">
+<a class="hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Honor Code</a>
+<a class="hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Syllabus Archive</a>
+<a class="hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Marking Scheme Rules</a>
+<a class="hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Accessibility</a>
+<a class="hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Support Desk</a>
+</div>
+</div>
+</footer>
+</body></html>
