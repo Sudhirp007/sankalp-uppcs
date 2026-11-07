@@ -45,7 +45,7 @@ async function main() {
   console.log(whoami.stdout.trim());
 
   runStep("1/4 Building TypeScript + Vite Production Bundle", "npm run build");
-  runStep("2/4 Deploying Worker & Custom Domains (mockexamonline.com)", "npx wrangler deploy");
+  runStep("2/4 Deploying Worker & Custom Domain (uppcs.mockexamonline.com)", "npx wrangler deploy");
 
   const localEnv = parseEnvFiles([".dev.vars", ".env.local"]);
   const allowedSecretKeys = [
@@ -77,10 +77,10 @@ async function main() {
     console.warn("\n[deploy:prod] Warning: No local secrets found in .env.local or .dev.vars to sync.");
   }
 
-  console.log("\n=== 4/4 Verifying Live Edge Health on https://mockexamonline.com/api/v1/health ===");
-  for (let attempt = 1; attempt <= 5; attempt++) {
+  console.log("\n=== 4/4 Verifying Live Edge Health on https://uppcs.mockexamonline.com/api/v1/health ===");
+  for (let attempt = 1; attempt <= 6; attempt++) {
     try {
-      const res = await fetch("https://mockexamonline.com/api/v1/health", {
+      const res = await fetch("https://uppcs.mockexamonline.com/api/v1/health", {
         headers: { Accept: "application/json" },
       });
       if (res.ok) {
@@ -89,20 +89,20 @@ async function main() {
           `[deploy:prod] LIVE HEALTH OK -> questions=${data?.neon?.counts?.questions}, firebase=${data?.firebase?.projectId}, razorpay=${data?.razorpay?.configuredMode}`
         );
         console.log("\nSankalp is LIVE publicly at:");
-        console.log("  • https://mockexamonline.com");
-        console.log("  • https://www.mockexamonline.com");
-        console.log("  • https://mockexamonline.com/sitemap.xml\n");
+        console.log("  • https://uppcs.mockexamonline.com");
+        console.log("  • https://uppcs.mockexamonline.com/app");
+        console.log("  • https://uppcs.mockexamonline.com/sitemap.xml\n");
         return;
       }
-      console.log(`[deploy:prod] Attempt ${attempt}/5 returned HTTP ${res.status} (SSL/edge certificate warming up)...`);
+      console.log(`[deploy:prod] Attempt ${attempt}/6 returned HTTP ${res.status} (SSL/edge certificate warming up)...`);
     } catch (err) {
-      console.log(`[deploy:prod] Attempt ${attempt}/5 waiting for SSL/DNS edge propagation (${err.message})...`);
+      console.log(`[deploy:prod] Attempt ${attempt}/6 waiting for SSL/DNS edge propagation (${err.message})...`);
     }
     await new Promise((r) => setTimeout(r, 4000));
   }
 
   console.log(
-    "\n[deploy:prod] Deployment succeeded! Custom domain SSL certificate on mockexamonline.com may take 30-90 seconds to finish propagating globally.\n"
+    "\n[deploy:prod] Deployment succeeded! Custom domain SSL certificate on uppcs.mockexamonline.com may take 30-90 seconds to finish propagating globally.\n"
   );
 }
 

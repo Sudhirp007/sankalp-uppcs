@@ -45,8 +45,8 @@ async function main() {
     "GET / must serve built Vite SPA HTML"
   );
   assert.ok(
-    rootHtml.includes('<link rel="canonical" href="https://mockexamonline.com/" />'),
-    "GET / must inject Edge SEO canonical tag for mockexamonline.com"
+    rootHtml.includes('<link rel="canonical" href="https://uppcs.mockexamonline.com/" />'),
+    "GET / must inject Edge SEO canonical tag for uppcs.mockexamonline.com"
   );
   assert.ok(
     rootHtml.includes('type="application/ld+json"'),
@@ -56,7 +56,7 @@ async function main() {
   const robotsRes = await fetch(`${BASE_URL}/robots.txt`);
   const robotsTxt = await robotsRes.text();
   assert.equal(robotsRes.status, 200);
-  assert.ok(robotsTxt.includes("Sitemap: https://mockexamonline.com/sitemap.xml"));
+  assert.ok(robotsTxt.includes("Sitemap: https://uppcs.mockexamonline.com/sitemap.xml"));
 
   const sitemapRes = await fetch(`${BASE_URL}/sitemap.xml`);
   const sitemapXml = await sitemapRes.text();

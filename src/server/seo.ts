@@ -2,7 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import type { createDb } from "../db/client";
 import * as schema from "../db/schema";
 
-const SITE_ORIGIN = "https://mockexamonline.com";
+const SITE_ORIGIN = "https://uppcs.mockexamonline.com";
 const BRAND_NAME = "Sankalp by MockExamOnline";
 
 function escapeHtml(str: string): string {

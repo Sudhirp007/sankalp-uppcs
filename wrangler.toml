@@ -3,10 +3,10 @@ main = "src/server/index.ts"
 compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Custom Domain Bindings for Public Production Deployment (mockexamonline.com)
+# Custom Domain Binding for Public Production Deployment (uppcs.mockexamonline.com)
+# Strictly scoped to uppcs.mockexamonline.com so root mockexamonline.com & testing.mockexamonline.com remain untouched.
 routes = [
-  { pattern = "mockexamonline.com", custom_domain = true },
-  { pattern = "www.mockexamonline.com", custom_domain = true }
+  { pattern = "uppcs.mockexamonline.com", custom_domain = true }
 ]
 
 [assets]

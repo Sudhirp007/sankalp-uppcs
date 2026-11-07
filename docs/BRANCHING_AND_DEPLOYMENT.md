@@ -59,17 +59,17 @@ See `public/media/README-FLOW-POMELLI.md` for aspect ratios and prompt tips.
 
 ---
 
-## 4. Public Deployment on `mockexamonline.com`
+## 4. Public Deployment on `uppcs.mockexamonline.com`
 
-`mockexamonline.com` uses Cloudflare nameservers (`dara.ns.cloudflare.com`, `isaac.ns.cloudflare.com`) and is bound in `wrangler.toml` with `custom_domain = true` (automatic SSL + global Edge caching) and whitelisted in Firebase Auth (`sankalp-uppcs-app`).
+`uppcs.mockexamonline.com` is bound in `wrangler.toml` with `custom_domain = true` (automatic Cloudflare DNS + SSL + global Edge caching, leaving root `mockexamonline.com` and `testing.mockexamonline.com` completely untouched) and whitelisted in Firebase Auth (`sankalp-uppcs-app`).
 
 ### First-Time 1-Click Cloudflare Login (Once per Machine)
 ```powershell
 npx wrangler login
 ```
 
-### Deploy Build + Encrypted Secrets + Custom Domains
+### Deploy Build + Encrypted Secrets + Custom Domain
 ```powershell
 npm run deploy:prod
 ```
-`scripts/deploy-production.mjs` builds the Vite + Worker bundle, deploys `mockexamonline.com` & `www.mockexamonline.com`, syncs encrypted secrets (`DATABASE_URL`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`) over stdin without exposing them in logs, and verifies `https://mockexamonline.com/api/v1/health`.
+`scripts/deploy-production.mjs` builds the Vite + Worker bundle, deploys `uppcs.mockexamonline.com`, syncs encrypted secrets (`DATABASE_URL`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`) over stdin without exposing them in logs, and verifies `https://uppcs.mockexamonline.com/api/v1/health`.
