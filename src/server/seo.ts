@@ -18,6 +18,8 @@ export function buildRobotsTxt(): string {
     "User-agent: *",
     "Allow: /",
     "Disallow: /api/",
+    "Disallow: /app",
+    "Disallow: /checkout",
     "",
     `Sitemap: ${SITE_ORIGIN}/sitemap.xml`,
     "",
@@ -130,6 +132,31 @@ export async function resolveRouteSeo(
   db: ReturnType<typeof createDb>
 ): Promise<RouteSeoMeta> {
   const cleanPath = pathname === "/" ? "/" : pathname.replace(/\/+$/, "");
+
+  // 0. Authenticated App Workspace & Checkout Routes (Noindex)
+  if (cleanPath === "/checkout") {
+    return {
+      title: `Secure Pro Pass Checkout | ${BRAND_NAME}`,
+      description: "Enter your mobile number and unlock Sankalp Pro Pass via Razorpay 256-bit secured checkout.",
+      canonicalPath: "/checkout",
+      ogType: "website",
+      robots: "noindex, nofollow",
+      jsonLd: { "@context": "https://schema.org", "@type": "WebPage", name: "Sankalp Checkout" },
+      ssrBodyHtml: "",
+    };
+  }
+
+  if (cleanPath === "/app" || cleanPath.startsWith("/app/")) {
+    return {
+      title: `Sankalp Adaptive Study Workspace | ${BRAND_NAME}`,
+      description: "Configure your preferred medium, exam journeys, adaptive drills, and FSRS flashcards.",
+      canonicalPath: "/app",
+      ogType: "website",
+      robots: "noindex, nofollow",
+      jsonLd: { "@context": "https://schema.org", "@type": "WebApplication", name: BRAND_NAME },
+      ssrBodyHtml: "",
+    };
+  }
 
   // 1. Individual Current Affairs or Blog Article
   if (cleanPath.startsWith("/current-affairs/") || cleanPath.startsWith("/blog/")) {

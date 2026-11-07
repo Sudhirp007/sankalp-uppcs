@@ -331,6 +331,20 @@ async function main() {
       updated_at TIMESTAMP NOT NULL DEFAULT NOW()
     )`,
     `CREATE INDEX IF NOT EXISTS idx_seo_posts_cat_pub ON seo_posts(category, published_at DESC)`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number TEXT`,
+    `ALTER TABLE users ALTER COLUMN streak_days SET DEFAULT 0`,
+    `ALTER TABLE user_exam_journeys ALTER COLUMN readiness_score SET DEFAULT 0`,
+    `ALTER TABLE user_exam_journeys ALTER COLUMN predicted_score SET DEFAULT 0`,
+    `ALTER TABLE user_exam_journeys ALTER COLUMN syllabus_covered_pct SET DEFAULT 0`,
+    `ALTER TABLE user_topic_mastery ALTER COLUMN mastery_score SET DEFAULT 0`,
+    `ALTER TABLE payment_orders ADD COLUMN IF NOT EXISTS buyer_phone TEXT`,
+    `CREATE INDEX IF NOT EXISTS idx_orders_buyer_phone ON payment_orders(buyer_phone)`,
+    // Clean pre-seeded synthetic metrics for users who have 0 submitted tests so new users start genuinely empty
+    `DELETE FROM user_topic_mastery WHERE user_id NOT IN (SELECT DISTINCT user_id FROM test_sessions WHERE status = 'SUBMITTED')`,
+    `DELETE FROM user_exam_journeys WHERE user_id NOT IN (SELECT DISTINCT user_id FROM test_sessions WHERE status = 'SUBMITTED') AND user_id IN (SELECT id FROM users WHERE onboarding_completed = FALSE)`,
+    `UPDATE user_exam_journeys SET readiness_score = 0, predicted_score = 0, syllabus_covered_pct = 0, tests_completed = 0, questions_practiced = 0, accuracy_pct = 0, guess_50_50_net_gain = 0 WHERE user_id NOT IN (SELECT DISTINCT user_id FROM test_sessions WHERE status = 'SUBMITTED')`,
+    `DELETE FROM user_item_srs WHERE origin_type = 'TEST_MISTAKE' AND user_id NOT IN (SELECT DISTINCT user_id FROM test_sessions WHERE status = 'SUBMITTED')`,
+    `UPDATE users SET streak_days = 0, scratchpad_notes = '{}'::jsonb WHERE id NOT IN (SELECT DISTINCT user_id FROM test_sessions WHERE status = 'SUBMITTED') AND streak_days = 14`,
   ];
 
   for (const stmt of ddlStatements) {

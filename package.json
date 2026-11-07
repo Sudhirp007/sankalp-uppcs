@@ -17,7 +17,8 @@
     "db:seed-seo": "tsx scripts/seed-seo-content.ts",
     "db:sync-sqlite": "tsx scripts/migrate_sqlite_to_neon.ts",
     "db:sync-economy": "tsx scripts/sync_indian_economy.ts",
-    "test:e2e": "tsx scripts/verify-e2e.ts"
+    "test:e2e": "tsx scripts/verify-e2e.ts",
+    "bench:load": "tsx scripts/load-benchmark.ts"
   },
   "dependencies": {
     "@neon/config": "^1.13.0",

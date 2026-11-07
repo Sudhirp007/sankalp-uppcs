@@ -2,11 +2,12 @@ import { getFreshFirebaseToken } from "./firebase";
 import type { LangCode } from "./i18n";
 
 const ASPIRANT_STORAGE_KEY = "sankalp_aspirant_id";
+const SAFE_GUEST_ID_RE = /^asp_[a-zA-Z0-9_-]{8,56}$/;
 
 export function getOrCreateAspirantId(): string {
   let id = localStorage.getItem(ASPIRANT_STORAGE_KEY);
-  if (!id) {
-    const rand = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+  if (!id || !SAFE_GUEST_ID_RE.test(id)) {
+    const rand = crypto.randomUUID().replace(/-/g, "").slice(0, 20);
     id = `asp_${rand}`;
     localStorage.setItem(ASPIRANT_STORAGE_KEY, id);
   }
@@ -14,7 +15,7 @@ export function getOrCreateAspirantId(): string {
 }
 
 export function rotateNewGuestAspirantId(): string {
-  const rand = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+  const rand = crypto.randomUUID().replace(/-/g, "").slice(0, 20);
   const id = `asp_${rand}`;
   localStorage.setItem(ASPIRANT_STORAGE_KEY, id);
   return id;
@@ -64,10 +65,11 @@ export interface ExamPortfolioCard {
   daysRemaining: number;
   isEnrolled: boolean;
   isPrimary: boolean;
+  hasActivity?: boolean;
   readinessScore: number;
   predictedScore: number;
   cutoffMargin: number;
-  statusTier: "STRONGHOLD" | "DEVELOPING" | "VULNERABLE";
+  statusTier: "STRONGHOLD" | "DEVELOPING" | "VULNERABLE" | "NOT_STARTED";
   testsCompleted: number;
   questionsPracticed: number;
   guess5050NetGain: number;
@@ -93,18 +95,21 @@ export interface UserProfileDTO {
 export interface BootstrapResponse {
   user: UserProfileDTO;
   exams: ExamPortfolioCard[];
+  enrolledExamsCount?: number;
   dueFlashcardsCount: number;
 }
 
 export interface JourneyDashboardResponse {
   exam: ExamPortfolioCard;
+  hasEnrolledExams: boolean;
+  totalQuestionsAttempted: number;
   subjectMastery: Array<{
     domainId: string;
     name: string;
     weightPct: number;
     masteryPct: number;
     practicedCount: number;
-    status: "MASTERED" | "DEVELOPING" | "WEAK";
+    status: "MASTERED" | "DEVELOPING" | "WEAK" | "NOT_STARTED";
   }>;
   gapAlerts: Array<{
     topicId: string;
@@ -137,11 +142,14 @@ export interface JourneyDashboardResponse {
 }
 
 export interface GlobalExpertiseResponse {
+  hasEnrolledExams: boolean;
+  totalQuestionsAttempted: number;
   overallPortfolioElo: number;
   examRanking: ExamPortfolioCard[];
   formatDiagnostics: Array<{
     format: string;
     label: string;
+    attemptedCount?: number;
     accuracyPct: number;
     avgTimeSec: number;
     availableQuestions: number;
@@ -401,6 +409,7 @@ export const api = {
     enrolledExamIds?: string[];
     dailyGoalMins?: number;
     displayName?: string;
+    phoneNumber?: string;
     onboardingCompleted?: boolean;
   }) =>
     apiFetch<{ ok: boolean; preferredLanguage: LangCode; activeExamId: string }>(
@@ -523,7 +532,10 @@ export const api = {
 
   getBillingPlans: () => apiFetch<{ plans: SubscriptionPlanDTO[] }>("/api/v1/billing/plans"),
 
-  createBillingOrder: (planId: string) =>
+  createBillingOrder: (
+    planId: string,
+    opts?: { phoneNumber?: string; displayName?: string }
+  ) =>
     apiFetch<{
       orderId: string;
       amountPaise: number;
@@ -531,6 +543,7 @@ export const api = {
       keyId: string;
       isSandbox: boolean;
       planName: string;
+      buyerPhone?: string | null;
       sandboxProof?: {
         razorpayOrderId: string;
         razorpayPaymentId: string;
@@ -538,7 +551,7 @@ export const api = {
       };
     }>("/api/v1/billing/create-order", {
       method: "POST",
-      body: JSON.stringify({ planId }),
+      body: JSON.stringify({ planId, ...(opts || {}) }),
     }),
 
   verifyBillingPayment: (payload: {

@@ -36,6 +36,7 @@ import { TestCockpitView } from "./views/TestCockpitView";
 import { LearningStudioView } from "./views/LearningStudioView";
 import { FlashcardsSrsView } from "./views/FlashcardsSrsView";
 import { PublicMarketingApp } from "./views/PublicMarketingApp";
+import { CheckoutPageView } from "./views/CheckoutPageView";
 
 type ActiveTab = "JOURNEY" | "GLOBAL" | "SYLLABUS" | "STUDIO" | "SRS" | "COCKPIT";
 
@@ -52,7 +53,6 @@ export const App: React.FC = () => {
   const [selectedSheetId, setSelectedSheetId] = useState<string | null>("cs-panchayati-raj");
   const [activeSession, setActiveSession] = useState<TestSessionDetailResponse | null>(null);
 
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -68,10 +68,13 @@ export const App: React.FC = () => {
   }, []);
 
   const navigateTo = useCallback((nextPath: string) => {
-    if (window.location.pathname !== nextPath) {
+    const currentFull = `${window.location.pathname}${window.location.search}`;
+    if (currentFull !== nextPath) {
       window.history.pushState({}, "", nextPath);
     }
-    setPathname(nextPath);
+    const cleanOnlyPath = nextPath.split("?")[0] || "/";
+    setPathname(cleanOnlyPath);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   useEffect(() => {
@@ -81,14 +84,11 @@ export const App: React.FC = () => {
     return unsub;
   }, []);
 
-  const refreshAll = useCallback(async (overrideExamId?: string) => {
+  const refreshAll = useCallback(async (overrideExamId?: string): Promise<BootstrapResponse | null> => {
     try {
       setErrorBanner(null);
       const b = await api.getBootstrap();
       setBoot(b);
-      if (!b.user.onboardingCompleted && window.location.pathname.startsWith("/app")) {
-        setShowOnboarding(true);
-      }
       const targetExam = overrideExamId || b.user.activeExamId || "uppcs-prelims";
       const [jData, gData, sTree, stData] = await Promise.all([
         api.getJourneyDashboard(targetExam),
@@ -100,8 +100,10 @@ export const App: React.FC = () => {
       setGlobalData(gData);
       setSyllabusData(sTree);
       setStudioSheets(stData.sheets);
+      return b;
     } catch (err: unknown) {
       setErrorBanner(err instanceof Error ? err.message : "Failed to connect to Sankalp Edge API");
+      return null;
     } finally {
       setLoadingBoot(false);
     }
@@ -114,6 +116,34 @@ export const App: React.FC = () => {
   const lang: LangCode = boot?.user.preferredLanguage || "EN";
   const t = UI_COPY[lang];
 
+  // Unified Sign-Out Handler -> Always Redirects Cleanly to Home Page (/)
+  const handleSignOut = useCallback(async () => {
+    await signOutFirebase();
+    rotateNewGuestAspirantId();
+    setActiveSession(null);
+    setActiveTab("JOURNEY");
+    setShowAuthModal(false);
+    setShowUpgradeModal(false);
+    navigateTo("/");
+    await refreshAll();
+  }, [navigateTo, refreshAll]);
+
+  // Unified Post-Registration / Post-Sign-In Handler -> Takes User to Configure Medium & Exam Journeys
+  const handleAuthenticated = useCallback(async () => {
+    const freshBoot = await refreshAll();
+    const hasPracticed = freshBoot?.exams.some((e) => e.questionsPracticed > 0) ?? false;
+    const needsSetup =
+      !freshBoot?.user.onboardingCompleted ||
+      (freshBoot?.enrolledExamsCount ?? 0) === 0 ||
+      !hasPracticed;
+
+    if (needsSetup) {
+      navigateTo("/app/setup");
+    } else if (!window.location.pathname.startsWith("/app")) {
+      navigateTo("/app");
+    }
+  }, [navigateTo, refreshAll]);
+
   const handleToggleLanguage = async () => {
     const nextLang: LangCode = lang === "EN" ? "HI" : "EN";
     await api.updatePreferences({ preferredLanguage: nextLang });
@@ -125,7 +155,11 @@ export const App: React.FC = () => {
   };
 
   const handleSwitchExamJourney = async (examId: string) => {
-    await api.updatePreferences({ activeExamId: examId, enrolledExamIds: [examId] });
+    if (examId === "__MANAGE__") {
+      navigateTo("/app/setup");
+      return;
+    }
+    await api.updatePreferences({ activeExamId: examId });
     await refreshAll(examId);
     setActiveTab("JOURNEY");
   };
@@ -200,19 +234,46 @@ export const App: React.FC = () => {
     setActiveTab("STUDIO");
   };
 
-  const isAppWorkspace = pathname.startsWith("/app");
+  const cleanPath = pathname === "/" ? "/" : pathname.replace(/\/+$/, "");
 
-  // Public Marketing Website, SEO Content Hubs & Pricing Funnel (/, /pricing, /current-affairs, /blog, /exams/*)
+  // 1. Dedicated Regular Full-Page Phone-First Checkout Route (/checkout)
+  if (cleanPath === "/checkout") {
+    return (
+      <CheckoutPageView
+        lang={lang}
+        userEmail={fbUser?.email || boot?.user.email || null}
+        initialDisplayName={fbUser?.displayName || boot?.user.displayName || ""}
+        initialPhoneNumber={fbUser?.phoneNumber || boot?.user.phoneNumber || null}
+        currentPlanTier={boot?.user.planTier || "FREE"}
+        isTestBillingMode={boot?.user.isTestBillingMode ?? true}
+        onToggleLanguage={handleToggleLanguage}
+        onNavigateHome={() => navigateTo("/")}
+        onResetPlanSuccess={async () => {
+          await refreshAll();
+        }}
+        onPaymentSuccess={async () => {
+          await refreshAll();
+          // After payment, take buyer straight to /app setup page to provide further profile & exam info
+          navigateTo("/app/setup");
+        }}
+      />
+    );
+  }
+
+  const isAppWorkspace = cleanPath === "/app" || cleanPath.startsWith("/app/");
+
+  // 2. Public Marketing Website, SEO Content Hubs & Pricing Funnel (/, /pricing, /current-affairs, /blog, /exams/*)
   if (!isAppWorkspace) {
     return (
       <>
         <PublicMarketingApp
-          pathname={pathname}
+          pathname={cleanPath}
           lang={lang}
           fbUser={fbUser}
           planTier={boot?.user.planTier || "FREE"}
           onToggleLanguage={handleToggleLanguage}
           onNavigate={navigateTo}
+          onSignOut={handleSignOut}
           onEnterFreeApp={async (opts) => {
             if (opts?.examId) {
               await api.updatePreferences({
@@ -228,44 +289,34 @@ export const App: React.FC = () => {
                 topicIds: [opts.topicId],
                 limit: 10,
               });
-            } else if (boot && !boot.user.onboardingCompleted) {
-              setShowOnboarding(true);
             }
           }}
-          onOpenProCheckout={() => setShowUpgradeModal(true)}
+          onOpenProCheckout={(planId) => {
+            // Unregistered visitors go to dedicated phone-first /checkout regular page;
+            // signed-in users also get the clean full-page /checkout experience!
+            const targetUrl =
+              typeof planId === "string" && planId
+                ? `/checkout?plan=${encodeURIComponent(planId)}`
+                : "/checkout";
+            navigateTo(targetUrl);
+          }}
           onOpenAuthModal={() => setShowAuthModal(true)}
         />
-
-        {showUpgradeModal && boot && (
-          <UpgradeModal
-            lang={lang}
-            userEmail={fbUser?.email || boot.user.email}
-            userName={fbUser?.displayName || boot.user.displayName}
-            currentPlanTier={boot.user.planTier}
-            isTestBillingMode={boot.user.isTestBillingMode}
-            onClose={() => setShowUpgradeModal(false)}
-            onSuccess={async () => {
-              await refreshAll();
-              navigateTo("/app");
-            }}
-          />
-        )}
 
         {showAuthModal && (
           <AuthModal
             lang={lang}
             fbUser={fbUser}
             onClose={() => setShowAuthModal(false)}
-            onAuthenticated={async () => {
-              await refreshAll();
-            }}
+            onAuthenticated={handleAuthenticated}
+            onSignedOut={handleSignOut}
           />
         )}
       </>
     );
   }
 
-  if (loadingBoot) {
+  if (loadingBoot || !boot) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8FAFC] text-slate-600 gap-3">
         <div className="w-10 h-10 rounded-xl bg-[#1E3A8A] text-white flex items-center justify-center font-extrabold text-lg animate-pulse">
@@ -276,7 +327,35 @@ export const App: React.FC = () => {
     );
   }
 
-  // Distraction-Free Full-Screen 3-Column Test Cockpit Mode
+  const enrolledExams = boot.exams.filter((e) => e.isEnrolled);
+  const requiresInitialSetup = !boot.user.onboardingCompleted || enrolledExams.length === 0;
+
+  // 3. Regular Full-Page "Configure Your Preferred Medium & Exam Journeys" (NOT a popup!)
+  if (cleanPath === "/app/setup" || (cleanPath === "/app" && requiresInitialSetup && activeTab !== "COCKPIT")) {
+    return (
+      <OnboardingModal
+        initialLang={boot.user.preferredLanguage}
+        initialActiveExamId={boot.user.activeExamId}
+        initialDailyGoalMins={boot.user.dailyGoalMins}
+        initialDisplayName={fbUser?.displayName || boot.user.displayName}
+        initialPhoneNumber={fbUser?.phoneNumber || boot.user.phoneNumber || ""}
+        planTier={boot.user.planTier}
+        isAuthenticated={Boolean(fbUser || boot.user.isAuthenticated)}
+        exams={boot.exams}
+        onNavigateHome={() => navigateTo("/")}
+        onSignOut={handleSignOut}
+        onClose={!requiresInitialSetup ? () => navigateTo("/app") : undefined}
+        onSave={async (payload) => {
+          await api.updatePreferences({ ...payload, onboardingCompleted: true });
+          await refreshAll(payload.activeExamId);
+          setActiveTab("JOURNEY");
+          navigateTo("/app");
+        }}
+      />
+    );
+  }
+
+  // 4. Distraction-Free Full-Screen 3-Column Test Cockpit Mode
   if (activeTab === "COCKPIT" && activeSession) {
     return (
       <TestCockpitView
@@ -288,7 +367,9 @@ export const App: React.FC = () => {
         onExitToDashboard={() => setActiveTab("JOURNEY")}
         onOpenCheatSheet={handleOpenCheatSheet}
         onOpenMistakeDeck={() => setActiveTab("SRS")}
-        onFlashcardCreated={() => refreshAll()}
+        onFlashcardCreated={() => {
+          void refreshAll();
+        }}
       />
     );
   }
@@ -316,7 +397,7 @@ export const App: React.FC = () => {
               </div>
             </div>
 
-            {boot && (
+            {enrolledExams.length > 0 && (
               <div className="flex items-center gap-1.5 pl-2 border-l border-slate-200">
                 <span className="hidden xl:inline text-[11px] font-semibold text-slate-400 uppercase">
                   {t.activeJourneyLabel}:
@@ -327,11 +408,14 @@ export const App: React.FC = () => {
                   onChange={(e) => handleSwitchExamJourney(e.target.value)}
                   className="rounded-xl border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-[#1E3A8A] focus:outline-none focus:border-[#1E3A8A] cursor-pointer"
                 >
-                  {boot.exams.map((ex) => (
+                  {enrolledExams.map((ex) => (
                     <option key={ex.examId} value={ex.examId}>
                       {ex.shortName} ({ex.readinessScore}%)
                     </option>
                   ))}
+                  <option value="__MANAGE__">
+                    {lang === "HI" ? "+ परीक्षाएं जोड़ें / बदलें..." : "+ Add / Manage Exams..."}
+                  </option>
                 </select>
               </div>
             )}
@@ -347,7 +431,7 @@ export const App: React.FC = () => {
                 { id: "STUDIO", label: t.navStudio, icon: BookOpen },
                 {
                   id: "SRS",
-                  label: `${t.navSrs}${boot?.dueFlashcardsCount ? ` (${boot.dueFlashcardsCount})` : ""}`,
+                  label: `${t.navSrs}${boot.dueFlashcardsCount ? ` (${boot.dueFlashcardsCount})` : ""}`,
                   icon: Layers,
                 },
               ] as const
@@ -372,15 +456,13 @@ export const App: React.FC = () => {
             })}
           </nav>
 
-          {/* Right Action Controls: Streak, Medium Toggle, Razorpay Pro Pass, Auth */}
+          {/* Right Action Controls: Streak, Medium Toggle, Razorpay Pro Pass, Setup, Auth */}
           <div className="flex items-center gap-2 shrink-0">
-            {boot && (
-              <div className="hidden 2xl:inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-bold text-amber-900 whitespace-nowrap">
-                <Flame className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                <span className="font-mono-metric">{boot.user.streakDays}</span>
-                <span className="text-[11px]">{t.streakSuffix}</span>
-              </div>
-            )}
+            <div className="hidden 2xl:inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-bold text-amber-900 whitespace-nowrap">
+              <Flame className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span className="font-mono-metric">{boot.user.streakDays}</span>
+              <span className="text-[11px]">{t.streakSuffix}</span>
+            </div>
 
             {/* Instant Single-Language Toggle (EN / हिन्दी) */}
             <button
@@ -393,8 +475,8 @@ export const App: React.FC = () => {
               <span>{t.mediumLabel}</span>
             </button>
 
-            {/* Razorpay Pro Pass Upgrade / Active Badge (Always clickable to manage or re-test) */}
-            {boot?.user.planTier === "PRO_PASS" ? (
+            {/* Razorpay Pro Pass Upgrade / Active Badge */}
+            {boot.user.planTier === "PRO_PASS" ? (
               <button
                 type="button"
                 onClick={() => setShowUpgradeModal(true)}
@@ -407,7 +489,7 @@ export const App: React.FC = () => {
             ) : (
               <button
                 type="button"
-                onClick={() => setShowUpgradeModal(true)}
+                onClick={() => navigateTo("/checkout")}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold px-2.5 sm:px-3 py-1.5 text-xs whitespace-nowrap shadow-xs transition cursor-pointer"
               >
                 <Crown className="w-3.5 h-3.5 shrink-0" />
@@ -418,7 +500,7 @@ export const App: React.FC = () => {
             <button
               type="button"
               title={t.preferencesSetup}
-              onClick={() => setShowOnboarding(true)}
+              onClick={() => navigateTo("/app/setup")}
               className="p-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 cursor-pointer"
             >
               <Settings2 className="w-4 h-4" />
@@ -438,12 +520,8 @@ export const App: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={async () => {
-                    await signOutFirebase();
-                    rotateNewGuestAspirantId();
-                    await refreshAll();
-                  }}
-                  title="Sign Out"
+                  onClick={handleSignOut}
+                  title="Sign Out to Home Page"
                   className="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 px-2.5 py-1.5 text-xs font-bold text-rose-800 cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
@@ -510,6 +588,7 @@ export const App: React.FC = () => {
             onOpenSession={handleOpenExistingSession}
             onOpenCheatSheet={handleOpenCheatSheet}
             onNavigateSyllabus={() => setActiveTab("SYLLABUS")}
+            onOpenSetup={() => navigateTo("/app/setup")}
           />
         )}
 
@@ -525,6 +604,7 @@ export const App: React.FC = () => {
                 limit: 10,
               })
             }
+            onOpenSetup={() => navigateTo("/app/setup")}
           />
         )}
 
@@ -560,40 +640,32 @@ export const App: React.FC = () => {
               })
             }
             onOpenFlashcards={() => setActiveTab("SRS")}
-            onRefreshStudio={() => refreshAll()}
+            onRefreshStudio={() => {
+              void refreshAll();
+            }}
           />
         )}
 
         {activeTab === "SRS" && (
-          <FlashcardsSrsView lang={lang} onReviewedCountChange={() => refreshAll()} />
+          <FlashcardsSrsView
+            lang={lang}
+            onReviewedCountChange={() => {
+              void refreshAll();
+            }}
+          />
         )}
       </main>
 
-      {/* Modals */}
-      {showOnboarding && boot && (
-        <OnboardingModal
-          initialLang={boot.user.preferredLanguage}
-          initialActiveExamId={boot.user.activeExamId}
-          initialDailyGoalMins={boot.user.dailyGoalMins}
-          exams={boot.exams}
-          onClose={boot.user.onboardingCompleted ? () => setShowOnboarding(false) : undefined}
-          onSave={async (payload) => {
-            await api.updatePreferences({ ...payload, onboardingCompleted: true });
-            setShowOnboarding(false);
-            await refreshAll(payload.activeExamId);
-          }}
-        />
-      )}
-
-      {showUpgradeModal && boot && (
+      {showUpgradeModal && (
         <UpgradeModal
           lang={lang}
           userEmail={fbUser?.email || boot.user.email}
+          userPhone={fbUser?.phoneNumber || boot.user.phoneNumber}
           userName={fbUser?.displayName || boot.user.displayName}
           currentPlanTier={boot.user.planTier}
           isTestBillingMode={boot.user.isTestBillingMode}
           onClose={() => setShowUpgradeModal(false)}
-          onSuccess={() => refreshAll()}
+          onSuccess={() => refreshAll().then(() => {})}
         />
       )}
 
@@ -602,7 +674,8 @@ export const App: React.FC = () => {
           lang={lang}
           fbUser={fbUser}
           onClose={() => setShowAuthModal(false)}
-          onAuthenticated={() => refreshAll()}
+          onAuthenticated={handleAuthenticated}
+          onSignedOut={handleSignOut}
         />
       )}
     </div>

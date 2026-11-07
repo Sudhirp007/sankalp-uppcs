@@ -16,6 +16,7 @@ import {
   GraduationCap,
   Layers,
   Lock,
+  LogOut,
   Newspaper,
   Play,
   Scissors,
@@ -43,8 +44,9 @@ interface PublicMarketingAppProps {
   onToggleLanguage: () => Promise<void>;
   onNavigate: (path: string) => void;
   onEnterFreeApp: (opts?: { examId?: string; topicId?: string }) => Promise<void>;
-  onOpenProCheckout: () => void;
+  onOpenProCheckout: (planId?: string) => void;
   onOpenAuthModal: () => void;
+  onSignOut?: () => Promise<void>;
 }
 
 export const PublicMarketingApp: React.FC<PublicMarketingAppProps> = ({
@@ -57,6 +59,7 @@ export const PublicMarketingApp: React.FC<PublicMarketingAppProps> = ({
   onEnterFreeApp,
   onOpenProCheckout,
   onOpenAuthModal,
+  onSignOut,
 }) => {
   const [homeData, setHomeData] = useState<PublicHomeResponse | null>(null);
   const [postsList, setPostsList] = useState<PublicPostSummary[]>([]);
@@ -235,7 +238,7 @@ export const PublicMarketingApp: React.FC<PublicMarketingAppProps> = ({
 
             <button
               type="button"
-              onClick={onOpenProCheckout}
+              onClick={() => onOpenProCheckout(annualPlan?.id)}
               className="mt-8 w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold py-3.5 text-sm shadow-lg transition cursor-pointer"
             >
               <Crown className="w-4 h-4" />
@@ -290,7 +293,7 @@ export const PublicMarketingApp: React.FC<PublicMarketingAppProps> = ({
 
             <button
               type="button"
-              onClick={onOpenProCheckout}
+              onClick={() => onOpenProCheckout(boosterPlan?.id)}
               className="mt-8 w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3.5 text-sm transition cursor-pointer"
             >
               <Lock className="w-3.5 h-3.5" />
@@ -567,7 +570,7 @@ export const PublicMarketingApp: React.FC<PublicMarketingAppProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={onOpenProCheckout}
+                  onClick={() => onOpenProCheckout()}
                   className="inline-flex items-center gap-2 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/25 text-white font-bold px-6 py-3.5 text-sm cursor-pointer"
                 >
                   <Crown className="w-4 h-4 text-amber-300" />
@@ -777,7 +780,7 @@ export const PublicMarketingApp: React.FC<PublicMarketingAppProps> = ({
 
                 <button
                   type="button"
-                  onClick={onOpenProCheckout}
+                  onClick={() => onOpenProCheckout()}
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/25 text-white font-bold px-6 py-4 text-sm transition cursor-pointer"
                 >
                   <Crown className="w-4 h-4 text-amber-300" />
@@ -1286,12 +1289,24 @@ export const PublicMarketingApp: React.FC<PublicMarketingAppProps> = ({
               <UserCircle2 className="w-3.5 h-3.5 text-[#1E3A8A]" />
               <span>
                 {fbUser
-                  ? fbUser.displayName?.split(" ")[0] || "Account"
+                  ? fbUser.displayName?.split(" ")[0] || fbUser.phoneNumber || "Account"
                   : lang === "HI"
                     ? "लॉगिन"
                     : "Sign In"}
               </span>
             </button>
+
+            {fbUser && onSignOut && (
+              <button
+                type="button"
+                onClick={onSignOut}
+                title="Sign Out"
+                className="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 px-2.5 py-1.5 text-xs font-bold text-rose-800 whitespace-nowrap cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{lang === "HI" ? "साइन आउट" : "Sign Out"}</span>
+              </button>
+            )}
 
             <button
               type="button"

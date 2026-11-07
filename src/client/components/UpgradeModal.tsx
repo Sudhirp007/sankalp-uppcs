@@ -15,6 +15,7 @@ declare global {
 interface UpgradeModalProps {
   lang: LangCode;
   userEmail: string | null;
+  userPhone?: string | null;
   userName: string;
   currentPlanTier?: "FREE" | "PRO_PASS";
   isTestBillingMode?: boolean;
@@ -25,6 +26,7 @@ interface UpgradeModalProps {
 export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   lang,
   userEmail,
+  userPhone = null,
   userName,
   currentPlanTier = "FREE",
   isTestBillingMode = true,
@@ -33,6 +35,9 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
 }) => {
   const [plans, setPlans] = useState<SubscriptionPlanDTO[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("plan-sankalp-pro-annual");
+  const [phoneDigits, setPhoneDigits] = useState<string>(() =>
+    (userPhone || "").replace(/^\+91/, "").replace(/[^\d]/g, "").slice(0, 10)
+  );
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
@@ -51,13 +56,30 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
       .finally(() => setLoadingPlans(false));
   }, []);
 
+  const needsPhoneInput = !userEmail && !userPhone;
+  const isPhoneReady = !needsPhoneInput || /^[6-9]\d{9}$/.test(phoneDigits);
+
   const handleCheckout = async () => {
+    if (!isPhoneReady) {
+      setErrorMsg(
+        lang === "HI"
+          ? "भुगतान शुरू करने हेतु कृपया अपना 10-अंकीय मोबाइल नंबर दर्ज करें।"
+          : "Please enter a valid 10-digit mobile number below before proceeding to payment."
+      );
+      return;
+    }
+
     setProcessing(true);
     setErrorMsg(null);
     setStatusMsg(null);
 
+    const formattedPhone = /^[6-9]\d{9}$/.test(phoneDigits) ? `+91${phoneDigits}` : userPhone || undefined;
+
     try {
-      const order = await api.createBillingOrder(selectedPlanId);
+      const order = await api.createBillingOrder(selectedPlanId, {
+        phoneNumber: formattedPhone,
+        displayName: userName,
+      });
 
       // 1. Live / Test Razorpay Checkout.js modal when real RAZORPAY_KEY_ID is set
       if (!order.isSandbox && window.Razorpay) {
@@ -77,7 +99,8 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
           order_id: order.orderId,
           prefill: {
             name: userName,
-            email: userEmail || "aspirant@sankalp.in",
+            ...(userEmail ? { email: userEmail } : {}),
+            ...(formattedPhone ? { contact: formattedPhone } : {}),
           },
           theme: { color: "#1E3A8A" },
           modal: {
@@ -240,6 +263,30 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {needsPhoneInput && (
+            <div className="rounded-xl bg-slate-50 border border-slate-200 p-3.5 space-y-1.5">
+              <label className="block text-xs font-bold text-slate-800">
+                {lang === "HI"
+                  ? "10-अंकीय मोबाइल नंबर दर्ज करें (प्रो पास लिंकिंग हेतु) *"
+                  : "Enter 10-Digit Mobile Number to Link Your Pro Pass *"}
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-mono-metric font-bold text-slate-700">
+                  +91
+                </span>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder="9876543210"
+                  value={phoneDigits}
+                  onChange={(e) => setPhoneDigits(e.target.value.replace(/[^\d]/g, "").slice(0, 10))}
+                  className="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-mono-metric focus:outline-none focus:border-[#1E3A8A]"
+                />
+              </div>
             </div>
           )}
 

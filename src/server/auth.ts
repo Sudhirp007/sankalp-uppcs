@@ -47,13 +47,17 @@ export async function verifyFirebaseIdToken(
   expectedProjectId: string
 ): Promise<{ uid: string; email?: string; phoneNumber?: string; name?: string } | null> {
   try {
+    if (token.length > 4096) return null;
     const parts = token.split(".");
     if (parts.length !== 3) return null;
-    const header = JSON.parse(new TextDecoder().decode(base64UrlToUint8Array(parts[0])));
-    const payload = JSON.parse(new TextDecoder().decode(base64UrlToUint8Array(parts[1])));
+    const header = JSON.parse(new TextDecoder().decode(base64UrlToUint8Array(parts[0]!)));
+    const payload = JSON.parse(new TextDecoder().decode(base64UrlToUint8Array(parts[1]!)));
+
+    if (header.alg !== "RS256" || typeof header.kid !== "string" || !header.kid) return null;
 
     const nowSec = Math.floor(Date.now() / 1000);
-    if (!payload.sub || payload.exp < nowSec) return null;
+    if (!payload.sub || typeof payload.exp !== "number" || payload.exp < nowSec) return null;
+    if (typeof payload.iat === "number" && payload.iat > nowSec + 60) return null;
     if (expectedProjectId && payload.aud !== expectedProjectId) return null;
     if (expectedProjectId && payload.iss !== `https://securetoken.google.com/${expectedProjectId}`) return null;
 
@@ -70,7 +74,7 @@ export async function verifyFirebaseIdToken(
     );
 
     const signedData = new TextEncoder().encode(`${parts[0]}.${parts[1]}`);
-    const signature = base64UrlToUint8Array(parts[2]);
+    const signature = base64UrlToUint8Array(parts[2]!);
     const valid = await crypto.subtle.verify(
       "RSASSA-PKCS1-v1_5",
       cryptoKey,
@@ -114,11 +118,12 @@ export async function resolveRequestIdentity(
     }
   }
 
+  // Strict Guest Namespace Isolation:
+  // Unauthenticated headers MUST start with `asp_` (8+ alphanumeric chars) and can NEVER impersonate `fb_*` Firebase UIDs.
   const aspirantHeader = (req.headers.get("x-aspirant-id") || "").trim();
-  const safeId =
-    aspirantHeader && /^[a-zA-Z0-9_-]{4,64}$/.test(aspirantHeader)
-      ? aspirantHeader
-      : "demo_aspirant_default";
+  const safeId = /^asp_[a-zA-Z0-9_-]{8,56}$/.test(aspirantHeader)
+    ? aspirantHeader
+    : `asp_anon_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
 
   return {
     userId: safeId,

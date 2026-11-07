@@ -26,6 +26,7 @@ interface AuthModalProps {
   fbUser: FirebaseUser | null;
   onClose: () => void;
   onAuthenticated: () => Promise<void>;
+  onSignedOut?: () => Promise<void>;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -33,6 +34,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   fbUser,
   onClose,
   onAuthenticated,
+  onSignedOut,
 }) => {
   const [authTab, setAuthTab] = useState<"PHONE" | "EMAIL">("PHONE");
   const [emailMode, setEmailMode] = useState<"signin" | "signup">("signin");
@@ -90,7 +92,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const msg = err instanceof Error ? err.message : "Failed to send OTP";
       if (msg.includes("billing-not-enabled")) {
         setError(
-          "Firebase $0 Spark tier restricts live carrier SMS; use pre-configured Spark Test Number +91 9999999999 (OTP: 123456) or +91 9876543210 (OTP: 654321), or sign in with Google!"
+          "India (+91) SMS region is enabled! Because this Firebase project is currently on the $0 Spark plan, live carrier SMS requires upgrading Firebase to Blaze (first 10 SMS/day free). Right now, use Spark Test Numbers 9999999999 (OTP: 123456) or 9876543210 (OTP: 654321), or sign in with Google / Email!"
         );
       } else {
         setError(msg);
@@ -138,9 +140,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleSignOutAll = async () => {
     setBusy(true);
     try {
-      await signOutFirebase();
-      rotateNewGuestAspirantId();
-      await onAuthenticated();
+      if (onSignedOut) {
+        await onSignedOut();
+      } else {
+        await signOutFirebase();
+        rotateNewGuestAspirantId();
+        await onAuthenticated();
+      }
       handleClose();
     } finally {
       setBusy(false);

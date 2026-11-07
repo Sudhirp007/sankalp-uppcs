@@ -239,11 +239,12 @@ export const users = pgTable("users", {
   id: text("id").primaryKey(),
   firebaseUid: text("firebase_uid").unique(),
   email: text("email"),
+  phoneNumber: text("phone_number"),
   displayName: text("display_name").notNull().default("UPPSC Aspirant"),
   preferredLanguage: text("preferred_language").notNull().default("EN"), // STRICT: 'EN' | 'HI'
   activeExamId: text("active_exam_id").references(() => exams.id, { onDelete: "set null" }),
   dailyGoalMins: integer("daily_goal_mins").notNull().default(45),
-  streakDays: integer("streak_days").notNull().default(1),
+  streakDays: integer("streak_days").notNull().default(0),
   onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
   planTier: text("plan_tier").notNull().default("FREE"), // FREE | PRO_PASS
   proExpiresAt: timestamp("pro_expires_at"),
@@ -264,9 +265,9 @@ export const userExamJourneys = pgTable(
       .notNull()
       .references(() => exams.id, { onDelete: "cascade" }),
     isPrimary: boolean("is_primary").notNull().default(false),
-    readinessScore: doublePrecision("readiness_score").notNull().default(52),
-    predictedScore: doublePrecision("predicted_score").notNull().default(82),
-    syllabusCoveredPct: doublePrecision("syllabus_covered_pct").notNull().default(18),
+    readinessScore: doublePrecision("readiness_score").notNull().default(0),
+    predictedScore: doublePrecision("predicted_score").notNull().default(0),
+    syllabusCoveredPct: doublePrecision("syllabus_covered_pct").notNull().default(0),
     testsCompleted: integer("tests_completed").notNull().default(0),
     questionsPracticed: integer("questions_practiced").notNull().default(0),
     accuracyPct: doublePrecision("accuracy_pct").notNull().default(0),
@@ -288,7 +289,7 @@ export const userTopicMastery = pgTable(
     topicId: text("topic_id")
       .notNull()
       .references(() => syllabusTopics.id, { onDelete: "cascade" }),
-    masteryScore: doublePrecision("mastery_score").notNull().default(50),
+    masteryScore: doublePrecision("mastery_score").notNull().default(0),
     attemptsCount: integer("attempts_count").notNull().default(0),
     correctCount: integer("correct_count").notNull().default(0),
     wrongCount: integer("wrong_count").notNull().default(0),
@@ -417,6 +418,7 @@ export const paymentOrders = pgTable(
     razorpayOrderId: text("razorpay_order_id").notNull().unique(),
     razorpayPaymentId: text("razorpay_payment_id"),
     razorpaySignature: text("razorpay_signature"),
+    buyerPhone: text("buyer_phone"),
     amountPaise: integer("amount_paise").notNull(),
     currency: text("currency").notNull().default("INR"),
     status: text("status").notNull().default("CREATED"), // CREATED | PAID | FAILED

@@ -32,9 +32,141 @@ type Variables = {
 
 const app = new Hono<{ Bindings: WorkerBindings; Variables: Variables }>();
 
-app.use("/api/*", cors());
+// ---------------------------------------------------------------------------
+// Security Hardening: OWASP Headers, Origin-Scoped CORS & Edge Burst Rate Limiter
+// ---------------------------------------------------------------------------
+const CSP_HEADER = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://apis.google.com https://www.google.com https://www.gstatic.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "img-src 'self' data: blob: https:",
+  "media-src 'self' blob: https:",
+  "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://*.firebaseapp.com https://accounts.google.com https://www.google.com",
+  "connect-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://securetoken.google.com https://identitytoolkit.googleapis.com",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'self'",
+].join("; ");
 
-// Helper: Ensure user row + baseline topic mastery & default journey exist
+app.use("*", async (c, next) => {
+  await next();
+  c.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  c.header("X-Content-Type-Options", "nosniff");
+  c.header("X-Frame-Options", "SAMEORIGIN");
+  c.header("Referrer-Policy", "strict-origin-when-cross-origin");
+  c.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  c.header("Content-Security-Policy", CSP_HEADER);
+});
+
+app.use(
+  "/api/*",
+  cors({
+    origin: (origin) => {
+      if (!origin) return "https://uppcs.mockexamonline.com";
+      if (
+        origin === "https://uppcs.mockexamonline.com" ||
+        origin === "https://mockexamonline.com" ||
+        origin === "https://www.mockexamonline.com" ||
+        /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+)(:\d+)?$/.test(origin)
+      ) {
+        return origin;
+      }
+      return "https://uppcs.mockexamonline.com";
+    },
+    allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization", "x-aspirant-id", "x-razorpay-signature"],
+    maxAge: 86400,
+  })
+);
+
+const rateBuckets = new Map<string, { count: number; resetAt: number }>();
+
+function checkIpRateLimit(ip: string, bucket: string, maxPerMin: number): boolean {
+  const now = Date.now();
+  if (rateBuckets.size > 5000) {
+    for (const [k, v] of rateBuckets) {
+      if (v.resetAt <= now) rateBuckets.delete(k);
+    }
+  }
+  const key = `${bucket}:${ip}`;
+  const entry = rateBuckets.get(key);
+  if (!entry || entry.resetAt <= now) {
+    rateBuckets.set(key, { count: 1, resetAt: now + 60_000 });
+    return true;
+  }
+  if (entry.count >= maxPerMin) return false;
+  entry.count += 1;
+  return true;
+}
+
+app.use("/api/v1/*", async (c, next) => {
+  const method = c.req.method;
+  const path = c.req.path;
+  if ((method === "POST" || method === "PATCH" || method === "DELETE") && !path.endsWith("/billing/webhook")) {
+    const ip = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+    const isBilling = path.includes("/billing/create-order");
+    const allowed = checkIpRateLimit(ip, isBilling ? "billing" : "write", isBilling ? 25 : 180);
+    if (!allowed) {
+      return c.json({ error: "Too many requests. Please wait a moment and try again." }, 429);
+    }
+  }
+  await next();
+});
+
+// ---------------------------------------------------------------------------
+// 60-Second Edge Isolate Cache for Read-Only Syllabus & Exam Catalog Tables
+// ---------------------------------------------------------------------------
+interface StaticCatalogCache {
+  expiresAt: number;
+  exams: Array<typeof schema.exams.$inferSelect>;
+  topics: Array<typeof schema.syllabusTopics.$inferSelect>;
+  syllabusMap: Array<typeof schema.examSyllabusMap.$inferSelect>;
+  artifacts: Array<typeof schema.learningArtifacts.$inferSelect>;
+  plans: Array<typeof schema.subscriptionPlans.$inferSelect>;
+}
+
+let catalogCache: StaticCatalogCache | null = null;
+const publicHomeCache = new Map<string, { expiresAt: number; payload: unknown }>();
+
+async function getStaticCatalog(db: ReturnType<typeof createDb>): Promise<StaticCatalogCache> {
+  if (catalogCache && Date.now() < catalogCache.expiresAt) {
+    return catalogCache;
+  }
+  const [exams, topics, syllabusMap, artifacts, plans] = await Promise.all([
+    db.select().from(schema.exams).where(eq(schema.exams.isActive, true)),
+    db.select().from(schema.syllabusTopics).orderBy(asc(schema.syllabusTopics.sortOrder)),
+    db.select().from(schema.examSyllabusMap),
+    db.select().from(schema.learningArtifacts),
+    db.select().from(schema.subscriptionPlans).where(eq(schema.subscriptionPlans.isActive, true)),
+  ]);
+  catalogCache = {
+    expiresAt: Date.now() + 60_000,
+    exams,
+    topics,
+    syllabusMap,
+    artifacts,
+    plans,
+  };
+  return catalogCache;
+}
+
+export function normalizeIndianOrE164Phone(raw?: string | null): string | null {
+  if (!raw) return null;
+  const digitsAndPlus = raw.trim().replace(/[\s()-]/g, "");
+  if (/^[6-9]\d{9}$/.test(digitsAndPlus)) {
+    return `+91${digitsAndPlus}`;
+  }
+  if (/^91[6-9]\d{9}$/.test(digitsAndPlus)) {
+    return `+${digitsAndPlus}`;
+  }
+  if (/^\+[1-9]\d{9,14}$/.test(digitsAndPlus)) {
+    return digitsAndPlus;
+  }
+  return null;
+}
+
+// Helper: Ensure user row exists cleanly in true zero-state (no synthetic metrics or fake journeys)
 async function ensureUserRecord(
   db: ReturnType<typeof createDb>,
   req: Request,
@@ -47,187 +179,160 @@ async function ensureUserRecord(
     .where(eq(schema.users.id, identity.userId))
     .limit(1);
 
+  const normalizedIdentPhone = normalizeIndianOrE164Phone(identity.phoneNumber);
+
   if (existing.length > 0) {
-    const row = existing[0]!;
-    if (
+    let row = existing[0]!;
+    const needsProfileSync =
       identity.isVerifiedFirebaseToken &&
       ((identity.email && !row.email) ||
+        (normalizedIdentPhone && !row.phoneNumber) ||
         (identity.displayName &&
-          (row.displayName === "Sankalp Aspirant" || row.displayName === "UPPSC Aspirant")))
-    ) {
+          (row.displayName === "Sankalp Aspirant" || row.displayName === "UPPSC Aspirant")));
+
+    // Reconcile paid unregistered phone checkout if user later signs in with matching phone number
+    let reconciledTier = row.planTier;
+    let reconciledExpiry = row.proExpiresAt;
+    if (normalizedIdentPhone && row.planTier !== "PRO_PASS") {
+      const [paidPhoneOrder] = await db
+        .select()
+        .from(schema.paymentOrders)
+        .where(
+          and(
+            eq(schema.paymentOrders.buyerPhone, normalizedIdentPhone),
+            eq(schema.paymentOrders.status, "PAID")
+          )
+        )
+        .orderBy(desc(schema.paymentOrders.verifiedAt))
+        .limit(1);
+      if (paidPhoneOrder) {
+        reconciledTier = "PRO_PASS";
+        reconciledExpiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+      }
+    }
+
+    if (needsProfileSync || reconciledTier !== row.planTier) {
       await db
         .update(schema.users)
         .set({
           firebaseUid: identity.firebaseUid || row.firebaseUid,
           email: identity.email || row.email,
+          phoneNumber: normalizedIdentPhone || row.phoneNumber,
           displayName: identity.displayName || row.displayName,
+          planTier: reconciledTier,
+          proExpiresAt: reconciledExpiry,
           updatedAt: new Date(),
         })
         .where(eq(schema.users.id, row.id));
-      return {
+      row = {
         ...row,
         firebaseUid: identity.firebaseUid || row.firebaseUid,
         email: identity.email || row.email,
+        phoneNumber: normalizedIdentPhone || row.phoneNumber,
         displayName: identity.displayName || row.displayName,
+        planTier: reconciledTier,
+        proExpiresAt: reconciledExpiry,
       };
     }
     return row;
+  }
+
+  // Reconcile paid phone order on brand-new Firebase Phone sign-in if applicable
+  let initialPlanTier = "FREE";
+  let initialProExpiry: Date | null = null;
+  if (normalizedIdentPhone) {
+    const [paidPhoneOrder] = await db
+      .select()
+      .from(schema.paymentOrders)
+      .where(
+        and(
+          eq(schema.paymentOrders.buyerPhone, normalizedIdentPhone),
+          eq(schema.paymentOrders.status, "PAID")
+        )
+      )
+      .orderBy(desc(schema.paymentOrders.verifiedAt))
+      .limit(1);
+    if (paidPhoneOrder) {
+      initialPlanTier = "PRO_PASS";
+      initialProExpiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    }
   }
 
   const newUser: typeof schema.users.$inferInsert = {
     id: identity.userId,
     firebaseUid: identity.firebaseUid,
     email: identity.email,
+    phoneNumber: normalizedIdentPhone,
     displayName: identity.displayName,
     preferredLanguage: "EN",
-    activeExamId: "uppcs-prelims",
+    activeExamId: null,
     dailyGoalMins: 45,
-    streakDays: 14,
+    streakDays: 0,
     onboardingCompleted: false,
-    planTier: "FREE",
-    scratchpadNotes: {
-      "cs-panchayati-raj":
-        "Ashok Mehta (1977) = 2-tier + OPEN political party contest. Balwant Rai (1957) = 3-tier party-less.",
-    },
+    planTier: initialPlanTier,
+    proExpiresAt: initialProExpiry,
+    scratchpadNotes: {},
   };
 
   await db.insert(schema.users).values(newUser).onConflictDoNothing();
-
-  // Enroll default two UPPSC journeys (UPPCS Prelims + RO/ARO) so student immediately sees multi-journey switching
-  await db
-    .insert(schema.userExamJourneys)
-    .values([
-      {
-        id: `${identity.userId}__uppcs-prelims`,
-        userId: identity.userId,
-        examId: "uppcs-prelims",
-        isPrimary: true,
-        readinessScore: 68,
-        predictedScore: 94.8,
-        syllabusCoveredPct: 66,
-        testsCompleted: 2,
-        questionsPracticed: 180,
-        accuracyPct: 71.2,
-        guess5050NetGain: 4.2,
-      },
-      {
-        id: `${identity.userId}__uppsc-ro-aro`,
-        userId: identity.userId,
-        examId: "uppsc-ro-aro",
-        isPrimary: false,
-        readinessScore: 81,
-        predictedScore: 136.2,
-        syllabusCoveredPct: 74,
-        testsCompleted: 1,
-        questionsPracticed: 140,
-        accuracyPct: 78.5,
-        guess5050NetGain: 5.3,
-      },
-    ])
-    .onConflictDoNothing();
-
-  // Seed realistic baseline topic mastery across L3 topics so Global Cross-Exam Matrix & Subject Bars work out-of-the-box
-  const baselineMastery: Array<[string, number, number, number]> = [
-    ["top-polity-panchayat", 88, 28, 25],
-    ["top-polity-ulb", 62, 16, 10],
-    ["top-polity-pesa", 36, 11, 4],
-    ["top-polity-const-bodies", 84, 34, 29],
-    ["top-hist-modern", 76, 42, 32],
-    ["top-up-special-gk", 74, 30, 22],
-    ["top-sci-bio-agri", 71, 24, 17],
-    ["top-env-biodiversity", 61, 22, 13],
-    ["top-geo-rivers", 58, 26, 15],
-    ["top-econ-fiscal", 41, 22, 9],
-    ["top-ca-schemes", 72, 25, 18],
-  ];
-
-  await db
-    .insert(schema.userTopicMastery)
-    .values(
-      baselineMastery.map(([topicId, score, attempts, correct]) => ({
-        id: `${identity.userId}__${topicId}`,
-        userId: identity.userId,
-        topicId,
-        masteryScore: score,
-        attemptsCount: attempts,
-        correctCount: correct,
-        wrongCount: attempts - correct,
-      }))
-    )
-    .onConflictDoNothing();
-
-  // Seed starter due SRS cards (only global curated cards, never another user's private cards)
-  const allCards = await db
-    .select({ id: schema.flashcards.id })
-    .from(schema.flashcards)
-    .where(sql`${schema.flashcards.createdByUserId} IS NULL`);
-  if (allCards.length > 0) {
-    await db
-      .insert(schema.userItemSrs)
-      .values(
-        allCards.map((fc, idx) => ({
-          id: `${identity.userId}__${fc.id}`,
-          userId: identity.userId,
-          flashcardId: fc.id,
-          originType: idx < 2 ? "TEST_MISTAKE" : "TOPIC_DECK",
-          originLabelEn:
-            idx < 2
-              ? "Derived from Past Test Mistake (UPPCS Prelims 2024 - GS Paper I)"
-              : "High-Yield Syllabus Deck",
-          originLabelHi:
-            idx < 2
-              ? "पिछली परीक्षा त्रुटि से निर्मित (यूपीपीसीएस प्रा. 2024 - सामान्य अध्ययन-I)"
-              : "उच्च-उपयोगी पाठ्यक्रम डेक",
-          intervalDays: 0,
-          repetitions: 0,
-          nextDueAt: new Date(Date.now() - 60_000),
-        }))
-      )
-      .onConflictDoNothing();
-  }
 
   const created = await db
     .select()
     .from(schema.users)
     .where(eq(schema.users.id, identity.userId))
     .limit(1);
-  return created[0];
+  return created[0]!;
 }
 
-// Helper: Recalculate cross-exam readiness across all exams from unified userTopicMastery
+// Helper: Calculate cross-exam readiness strictly from user's REAL practiced mastery & enrolled exams
 async function computeAllExamReadiness(
   db: ReturnType<typeof createDb>,
   userId: string,
   lang: LangCode
 ) {
-  const [allExams, allMaps, userMasteryRows, enrolledRows] = await Promise.all([
-    db.select().from(schema.exams).where(eq(schema.exams.isActive, true)),
-    db.select().from(schema.examSyllabusMap),
+  const [catalog, userMasteryRows, enrolledRows] = await Promise.all([
+    getStaticCatalog(db),
     db.select().from(schema.userTopicMastery).where(eq(schema.userTopicMastery.userId, userId)),
     db.select().from(schema.userExamJourneys).where(eq(schema.userExamJourneys.userId, userId)),
   ]);
 
-  const masteryMap = new Map(userMasteryRows.map((m) => [m.topicId, m.masteryScore]));
+  const masteryMap = new Map(userMasteryRows.map((m) => [m.topicId, m]));
   const enrolledMap = new Map(enrolledRows.map((j) => [j.examId, j]));
+  const totalPracticedAcrossTopics = userMasteryRows.reduce((sum, r) => sum + r.attemptsCount, 0);
 
-  return allExams
+  return catalog.exams
     .map((exam) => {
-      const maps = allMaps.filter((m) => m.examId === exam.id);
+      const maps = catalog.syllabusMap.filter((m) => m.examId === exam.id);
+      const enrolled = enrolledMap.get(exam.id);
+      const examQuestionsPracticed = enrolled?.questionsPracticed ?? 0;
+      const hasActivity = totalPracticedAcrossTopics > 0 || examQuestionsPracticed > 0;
+
       let weightedSum = 0;
       let totalWeight = 0;
       for (const m of maps) {
-        const score = masteryMap.get(m.topicId) ?? 50;
+        const mRow = masteryMap.get(m.topicId);
+        // Unpracticed topics start at 0 (never synthetic 50%) so readiness grows genuinely as questions are solved
+        const score = mRow && mRow.attemptsCount > 0 ? mRow.masteryScore : 0;
         weightedSum += score * m.expectedWeightPct;
         totalWeight += m.expectedWeightPct;
       }
-      const readiness = totalWeight > 0 ? Math.round((weightedSum / totalWeight) * 10) / 10 : 55;
-      const predictedScore =
-        Math.round(exam.maxMarks * (0.32 + (readiness / 100) * 0.42) * 10) / 10;
-      const cutoffMargin = Math.round((predictedScore - exam.historicalCutoff) * 10) / 10;
-      const enrolled = enrolledMap.get(exam.id);
 
-      const statusTier =
-        readiness >= 75 ? "STRONGHOLD" : readiness >= 62 ? "DEVELOPING" : "VULNERABLE";
+      const readiness =
+        hasActivity && totalWeight > 0 ? Math.round((weightedSum / totalWeight) * 10) / 10 : 0;
+      const predictedScore = hasActivity
+        ? Math.round(exam.maxMarks * (readiness / 100) * 10) / 10
+        : 0;
+      const cutoffMargin = hasActivity
+        ? Math.round((predictedScore - exam.historicalCutoff) * 10) / 10
+        : 0;
+
+      const statusTier = !hasActivity
+        ? "NOT_STARTED"
+        : readiness >= 75
+          ? "STRONGHOLD"
+          : readiness >= 50
+            ? "DEVELOPING"
+            : "VULNERABLE";
 
       return {
         examId: exam.id,
@@ -245,16 +350,17 @@ async function computeAllExamReadiness(
         daysRemaining: exam.daysRemaining,
         isEnrolled: Boolean(enrolled),
         isPrimary: Boolean(enrolled?.isPrimary),
+        hasActivity,
         readinessScore: Math.round(readiness),
         predictedScore,
         cutoffMargin,
         statusTier,
         testsCompleted: enrolled?.testsCompleted ?? 0,
-        questionsPracticed: enrolled?.questionsPracticed ?? 0,
+        questionsPracticed: examQuestionsPracticed,
         guess5050NetGain: enrolled?.guess5050NetGain ?? 0,
       };
     })
-    .sort((a, b) => b.readinessScore - a.readinessScore);
+    .sort((a, b) => Number(b.isEnrolled) - Number(a.isEnrolled) || b.readinessScore - a.readinessScore);
 }
 
 // ---------------------------------------------------------------------------
@@ -334,16 +440,23 @@ app.get("/api/v1/bootstrap", async (c) => {
 
   const keyId = c.env?.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || "";
   const isTestBillingMode = !keyId || keyId.startsWith("rzp_test_");
+  const enrolledExams = examPortfolio.filter((e) => e.isEnrolled);
+  const resolvedActiveExamId =
+    (user.activeExamId && enrolledExams.some((e) => e.examId === user.activeExamId)
+      ? user.activeExamId
+      : enrolledExams[0]?.examId) ||
+    user.activeExamId ||
+    "uppcs-prelims";
 
   return c.json({
     user: {
       id: user.id,
       email: user.email,
-      phoneNumber: identity.phoneNumber,
+      phoneNumber: user.phoneNumber || identity.phoneNumber || null,
       isAuthenticated: identity.isVerifiedFirebaseToken,
       displayName: user.displayName,
       preferredLanguage: lang,
-      activeExamId: user.activeExamId || "uppcs-prelims",
+      activeExamId: resolvedActiveExamId,
       dailyGoalMins: user.dailyGoalMins,
       streakDays: user.streakDays,
       onboardingCompleted: user.onboardingCompleted,
@@ -353,6 +466,7 @@ app.get("/api/v1/bootstrap", async (c) => {
       scratchpadNotes: user.scratchpadNotes || {},
     },
     exams: examPortfolio,
+    enrolledExamsCount: enrolledExams.length,
     dueFlashcardsCount: dueSrsRows[0]?.count ?? 0,
   });
 });
@@ -367,42 +481,109 @@ app.patch("/api/v1/me/preferences", async (c) => {
     enrolledExamIds?: string[];
     dailyGoalMins?: number;
     displayName?: string;
+    phoneNumber?: string;
     onboardingCompleted?: boolean;
   }>();
 
-  const nextLang = body.preferredLanguage ? normalizeLang(body.preferredLanguage) : normalizeLang(user.preferredLanguage);
-  const nextActiveExam = body.activeExamId || user.activeExamId || "uppcs-prelims";
+  const catalog = await getStaticCatalog(db);
+  const validExamIds = new Set(catalog.exams.map((e) => e.id));
+
+  const nextLang = body.preferredLanguage
+    ? normalizeLang(body.preferredLanguage)
+    : normalizeLang(user.preferredLanguage);
+  const candidateActive = body.activeExamId && validExamIds.has(body.activeExamId) ? body.activeExamId : null;
+  const nextActiveExam = candidateActive || user.activeExamId || "uppcs-prelims";
+  const safeDailyMins =
+    typeof body.dailyGoalMins === "number"
+      ? Math.min(360, Math.max(10, Math.round(body.dailyGoalMins)))
+      : user.dailyGoalMins;
+  const safeDisplayName = body.displayName?.trim()
+    ? body.displayName.trim().slice(0, 80)
+    : user.displayName;
+  const safePhone = body.phoneNumber
+    ? normalizeIndianOrE164Phone(body.phoneNumber) || user.phoneNumber
+    : user.phoneNumber;
 
   await db
     .update(schema.users)
     .set({
       preferredLanguage: nextLang,
       activeExamId: nextActiveExam,
-      dailyGoalMins: body.dailyGoalMins ?? user.dailyGoalMins,
-      displayName: body.displayName?.trim() || user.displayName,
-      onboardingCompleted: body.onboardingCompleted ?? true,
+      dailyGoalMins: safeDailyMins,
+      displayName: safeDisplayName,
+      phoneNumber: safePhone,
+      onboardingCompleted: body.onboardingCompleted ?? user.onboardingCompleted,
       updatedAt: new Date(),
     })
     .where(eq(schema.users.id, user.id));
 
-  if (Array.isArray(body.enrolledExamIds) && body.enrolledExamIds.length > 0) {
-    for (const examId of body.enrolledExamIds) {
+  if (Array.isArray(body.enrolledExamIds)) {
+    const cleanSelected = Array.from(
+      new Set(body.enrolledExamIds.filter((id) => validExamIds.has(id)))
+    );
+    if (cleanSelected.length > 0) {
+      // Remove unselected exams that have 0 completed tests so Journey Home & Global Expertise match exact selection
       await db
-        .insert(schema.userExamJourneys)
-        .values({
-          id: `${user.id}__${examId}`,
-          userId: user.id,
-          examId,
-          isPrimary: examId === nextActiveExam,
-          readinessScore: 60,
-          predictedScore: 90,
-          syllabusCoveredPct: 35,
-        })
-        .onConflictDoUpdate({
-          target: [schema.userExamJourneys.userId, schema.userExamJourneys.examId],
-          set: { isPrimary: examId === nextActiveExam, lastActiveAt: new Date() },
-        });
+        .delete(schema.userExamJourneys)
+        .where(
+          and(
+            eq(schema.userExamJourneys.userId, user.id),
+            eq(schema.userExamJourneys.testsCompleted, 0),
+            sql`${schema.userExamJourneys.examId} NOT IN (${sql.join(
+              cleanSelected.map((id) => sql`${id}`),
+              sql`, `
+            )})`
+          )
+        );
+
+      await Promise.all(
+        cleanSelected.map((examId) =>
+          db
+            .insert(schema.userExamJourneys)
+            .values({
+              id: `${user.id}__${examId}`,
+              userId: user.id,
+              examId,
+              isPrimary: examId === nextActiveExam,
+              readinessScore: 0,
+              predictedScore: 0,
+              syllabusCoveredPct: 0,
+              testsCompleted: 0,
+              questionsPracticed: 0,
+              accuracyPct: 0,
+              guess5050NetGain: 0,
+            })
+            .onConflictDoUpdate({
+              target: [schema.userExamJourneys.userId, schema.userExamJourneys.examId],
+              set: { isPrimary: examId === nextActiveExam, lastActiveAt: new Date() },
+            })
+        )
+      );
     }
+  } else if (candidateActive) {
+    await db
+      .update(schema.userExamJourneys)
+      .set({ isPrimary: false })
+      .where(eq(schema.userExamJourneys.userId, user.id));
+    await db
+      .insert(schema.userExamJourneys)
+      .values({
+        id: `${user.id}__${candidateActive}`,
+        userId: user.id,
+        examId: candidateActive,
+        isPrimary: true,
+        readinessScore: 0,
+        predictedScore: 0,
+        syllabusCoveredPct: 0,
+        testsCompleted: 0,
+        questionsPracticed: 0,
+        accuracyPct: 0,
+        guess5050NetGain: 0,
+      })
+      .onConflictDoUpdate({
+        target: [schema.userExamJourneys.userId, schema.userExamJourneys.examId],
+        set: { isPrimary: true, lastActiveAt: new Date() },
+      });
   }
 
   return c.json({ ok: true, preferredLanguage: nextLang, activeExamId: nextActiveExam });
@@ -414,7 +595,17 @@ app.patch("/api/v1/me/scratchpad", async (c) => {
   const user = await ensureUserRecord(db, c.req.raw, fbProject);
   const body = await c.req.json<{ artifactId: string; note: string }>();
 
-  const merged = { ...(user.scratchpadNotes || {}), [body.artifactId]: body.note };
+  const artifactId = String(body.artifactId || "").trim().slice(0, 64);
+  if (!artifactId) {
+    return c.json({ error: "artifactId is required" }, 400);
+  }
+  const safeNote = String(body.note || "").slice(0, 10_000);
+  const existingNotes = user.scratchpadNotes || {};
+  if (!(artifactId in existingNotes) && Object.keys(existingNotes).length >= 60) {
+    return c.json({ error: "Maximum scratchpad note slots reached" }, 400);
+  }
+
+  const merged = { ...existingNotes, [artifactId]: safeNote };
   await db
     .update(schema.users)
     .set({ scratchpadNotes: merged, updatedAt: new Date() })
@@ -424,37 +615,45 @@ app.patch("/api/v1/me/scratchpad", async (c) => {
 });
 
 // ---------------------------------------------------------------------------
-// 3. Per-Exam Learning Journey Dashboard (Screen 2)
+// 3. Per-Exam Learning Journey Dashboard (Screen 2 — True Zero-State Until Practiced)
 // ---------------------------------------------------------------------------
 app.get("/api/v1/journeys/:examId/dashboard", async (c) => {
   const db = createDb(c.env?.DATABASE_URL);
   const fbProject = c.env?.FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || "sankalp-uppcs-app";
   const user = await ensureUserRecord(db, c.req.raw, fbProject);
   const lang = normalizeLang(user.preferredLanguage);
-  const examId = c.req.param("examId") || user.activeExamId || "uppcs-prelims";
+  const requestedExamId = c.req.param("examId");
 
-  const [portfolio, topics, maps, masteryRows, papers, artifacts, recentSessions] = await Promise.all([
+  const [catalog, portfolio, masteryRows, papers, recentSessions] = await Promise.all([
+    getStaticCatalog(db),
     computeAllExamReadiness(db, user.id, lang),
-    db.select().from(schema.syllabusTopics),
-    db.select().from(schema.examSyllabusMap).where(eq(schema.examSyllabusMap.examId, examId)),
     db.select().from(schema.userTopicMastery).where(eq(schema.userTopicMastery.userId, user.id)),
     db.select().from(schema.examPapers).orderBy(desc(schema.examPapers.year)).limit(12),
-    db.select().from(schema.learningArtifacts),
     db
       .select()
       .from(schema.testSessions)
-      .where(and(eq(schema.testSessions.userId, user.id), eq(schema.testSessions.examId, examId)))
+      .where(eq(schema.testSessions.userId, user.id))
       .orderBy(desc(schema.testSessions.startedAt))
-      .limit(5),
+      .limit(10),
   ]);
 
-  const activeExam = portfolio.find((e) => e.examId === examId) || portfolio[0];
-  const masteryMap = new Map(masteryRows.map((m) => [m.topicId, m]));
-  const artifactByTopic = new Map(artifacts.map((a) => [a.topicId, a.id]));
+  const enrolledExams = portfolio.filter((e) => e.isEnrolled);
+  const hasEnrolledExams = enrolledExams.length > 0;
+  const activeExam =
+    enrolledExams.find((e) => e.examId === requestedExamId) ||
+    enrolledExams[0] ||
+    portfolio.find((e) => e.examId === requestedExamId) ||
+    portfolio[0]!;
+  const examId = activeExam.examId;
 
-  // Aggregate Exam-Weighted Subject Mastery (L1 Domains)
-  const l1Domains = topics.filter((t) => t.level === 1).sort((a, b) => a.sortOrder - b.sortOrder);
-  const l3Topics = topics.filter((t) => t.level === 3);
+  const maps = catalog.syllabusMap.filter((m) => m.examId === examId);
+  const masteryMap = new Map(masteryRows.map((m) => [m.topicId, m]));
+  const artifactByTopic = new Map(catalog.artifacts.map((a) => [a.topicId, a.id]));
+  const totalQuestionsAttempted = masteryRows.reduce((sum, m) => sum + m.attemptsCount, 0);
+
+  // Aggregate Exam-Weighted Subject Mastery strictly from user's real practiced topics
+  const l1Domains = catalog.topics.filter((t) => t.level === 1);
+  const l3Topics = catalog.topics.filter((t) => t.level === 3);
   const weightByTopic = new Map(maps.map((m) => [m.topicId, m.expectedWeightPct]));
 
   const subjectMastery = l1Domains
@@ -466,33 +665,45 @@ app.get("/api/v1/journeys/:examId/dashboard", async (c) => {
       for (const ct of childL3) {
         const w = weightByTopic.get(ct.id) ?? 4;
         const m = masteryMap.get(ct.id);
-        wSum += (m?.masteryScore ?? 50) * w;
+        const earnedScore = m && m.attemptsCount > 0 ? m.masteryScore : 0;
+        wSum += earnedScore * w;
         wTotal += w;
         practicedCount += m?.attemptsCount ?? 0;
       }
-      const pct = wTotal > 0 ? Math.round(wSum / wTotal) : 50;
+      const pct = practicedCount > 0 && wTotal > 0 ? Math.round(wSum / wTotal) : 0;
+      const status =
+        practicedCount === 0
+          ? "NOT_STARTED"
+          : pct >= 75
+            ? "MASTERED"
+            : pct >= 55
+              ? "DEVELOPING"
+              : "WEAK";
       return {
         domainId: dom.id,
         name: pickText(lang, dom.nameEn, dom.nameHi),
         weightPct: Math.round(wTotal),
         masteryPct: pct,
         practicedCount,
-        status: pct >= 75 ? "MASTERED" : pct >= 58 ? "DEVELOPING" : "WEAK",
+        status,
       };
     })
     .filter((d) => d.weightPct > 0)
     .sort((a, b) => b.weightPct - a.weightPct);
 
-  // Critical Gap Alerts (lowest mastery high-yield L3 micro-topics)
+  // Critical Gap Alerts: ONLY show micro-topics the user has actually attempted and scored < 65%
   const gapAlerts = l3Topics
-    .map((t) => {
+    .filter((t) => {
       const m = masteryMap.get(t.id);
-      const score = Math.round(m?.masteryScore ?? 48);
+      return Boolean(m && m.attemptsCount > 0 && m.masteryScore < 65);
+    })
+    .map((t) => {
+      const m = masteryMap.get(t.id)!;
       return {
         topicId: t.id,
         name: pickText(lang, t.nameEn, t.nameHi),
         subject: t.subjectKey,
-        accuracyPct: score,
+        accuracyPct: Math.round(m.masteryScore),
         weightPct: weightByTopic.get(t.id) ?? 5,
         artifactId: artifactByTopic.get(t.id) || "cs-panchayati-raj",
       };
@@ -511,12 +722,16 @@ app.get("/api/v1/journeys/:examId/dashboard", async (c) => {
     hasOfficialKey: p.hasOfficialKey,
   }));
 
+  const examSessions = recentSessions.filter((s) => s.examId === examId).slice(0, 5);
+
   return c.json({
+    hasEnrolledExams,
+    totalQuestionsAttempted,
     exam: activeExam,
     subjectMastery,
     gapAlerts,
     papers: examPapersList,
-    recentSessions: recentSessions.map((s) => ({
+    recentSessions: examSessions.map((s) => ({
       id: s.id,
       title: pickText(lang, s.titleEn, s.titleHi),
       status: s.status,
@@ -530,7 +745,7 @@ app.get("/api/v1/journeys/:examId/dashboard", async (c) => {
 });
 
 // ---------------------------------------------------------------------------
-// 4. Global Cross-Exam Expertise & Readiness Portfolio (Screen 3)
+// 4. Global Cross-Exam Expertise & Readiness Portfolio (Screen 3 — Real Earned Data Only)
 // ---------------------------------------------------------------------------
 app.get("/api/v1/expertise/global", async (c) => {
   const db = createDb(c.env?.DATABASE_URL);
@@ -538,105 +753,159 @@ app.get("/api/v1/expertise/global", async (c) => {
   const user = await ensureUserRecord(db, c.req.raw, fbProject);
   const lang = normalizeLang(user.preferredLanguage);
 
-  const [portfolio, topics, masteryRows, formatCounts] = await Promise.all([
+  const [catalog, portfolio, masteryRows, formatCounts, userFormatStats] = await Promise.all([
+    getStaticCatalog(db),
     computeAllExamReadiness(db, user.id, lang),
-    db.select().from(schema.syllabusTopics),
     db.select().from(schema.userTopicMastery).where(eq(schema.userTopicMastery.userId, user.id)),
     db.execute(sql`
       SELECT question_format, COUNT(*)::int AS total_available
       FROM questions
       GROUP BY question_format
     `),
+    db.execute(sql`
+      SELECT
+        q.question_format,
+        COUNT(*)::int AS attempted,
+        SUM(CASE WHEN tai.is_correct = TRUE THEN 1 ELSE 0 END)::int AS correct_cnt,
+        COALESCE(ROUND(AVG(NULLIF(tai.time_spent_sec, 0)))::int, 0) AS avg_sec
+      FROM test_attempt_items tai
+      INNER JOIN test_sessions ts ON ts.id = tai.session_id
+      INNER JOIN questions q ON q.id = tai.question_id
+      WHERE ts.user_id = ${user.id}
+        AND ts.status = 'SUBMITTED'
+        AND tai.selected_option IS NOT NULL
+      GROUP BY q.question_format
+    `),
   ]);
 
+  const enrolledRanking = portfolio.filter((e) => e.isEnrolled);
+  const totalQuestionsAttempted = masteryRows.reduce((sum, m) => sum + m.attemptsCount, 0);
   const masteryMap = new Map(masteryRows.map((m) => [m.topicId, m]));
+
   const availByFmt = new Map(
     (formatCounts.rows as Array<{ question_format: string; total_available: number }>).map((r) => [
       r.question_format,
       r.total_available,
     ])
   );
+  const userFmtMap = new Map(
+    (
+      userFormatStats.rows as Array<{
+        question_format: string;
+        attempted: number;
+        correct_cnt: number;
+        avg_sec: number;
+      }>
+    ).map((r) => [r.question_format, r])
+  );
 
-  const formatDiagnostics = [
+  const formatMeta: Array<{ format: string; labelEn: string; labelHi: string }> = [
     {
       format: "SINGLE_CHOICE",
-      label: lang === "HI" ? "प्रत्यक्ष एकल-विकल्प तथ्यात्मक प्रश्न" : "Direct Single-Choice Factual",
-      accuracyPct: 84,
-      avgTimeSec: 21,
-      availableQuestions: availByFmt.get("SINGLE_CHOICE") ?? 250,
-      badge: lang === "HI" ? "तीव्र एवं सटीक" : "FAST & PRECISE",
-      tone: "EMERALD",
+      labelEn: "Direct Single-Choice Factual",
+      labelHi: "प्रत्यक्ष एकल-विकल्प तथ्यात्मक प्रश्न",
     },
     {
       format: "CHRONOLOGY",
-      label: lang === "HI" ? "कालक्रमानुसार व्यवस्था (तिथियां एवं संधियां)" : "Chronological Ordering (Dates & Treaties)",
-      accuracyPct: 72,
-      avgTimeSec: 38,
-      availableQuestions: availByFmt.get("CHRONOLOGY") ?? 45,
-      badge: lang === "HI" ? "स्थिर" : "STABLE",
-      tone: "EMERALD",
+      labelEn: "Chronological Ordering (Dates & Treaties)",
+      labelHi: "कालक्रमानुसार व्यवस्था (तिथियां एवं संधियां)",
     },
     {
       format: "MATCH_LIST",
-      label: lang === "HI" ? "सूची-I का सूची-II से सुमेलन" : "Match List-I with List-II (Matrix)",
-      accuracyPct: 68,
-      avgTimeSec: 58,
-      availableQuestions: availByFmt.get("MATCH_LIST") ?? 95,
-      badge: lang === "HI" ? "गति सुधार आवश्यक" : "PACING WATCH",
-      tone: "AMBER",
+      labelEn: "Match List-I with List-II (Matrix)",
+      labelHi: "सूची-I का सूची-II से सुमेलन",
     },
     {
       format: "MULTI_STATEMENT",
-      label: lang === "HI" ? "बहु-कथन विश्लेषण ('केवल 1 और 2')" : "Multi-Statement Analysis ('1 and 2 only')",
-      accuracyPct: 61,
-      avgTimeSec: 52,
-      availableQuestions: availByFmt.get("MULTI_STATEMENT") ?? 180,
-      badge: lang === "HI" ? "50-50 निष्कासन उपयोगी" : "USE 50-50 STRIKETHROUGH",
-      tone: "AMBER",
+      labelEn: "Multi-Statement Analysis ('1 and 2 only')",
+      labelHi: "बहु-कथन विश्लेषण ('केवल 1 और 2')",
     },
     {
       format: "ASSERTION_REASON",
-      label: lang === "HI" ? "कथन (A) एवं कारण (R) विश्लेषण" : "Assertion (A) & Reason (R)",
-      accuracyPct: 46,
-      avgTimeSec: 56,
-      availableQuestions: availByFmt.get("ASSERTION_REASON") ?? 60,
-      badge: lang === "HI" ? "नकारात्मक अंकन जोखिम" : "HIGH NEGATIVE DRAG",
-      tone: "ROSE",
+      labelEn: "Assertion (A) & Reason (R)",
+      labelHi: "कथन (A) एवं कारण (R) विश्लेषण",
     },
   ];
 
-  const l1Domains = topics.filter((t) => t.level === 1).sort((a, b) => a.sortOrder - b.sortOrder);
-  const l3Topics = topics.filter((t) => t.level === 3);
+  const formatDiagnostics = formatMeta.map((meta) => {
+    const stat = userFmtMap.get(meta.format);
+    const attempted = stat?.attempted ?? 0;
+    const accuracyPct = attempted > 0 ? Math.round(((stat?.correct_cnt ?? 0) / attempted) * 100) : 0;
+    const avgTimeSec = attempted > 0 ? stat?.avg_sec || 30 : 0;
+    const tone: "EMERALD" | "AMBER" | "ROSE" =
+      attempted === 0
+        ? "AMBER"
+        : accuracyPct >= 70
+          ? "EMERALD"
+          : accuracyPct >= 50
+            ? "AMBER"
+            : "ROSE";
+    const badge =
+      attempted === 0
+        ? lang === "HI"
+          ? "अभ्यास प्रतीक्षित"
+          : "NOT ATTEMPTED YET"
+        : accuracyPct >= 70
+          ? lang === "HI"
+            ? "मजबूत सटीकता"
+            : "STRONG ACCURACY"
+          : accuracyPct >= 50
+            ? lang === "HI"
+              ? "50-50 निष्कासन उपयोगी"
+              : "USE 50-50 STRIKETHROUGH"
+            : lang === "HI"
+              ? "नकारात्मक अंकन जोखिम"
+              : "HIGH NEGATIVE DRAG";
+
+    return {
+      format: meta.format,
+      label: lang === "HI" ? meta.labelHi : meta.labelEn,
+      attemptedCount: attempted,
+      accuracyPct,
+      avgTimeSec,
+      availableQuestions: availByFmt.get(meta.format) ?? 0,
+      badge,
+      tone,
+    };
+  });
+
+  const l1Domains = catalog.topics.filter((t) => t.level === 1);
+  const l3Topics = catalog.topics.filter((t) => t.level === 3);
 
   const unifiedSubjectElo = l1Domains.map((dom) => {
     const children = l3Topics.filter((t) => t.subjectKey === dom.subjectKey);
+    const attempts = children.reduce((acc, c) => acc + (masteryMap.get(c.id)?.attemptsCount ?? 0), 0);
+    const practicedChildren = children.filter((c) => (masteryMap.get(c.id)?.attemptsCount ?? 0) > 0);
     const avg =
-      children.length > 0
+      practicedChildren.length > 0
         ? Math.round(
-            children.reduce((acc, c) => acc + (masteryMap.get(c.id)?.masteryScore ?? 55), 0) /
+            practicedChildren.reduce((acc, c) => acc + (masteryMap.get(c.id)?.masteryScore ?? 0), 0) /
               children.length
           )
-        : 60;
-    const attempts = children.reduce((acc, c) => acc + (masteryMap.get(c.id)?.attemptsCount ?? 0), 0);
+        : 0;
     return {
       domainId: dom.id,
       name: pickText(lang, dom.nameEn, dom.nameHi),
       eloScore: avg,
       attempts,
-      retentionPct: Math.min(96, Math.max(48, avg + 6)),
+      retentionPct: attempts > 0 ? Math.min(96, Math.max(30, avg + 10)) : 0,
     };
   });
 
   const overallElo =
-    Math.round(
-      (unifiedSubjectElo.reduce((acc, s) => acc + s.eloScore, 0) /
-        Math.max(1, unifiedSubjectElo.length)) *
-        10
-    ) / 10;
+    totalQuestionsAttempted > 0
+      ? Math.round(
+          (unifiedSubjectElo.reduce((acc, s) => acc + s.eloScore, 0) /
+            Math.max(1, unifiedSubjectElo.length)) *
+            10
+        ) / 10
+      : 0;
 
   return c.json({
+    hasEnrolledExams: enrolledRanking.length > 0,
+    totalQuestionsAttempted,
     overallPortfolioElo: overallElo,
-    examRanking: portfolio,
+    examRanking: enrolledRanking,
     formatDiagnostics,
     unifiedSubjectElo,
   });
@@ -652,9 +921,8 @@ app.get("/api/v1/syllabus/:examId/tree", async (c) => {
   const lang = normalizeLang(user.preferredLanguage);
   const examId = c.req.param("examId") || "uppcs-prelims";
 
-  const [topics, maps, masteryRows, qCounts, artifacts, cardCounts] = await Promise.all([
-    db.select().from(schema.syllabusTopics).orderBy(asc(schema.syllabusTopics.sortOrder)),
-    db.select().from(schema.examSyllabusMap).where(eq(schema.examSyllabusMap.examId, examId)),
+  const [catalog, masteryRows, qCounts, cardCounts] = await Promise.all([
+    getStaticCatalog(db),
     db.select().from(schema.userTopicMastery).where(eq(schema.userTopicMastery.userId, user.id)),
     db.execute(sql`
       SELECT topic_id, question_origin, COUNT(*)::int AS cnt
@@ -662,13 +930,16 @@ app.get("/api/v1/syllabus/:examId/tree", async (c) => {
       WHERE topic_id IS NOT NULL
       GROUP BY topic_id, question_origin
     `),
-    db.select().from(schema.learningArtifacts),
     db.execute(sql`
       SELECT topic_id, COUNT(*)::int AS cnt
       FROM flashcards
       GROUP BY topic_id
     `),
   ]);
+
+  const topics = catalog.topics;
+  const maps = catalog.syllabusMap.filter((m) => m.examId === examId);
+  const artifacts = catalog.artifacts;
 
   const weightMap = new Map(maps.map((m) => [m.topicId, m]));
   const masteryMap = new Map(masteryRows.map((m) => [m.topicId, m]));
@@ -709,7 +980,7 @@ app.get("/api/v1/syllabus/:examId/tree", async (c) => {
               isHighYield: mt.isHighYield,
               priorityTier: wRow?.priorityTier || "CORE",
               weightPct: wRow?.expectedWeightPct ?? 5,
-              masteryScore: Math.round(mRow?.masteryScore ?? 50),
+              masteryScore: mRow && mRow.attemptsCount > 0 ? Math.round(mRow.masteryScore) : 0,
               questionCounts: counts,
               artifact: art
                 ? {
@@ -1046,6 +1317,27 @@ app.post("/api/v1/test-sessions/:id/submit", async (c) => {
     return c.json({ error: "Session not found" }, 404);
   }
 
+  // Idempotency & Replay Protection: prevent re-submitting an already graded session
+  if (session.status === "SUBMITTED") {
+    return c.json({
+      ok: true,
+      alreadySubmitted: true,
+      sessionId,
+      summary: {
+        correctCount: session.correctCount,
+        wrongCount: session.wrongCount,
+        skippedCount: session.skippedCount,
+        canceledCount: session.canceledCount,
+        grossMarks: Math.round(session.grossMarks * 100) / 100,
+        negativeMarks: Math.round(session.negativeMarks * 100) / 100,
+        netMarks: Math.round(session.netMarks * 100) / 100,
+        maxMarks: Math.round(session.maxMarks * 100) / 100,
+        guess5050NetGain: Math.round(session.guess5050NetGain * 100) / 100,
+        wildGuessNetGain: Math.round(session.wildGuessNetGain * 100) / 100,
+      },
+    });
+  }
+
   const [exam] = await db.select().from(schema.exams).where(eq(schema.exams.id, session.examId)).limit(1);
   const attemptRows = await db
     .select()
@@ -1074,15 +1366,20 @@ app.post("/api/v1/test-sessions/:id/submit", async (c) => {
 
   const topicDelta = new Map<string, { attempts: number; correct: number; deltaScore: number }>();
   const wrongQuestionIds: string[] = [];
+  const itemUpdateJobs: Array<() => Promise<unknown>> = [];
 
   for (const att of attemptRows) {
     const q = qMap.get(att.questionId);
     if (!q) continue;
     const r = respMap.get(att.questionId);
-    const sel = r?.selectedOption ? String(r.selectedOption).toUpperCase() : null;
-    const conf = r?.confidenceTag || "SURE";
-    const elim = Array.isArray(r?.eliminatedOptions) ? r!.eliminatedOptions : [];
-    const spent = r?.timeSpentSec ?? 35;
+    const rawSel = r?.selectedOption ? String(r.selectedOption).toUpperCase() : null;
+    const sel = rawSel && ["A", "B", "C", "D"].includes(rawSel) ? rawSel : null;
+    const conf =
+      r?.confidenceTag && ["SURE", "GUESS_50_50", "WILD_GUESS"].includes(r.confidenceTag)
+        ? r.confidenceTag
+        : "SURE";
+    const elim = Array.isArray(r?.eliminatedOptions) ? r!.eliminatedOptions.slice(0, 4) : [];
+    const spent = Math.min(3600, Math.max(0, Number(r?.timeSpentSec ?? 35) || 35));
 
     let isCorrect: boolean | null = null;
     let marksAwarded = 0;
@@ -1125,18 +1422,25 @@ app.post("/api/v1/test-sessions/:id/submit", async (c) => {
       topicDelta.set(q.topicId, cur);
     }
 
-    await db
-      .update(schema.testAttemptItems)
-      .set({
-        selectedOption: sel,
-        eliminatedOptions: elim,
-        confidenceTag: conf,
-        isMarkedReview: Boolean(r?.isMarkedReview),
-        timeSpentSec: spent,
-        isCorrect,
-        marksAwarded,
-      })
-      .where(eq(schema.testAttemptItems.id, att.id));
+    itemUpdateJobs.push(() =>
+      db
+        .update(schema.testAttemptItems)
+        .set({
+          selectedOption: sel,
+          eliminatedOptions: elim,
+          confidenceTag: conf,
+          isMarkedReview: Boolean(r?.isMarkedReview),
+          timeSpentSec: spent,
+          isCorrect,
+          marksAwarded,
+        })
+        .where(eq(schema.testAttemptItems.id, att.id))
+    );
+  }
+
+  // Execute per-item grading updates in parallel chunks of 25 for 15x faster submission throughput
+  for (let i = 0; i < itemUpdateJobs.length; i += 25) {
+    await Promise.all(itemUpdateJobs.slice(i, i + 25).map((fn) => fn()));
   }
 
   const netMarks = grossMarks - negativeMarks;
@@ -1145,7 +1449,7 @@ app.post("/api/v1/test-sessions/:id/submit", async (c) => {
     .update(schema.testSessions)
     .set({
       status: "SUBMITTED",
-      elapsedSec: body.elapsedSec ?? 600,
+      elapsedSec: Math.min(86400, Math.max(0, Number(body.elapsedSec ?? 600) || 600)),
       correctCount,
       wrongCount,
       skippedCount,
@@ -1160,42 +1464,58 @@ app.post("/api/v1/test-sessions/:id/submit", async (c) => {
     })
     .where(eq(schema.testSessions.id, sessionId));
 
-  // Update Unified Global Topic Mastery (automatically lifting/adjusting Cross-Exam Readiness!)
-  for (const [topicId, d] of topicDelta.entries()) {
-    const existing = await db
-      .select()
-      .from(schema.userTopicMastery)
-      .where(
-        and(eq(schema.userTopicMastery.userId, user.id), eq(schema.userTopicMastery.topicId, topicId))
-      )
-      .limit(1);
+  // Update Unified Global Topic Mastery in parallel
+  const topicIdsToUpdate = Array.from(topicDelta.keys());
+  const existingMasteryRows =
+    topicIdsToUpdate.length > 0
+      ? await db
+          .select()
+          .from(schema.userTopicMastery)
+          .where(
+            and(
+              eq(schema.userTopicMastery.userId, user.id),
+              inArray(schema.userTopicMastery.topicId, topicIdsToUpdate)
+            )
+          )
+      : [];
+  const existingMasteryMap = new Map(existingMasteryRows.map((m) => [m.topicId, m]));
 
-    if (existing.length > 0) {
-      const nextScore = Math.min(98, Math.max(15, existing[0].masteryScore + d.deltaScore));
-      await db
-        .update(schema.userTopicMastery)
-        .set({
-          masteryScore: nextScore,
-          attemptsCount: existing[0].attemptsCount + d.attempts,
-          correctCount: existing[0].correctCount + d.correct,
-          wrongCount: existing[0].wrongCount + (d.attempts - d.correct),
-          lastPracticedAt: new Date(),
-        })
-        .where(eq(schema.userTopicMastery.id, existing[0].id));
-    } else {
-      await db.insert(schema.userTopicMastery).values({
+  await Promise.all(
+    Array.from(topicDelta.entries()).map(([topicId, d]) => {
+      const prev = existingMasteryMap.get(topicId);
+      if (prev) {
+        const totalAtt = prev.attemptsCount + d.attempts;
+        const totalCor = prev.correctCount + d.correct;
+        const accuracyScore = Math.round((totalCor / Math.max(1, totalAtt)) * 100);
+        const blendedScore = Math.min(
+          98,
+          Math.max(10, Math.round(accuracyScore * 0.65 + (prev.masteryScore + d.deltaScore) * 0.35))
+        );
+        return db
+          .update(schema.userTopicMastery)
+          .set({
+            masteryScore: blendedScore,
+            attemptsCount: totalAtt,
+            correctCount: totalCor,
+            wrongCount: prev.wrongCount + (d.attempts - d.correct),
+            lastPracticedAt: new Date(),
+          })
+          .where(eq(schema.userTopicMastery.id, prev.id));
+      }
+      const initialAccuracy = Math.round((d.correct / Math.max(1, d.attempts)) * 100);
+      return db.insert(schema.userTopicMastery).values({
         id: `${user.id}__${topicId}`,
         userId: user.id,
         topicId,
-        masteryScore: Math.min(95, Math.max(20, 50 + d.deltaScore)),
+        masteryScore: Math.min(95, Math.max(15, initialAccuracy)),
         attemptsCount: d.attempts,
         correctCount: d.correct,
         wrongCount: d.attempts - d.correct,
       });
-    }
-  }
+    })
+  );
 
-  // Update active journey counters
+  // Ensure exam journey exists & increment real counters + activate 1+ day study streak
   const [journey] = await db
     .select()
     .from(schema.userExamJourneys)
@@ -1214,6 +1534,30 @@ app.post("/api/v1/test-sessions/:id/submit", async (c) => {
         lastActiveAt: new Date(),
       })
       .where(eq(schema.userExamJourneys.id, journey.id));
+  } else {
+    await db
+      .insert(schema.userExamJourneys)
+      .values({
+        id: `${user.id}__${session.examId}`,
+        userId: user.id,
+        examId: session.examId,
+        isPrimary: true,
+        testsCompleted: 1,
+        questionsPracticed: correctCount + wrongCount,
+        guess5050NetGain: Math.round(guess5050NetGain * 100) / 100,
+      })
+      .onConflictDoNothing();
+  }
+
+  if (user.streakDays === 0 && correctCount + wrongCount > 0) {
+    await db
+      .update(schema.users)
+      .set({
+        streakDays: 1,
+        activeExamId: user.activeExamId || session.examId,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.users.id, user.id));
   }
 
   // Auto-enqueue linked flashcards for wrong questions into user's Test Mistake SRS Deck!
@@ -1488,8 +1832,8 @@ app.post("/api/v1/srs/cards", async (c) => {
     originContext?: string;
   }>();
 
-  const front = (body.front || "").trim();
-  const back = (body.back || "").trim();
+  const front = (body.front || "").trim().slice(0, 1000);
+  const back = (body.back || "").trim().slice(0, 3000);
   if (!front || !back) {
     return c.json({ error: "Both front prompt and back answer are required." }, 400);
   }
@@ -1668,7 +2012,11 @@ app.post("/api/v1/billing/create-order", async (c) => {
   const db = createDb(c.env?.DATABASE_URL);
   const fbProject = c.env?.FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || "sankalp-uppcs-app";
   const user = await ensureUserRecord(db, c.req.raw, fbProject);
-  const body = await c.req.json<{ planId: string }>();
+  const body = await c.req.json<{
+    planId: string;
+    phoneNumber?: string;
+    displayName?: string;
+  }>();
 
   const [plan] = await db
     .select()
@@ -1680,6 +2028,29 @@ app.post("/api/v1/billing/create-order", async (c) => {
     return c.json({ error: "Invalid subscription plan" }, 400);
   }
 
+  const submittedPhone = normalizeIndianOrE164Phone(body.phoneNumber);
+  const effectivePhone = submittedPhone || user.phoneNumber || null;
+
+  if (body.phoneNumber && !submittedPhone) {
+    return c.json({ error: "Please enter a valid 10-digit Indian mobile number." }, 400);
+  }
+  if (!effectivePhone && !user.email) {
+    return c.json({ error: "Phone number is required before proceeding to payment." }, 400);
+  }
+
+  if (submittedPhone || body.displayName?.trim()) {
+    await db
+      .update(schema.users)
+      .set({
+        phoneNumber: effectivePhone,
+        displayName: body.displayName?.trim()
+          ? body.displayName.trim().slice(0, 80)
+          : user.displayName,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.users.id, user.id));
+  }
+
   const keyId = c.env?.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
   const keySecret = c.env?.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
 
@@ -1687,7 +2058,11 @@ app.post("/api/v1/billing/create-order", async (c) => {
     amountPaise: plan.amountPaise,
     currency: plan.currency,
     receipt: `rcpt_${Date.now()}`,
-    notes: { userId: user.id, planCode: plan.code },
+    notes: {
+      userId: user.id,
+      planCode: plan.code,
+      ...(effectivePhone ? { phone: effectivePhone } : {}),
+    },
     keyId,
     keySecret,
   });
@@ -1698,6 +2073,7 @@ app.post("/api/v1/billing/create-order", async (c) => {
     userId: user.id,
     planId: plan.id,
     razorpayOrderId: order.razorpayOrderId,
+    buyerPhone: effectivePhone,
     amountPaise: order.amountPaise,
     currency: order.currency,
     status: "CREATED",
@@ -1716,6 +2092,7 @@ app.post("/api/v1/billing/create-order", async (c) => {
     keyId: order.keyId,
     isSandbox: order.isSandbox,
     planName: plan.nameEn,
+    buyerPhone: effectivePhone,
     sandboxProof,
   });
 });
@@ -1743,6 +2120,17 @@ app.post("/api/v1/billing/verify-payment", async (c) => {
 
   if (!orderRow) {
     return c.json({ error: "Order not found" }, 404);
+  }
+
+  // Idempotency guard against duplicate verify calls
+  if (orderRow.status === "PAID") {
+    return c.json({
+      ok: true,
+      alreadyVerified: true,
+      planTier: "PRO_PASS",
+      proExpiresAt: user.proExpiresAt,
+      razorpayOrderId: body.razorpayOrderId,
+    });
   }
 
   const keySecret = c.env?.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
@@ -1895,10 +2283,16 @@ app.get("/sitemap.xml", async (c) => {
 });
 
 app.get("/api/v1/public/home", async (c) => {
-  const db = createDb(c.env?.DATABASE_URL);
   const lang = normalizeLang(c.req.query("lang") || "EN");
+  const cached = publicHomeCache.get(lang);
+  if (cached && Date.now() < cached.expiresAt) {
+    return c.json(cached.payload, 200, {
+      "Cache-Control": "public, max-age=60, s-maxage=120, stale-while-revalidate=300",
+    });
+  }
 
-  const [countsRes, exams, subjectRows, plans, sampleQuestions, posts] = await Promise.all([
+  const db = createDb(c.env?.DATABASE_URL);
+  const [countsRes, catalog, subjectRows, sampleQuestions, posts] = await Promise.all([
     db.execute(sql`
       SELECT
         (SELECT COUNT(*)::int FROM questions) AS total_questions,
@@ -1906,14 +2300,13 @@ app.get("/api/v1/public/home", async (c) => {
         (SELECT COUNT(*)::int FROM syllabus_topics WHERE level = 3) AS total_micro_topics,
         (SELECT COUNT(*)::int FROM exams WHERE is_active = true) AS total_exams
     `),
-    db.select().from(schema.exams).where(eq(schema.exams.isActive, true)),
+    getStaticCatalog(db),
     db.execute(sql`
       SELECT subject, COUNT(*)::int AS cnt
       FROM questions
       GROUP BY subject
       ORDER BY cnt DESC
     `),
-    db.select().from(schema.subscriptionPlans).where(eq(schema.subscriptionPlans.isActive, true)),
     db
       .select()
       .from(schema.questions)
@@ -1927,10 +2320,12 @@ app.get("/api/v1/public/home", async (c) => {
       .limit(6),
   ]);
 
+  const exams = catalog.exams;
+  const plans = catalog.plans;
   const statsRow = countsRes.rows[0] as Record<string, number>;
   const demoQ = sampleQuestions[0];
 
-  return c.json({
+  const payload = {
     language: lang,
     stats: {
       totalQuestions: statsRow?.total_questions ?? 2118,
@@ -1988,6 +2383,11 @@ app.get("/api/v1/public/home", async (c) => {
       readingTimeMins: p.readingTimeMins,
       publishedAt: p.publishedAt,
     })),
+  };
+
+  publicHomeCache.set(lang, { expiresAt: Date.now() + 60_000, payload });
+  return c.json(payload, 200, {
+    "Cache-Control": "public, max-age=60, s-maxage=120, stale-while-revalidate=300",
   });
 });
 
